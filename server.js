@@ -317,7 +317,7 @@ app.get('/api/health', ah(async (req, res) => {
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'LeadStock backend ap mache' });
+  res.redirect('/leadstock-erp.html');
 });
 // -------------------- GESTIONÈ ERÈ --------------------
 app.use((err, req, res, next) => {
