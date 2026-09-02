@@ -1,15 +1,18 @@
 {
-  "name": "stockpro-backend",
-  "version": "2.0.0",
-  "description": "Backend API pou LeadStock ERP — otantifikasyon ak yon vrè baz done SQLite.",
+  "name": "leadstock-backend",
+  "version": "3.0.0",
+  "description": "Backend API pou LeadStock ERP — otantifikasyon ak baz done Upstash Redis (cloud, toujou disponib).",
   "main": "server.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "cors": "^2.8.5",
-    "sql.js": "^1.10.3"
+    "dotenv": "^16.4.5"
   }
 }
