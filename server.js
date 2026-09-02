@@ -316,9 +316,7 @@ app.get('/api/health', ah(async (req, res) => {
 // -------------------- STATIC (paj kliyan mòd ?kliyan=1) --------------------
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'LeadStock backend ap mache' });
-});
+
 // -------------------- GESTIONÈ ERÈ --------------------
 app.use((err, req, res, next) => {
   console.error('Erè sèvè:', err.message);
