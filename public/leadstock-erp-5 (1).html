@@ -1,0 +1,3268 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadStock ERP — Jesyon Estòk, Vant & Finans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f4ecd8;
+  --bg-panel:#fbf6e9;
+  --bg-panel2:#ede1c2;
+  --line:#d8c9a3;
+  --green:#2f6b3a;
+  --green-soft:#4c8a56;
+  --green-pale:#e3ecdd;
+  --red:#a13d2f;
+  --red-soft:#c1584a;
+  --red-pale:#f3e2dd;
+  --gold:#b3872f;
+  --text:#2b2417;
+  --text-dim:#6b5f47;
+  --text-faint:#8f8368;
+  --font-display:'Fraunces',serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:10px;
+  --shadow:0 2px 10px rgba(43,36,23,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='6' y='6' width='228' height='108' rx='10' fill='none' stroke='%232f6b3a' stroke-width='2' stroke-opacity='0.12'/%3E%3Ctext x='120' y='78' font-family='Georgia,serif' font-size='54' font-weight='700' fill='%232f6b3a' fill-opacity='0.09' text-anchor='middle'%3E100%3C/text%3E%3Ctext x='24' y='32' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10'%3E%24%3C/text%3E%3Ctext x='216' y='104' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10' text-anchor='end'%3E%24%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--green);color:#fff;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+a{color:inherit;}
+
+/* ============ LOGIN ============ */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background-image: radial-gradient(circle at 30% 20%,#faf3de,var(--bg) 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='6' y='6' width='228' height='108' rx='10' fill='none' stroke='%232f6b3a' stroke-width='2' stroke-opacity='0.12'/%3E%3Ctext x='120' y='78' font-family='Georgia,serif' font-size='54' font-weight='700' fill='%232f6b3a' fill-opacity='0.09' text-anchor='middle'%3E100%3C/text%3E%3Ctext x='24' y='32' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10'%3E%24%3C/text%3E%3Ctext x='216' y='104' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10' text-anchor='end'%3E%24%3C/text%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  padding:20px;
+}
+.login-card{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;
+  padding:40px 36px;width:100%;max-width:400px;box-shadow:var(--shadow);
+  position:relative;overflow:hidden;
+}
+.login-card::before{
+  content:'';position:absolute;top:0;left:0;width:100%;height:6px;
+  background:linear-gradient(90deg,var(--green),var(--gold),var(--red));
+}
+.login-logo{
+  font-family:var(--font-display);font-weight:700;font-size:30px;color:var(--green);
+  text-align:center;margin-bottom:2px;
+}
+.login-sub{
+  text-align:center;font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--text-faint);margin-bottom:28px;
+}
+.login-field{margin-bottom:16px;}
+.login-field label{
+  display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:6px;
+}
+.login-field input{
+  width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;
+  background:#fff;font-size:14px;color:var(--text);
+}
+.login-field input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-pale);}
+.login-btn{
+  width:100%;padding:13px;border:none;border-radius:8px;background:var(--green);
+  color:#fff;font-weight:700;font-size:14px;margin-top:6px;transition:.15s;
+}
+.login-btn:hover{background:var(--green-soft);}
+.login-error{
+  background:var(--red-pale);color:var(--red);border-radius:7px;padding:9px 12px;
+  font-size:12.5px;margin-bottom:14px;display:none;
+}
+.login-hint{
+  margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);
+  font-size:11.5px;color:var(--text-faint);line-height:1.7;text-align:center;
+}
+.login-hint b{color:var(--text-dim);font-family:var(--font-mono);}
+
+/* ============ APP SHELL ============ */
+#appShell{display:none;min-height:100vh;}
+.sidebar{
+  width:236px;background:var(--bg-panel);border-right:1px solid var(--line);
+  height:100vh;position:fixed;top:0;left:0;overflow-y:auto;z-index:50;
+  display:flex;flex-direction:column;transition:.2s;
+}
+.sidebar-brand{
+  padding:20px 20px 16px;border-bottom:1px solid var(--line);
+}
+.sidebar-brand .mark{font-family:var(--font-display);font-weight:700;font-size:19px;color:var(--green);}
+.sidebar-brand .sub{font-family:var(--font-mono);font-size:10px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.nav-group{padding:10px 10px 4px;}
+.nav-group-label{
+  font-family:var(--font-mono);font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--text-faint);padding:10px 10px 4px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+  font-size:13.5px;font-weight:600;color:var(--text-dim);cursor:pointer;margin-bottom:2px;
+  transition:.12s;
+}
+.nav-item:hover{background:var(--bg-panel2);}
+.nav-item.active{background:var(--green);color:#fff;}
+.nav-item .ic{font-size:15px;width:18px;text-align:center;}
+.sidebar-footer{
+  margin-top:auto;padding:14px;border-top:1px solid var(--line);
+}
+.userchip{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.userchip .av{
+  width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+}
+.userchip .name{font-size:12.5px;font-weight:700;}
+.userchip .role{font-size:10.5px;color:var(--text-faint);font-family:var(--font-mono);}
+.logout-btn{
+  width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;background:transparent;
+  color:var(--red);font-size:12px;font-weight:700;
+}
+.logout-btn:hover{background:var(--red-pale);}
+
+.main{margin-left:236px;min-height:100vh;}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 26px;border-bottom:1px solid var(--line);background:var(--bg-panel);
+  position:sticky;top:0;z-index:30;flex-wrap:wrap;gap:10px;
+}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+#menuToggle{display:none;background:none;border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:15px;}
+.view-title{font-family:var(--font-display);font-size:21px;font-weight:600;color:var(--text);}
+.global-search{
+  padding:9px 14px;border:1px solid var(--line);border-radius:20px;background:#fff;
+  font-size:13px;min-width:220px;
+}
+.global-search:focus{outline:none;border-color:var(--green);}
+.topbar-right{font-family:var(--font-mono);font-size:11px;display:flex;align-items:center;gap:6px;}
+.srv-dot{width:8px;height:8px;border-radius:50%;background:var(--text-faint);display:inline-block;}
+.srv-dot.on{background:var(--green);}
+.srv-dot.off{background:var(--red-soft);}
+.content{padding:24px 26px 60px;}
+
+/* ============ COMMON UI ============ */
+.btn{
+  font-weight:700;font-size:13px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);
+  background:#fff;color:var(--text);display:inline-flex;align-items:center;gap:7px;transition:.13s;
+}
+.btn:hover{border-color:var(--green);color:var(--green);}
+.btn-primary{background:var(--green);border-color:var(--green);color:#fff;}
+.btn-primary:hover{background:var(--green-soft);color:#fff;}
+.btn-red{background:var(--red);border-color:var(--red);color:#fff;}
+.btn-red:hover{background:var(--red-soft);color:#fff;}
+.btn-sm{padding:6px 11px;font-size:12px;}
+.btn-ghost{background:transparent;}
+
+.panel{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.panel-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text);}
+.panel-title .count{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);font-weight:400;margin-left:6px;}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--green);}
+.stat-card.red::before{background:var(--red);}
+.stat-card.gold::before{background:var(--gold);}
+.stat-label{font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:1.1px;color:var(--text-faint);margin-bottom:8px;}
+.stat-value{font-family:var(--font-mono);font-size:23px;font-weight:700;}
+.stat-sub{font-size:11px;color:var(--text-dim);margin-top:4px;}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.tb-input,.tb-select{
+  background:#fff;border:1px solid var(--line);border-radius:7px;color:var(--text);
+  padding:9px 12px;font-size:13px;
+}
+.tb-input{flex:1;min-width:170px;}
+.tb-input:focus,.tb-select:focus{outline:none;border-color:var(--green);}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  text-align:left;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--text-faint);padding:9px 10px;border-bottom:2px solid var(--line);
+  white-space:nowrap;
+}
+tbody td{padding:10px 10px;border-bottom:1px solid var(--line);}
+tbody tr:hover{background:var(--bg-panel2);}
+.row-actions{display:flex;gap:6px;}
+.icon-btn{
+  background:#fff;border:1px solid var(--line);border-radius:6px;color:var(--text-dim);
+  padding:5px 9px;font-size:11.5px;font-weight:600;
+}
+.icon-btn:hover{border-color:var(--green);color:var(--green);}
+.icon-btn.danger:hover{border-color:var(--red);color:var(--red);}
+
+.badge{font-family:var(--font-mono);font-size:10px;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;display:inline-block;font-weight:700;}
+.badge.green{background:var(--green-pale);color:var(--green);}
+.badge.red{background:var(--red-pale);color:var(--red);}
+.badge.gold{background:#f5ecd6;color:var(--gold);}
+.badge.gray{background:#ece6d5;color:var(--text-dim);}
+
+.mono{font-family:var(--font-mono);}
+.tag-low{color:var(--red);font-weight:700;}
+
+.view{display:none;}
+.view.active{display:block;}
+
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);}
+.tab-btn{
+  background:none;border:none;padding:10px 16px;font-size:13px;font-weight:700;color:var(--text-faint);
+  border-bottom:2px solid transparent;
+}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+.empty-state{text-align:center;padding:44px 20px;color:var(--text-faint);}
+.empty-state .big{font-family:var(--font-display);font-size:17px;color:var(--text-dim);margin-bottom:5px;}
+
+/* ============ MODAL ============ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(43,36,23,.5);z-index:100;
+  align-items:flex-start;justify-content:center;padding:36px 16px;overflow-y:auto;
+}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;width:100%;max-width:580px;padding:24px;box-shadow:0 10px 40px rgba(43,36,23,.2);}
+.modal.narrow{max-width:420px;}
+.modal-title{font-family:var(--font-display);font-size:19px;font-weight:600;color:var(--text);margin-bottom:16px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid .full{grid-column:1/-1;}
+.field label{display:block;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-faint);margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;background:#fff;border:1px solid var(--line);border-radius:7px;color:var(--text);
+  padding:9px 11px;font-size:13.5px;
+}
+.field textarea{resize:vertical;min-height:56px;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green);}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+
+.pay-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;}
+.pay-opt{
+  border:2px solid var(--line);border-radius:10px;padding:14px 10px;text-align:center;
+  background:#fff;font-weight:700;font-size:13px;color:var(--text-dim);
+}
+.pay-opt .ic{font-size:22px;display:block;margin-bottom:6px;}
+.pay-opt:hover{border-color:var(--green);}
+.pay-opt.selected{border-color:var(--green);background:var(--green-pale);color:var(--green);}
+.pay-balance-note{font-size:11.5px;color:var(--text-faint);text-align:center;margin-top:-4px;margin-bottom:10px;}
+
+.cart-table td,.cart-table th{padding:7px 8px;}
+.total-row{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--green);text-align:right;padding-top:10px;}
+
+.charts-row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:20px;}
+.chart-box{height:220px;position:relative;}
+
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,.2);}
+  .main{margin-left:0;}
+  #menuToggle{display:inline-flex;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .charts-row{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .pay-options{grid-template-columns:1fr;}
+  .global-search{min-width:120px;}
+}
+/* ============ KLIYAN MODE (paj katalòg/kòmand/dèt piblik, san login) ============ */
+#kliyanScreen{display:none;min-height:100vh;}
+.kv-topbar{background:linear-gradient(135deg,var(--green),var(--green-soft));color:#fff;padding:20px 18px;text-align:center;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.1);}
+.kv-topbar img{height:36px;border-radius:8px;margin-bottom:6px;background:#fff;padding:2px;}
+.kv-topbar .mark{font-family:var(--font-display);font-weight:700;font-size:22px;}
+.kv-topbar .sub{font-family:var(--font-mono);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;margin-top:2px;}
+.kv-wrap{max-width:640px;margin:0 auto;padding:16px 14px 100px;}
+.kv-pagetabs{display:flex;max-width:640px;margin:0 auto;border-bottom:1px solid var(--line);background:var(--bg-panel);position:sticky;top:76px;z-index:19;}
+.kv-pagetab{flex:1;background:none;border:none;padding:12px 10px;font-size:13px;font-weight:700;color:var(--text-faint);border-bottom:3px solid transparent;}
+.kv-pagetab.active{color:var(--green);border-bottom-color:var(--green);}
+.kv-debt-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:16px;}
+.kv-debt-balance-box{background:var(--green-pale);border-radius:10px;padding:14px;margin-bottom:14px;}
+.kv-debt-balance-box .row{display:flex;justify-content:space-between;font-size:13.5px;padding:4px 0;}
+.kv-debt-balance-box .row b{font-family:var(--font-mono);color:var(--green);}
+.kv-debt-balance-box .row.owe b{color:var(--red);}
+.kv-loan-line{font-size:12px;color:var(--text-dim);padding:3px 0 3px 10px;border-left:2px solid var(--line);margin-bottom:3px;}
+.kv-search-bar{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:22px;background:#fff;font-size:14px;margin-bottom:16px;}
+.kv-search-bar:focus{outline:none;border-color:var(--green);}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.kv-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:12px;position:relative;}
+.kv-card img{width:100%;height:90px;object-fit:cover;border-radius:8px;background:var(--bg-panel2);margin-bottom:8px;}
+.kv-card .noimg{width:100%;height:90px;border-radius:8px;background:var(--bg-panel2);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text-faint);}
+.kv-card .name{font-weight:700;font-size:13px;margin-bottom:3px;line-height:1.25;}
+.kv-card .cat{font-size:10.5px;color:var(--text-faint);margin-bottom:6px;}
+.kv-card .price{font-family:var(--font-mono);color:var(--green);font-weight:700;font-size:14px;}
+.kv-card .stockline{font-size:10.5px;color:var(--text-dim);margin-top:2px;}
+.kv-badge-out{position:absolute;top:10px;right:10px;background:var(--red);color:#fff;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;}
+.kv-add-btn{width:100%;margin-top:8px;padding:8px;border:none;border-radius:7px;background:var(--green);color:#fff;font-weight:700;font-size:12.5px;}
+.kv-add-btn:disabled{background:var(--line);color:var(--text-faint);cursor:not-allowed;}
+.kv-add-btn:hover:not(:disabled){background:var(--green-soft);}
+.kv-empty{text-align:center;padding:50px 20px;color:var(--text-faint);}
+.kv-empty .big{font-family:var(--font-display);font-size:18px;color:var(--text-dim);margin-bottom:5px;}
+.kv-cart-fab{position:fixed;bottom:18px;right:18px;background:var(--green);color:#fff;border:none;border-radius:30px;padding:14px 20px;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;z-index:30;}
+.kv-cart-fab .count{background:#fff;color:var(--green);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11.5px;}
+.kv-modal-overlay{display:none;position:fixed;inset:0;background:rgba(43,36,23,.55);z-index:100;align-items:flex-end;justify-content:center;}
+.kv-modal-overlay.open{display:flex;}
+.kv-modal{background:var(--bg-panel);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:88vh;overflow-y:auto;padding:20px 18px 28px;}
+.kv-modal-title{font-family:var(--font-display);font-size:19px;font-weight:700;margin-bottom:14px;}
+.kv-cart-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+.kv-cart-row .nm{font-size:13.5px;font-weight:600;}
+.kv-cart-row .qtybox{display:flex;align-items:center;gap:8px;}
+.kv-qtybox button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:#fff;font-weight:700;}
+.kv-cart-total{font-family:var(--font-mono);font-weight:700;font-size:17px;color:var(--green);text-align:right;padding:14px 0;}
+.kv-field{margin-bottom:12px;}
+.kv-field label{display:block;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-faint);margin-bottom:5px;}
+.kv-field input,.kv-field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;}
+.kv-field input:focus,.kv-field select:focus{outline:none;border-color:var(--green);}
+.kv-pay-instructions{background:var(--green-pale);border-radius:10px;padding:14px;font-size:13px;margin-bottom:14px;line-height:1.6;}
+.kv-pay-instructions b{color:var(--green);}
+.kv-btn-full{width:100%;padding:13px;border:none;border-radius:9px;background:var(--green);color:#fff;font-weight:700;font-size:14.5px;}
+.kv-btn-full:hover{background:var(--green-soft);}
+.kv-btn-ghost-full{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--text-dim);font-weight:600;font-size:13px;margin-top:8px;}
+.kv-error-box{background:var(--red-pale);color:var(--red);border-radius:8px;padding:10px 12px;font-size:12.5px;margin-bottom:12px;display:none;}
+.kv-success-box{text-align:center;padding:30px 10px;}
+.kv-success-box .ic{font-size:44px;margin-bottom:10px;}
+.kv-success-box h3{font-family:var(--font-display);font-size:20px;margin-bottom:8px;color:var(--green);}
+.kv-success-box p{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">LeadStock</div>
+    <div class="login-sub">ERP · Estòk · Finans</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-field">
+      <label>Non Itilizatè</label>
+      <input id="loginUser" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Modpas</label>
+      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Konekte</button>
+    <div class="login-hint">
+      Admin: <b>admin</b> / <b>admin123</b><br>
+      Anplwaye: <b>anplwaye</b> / <b>anplwaye123</b>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="appShell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark">LeadStock</div>
+      <div class="sub">ERP Konplè</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Prensipal</div>
+      <div class="nav-item" data-view="dashboard"><span class="ic">📊</span>Dashboard</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Estòk</div>
+      <div class="nav-item" data-view="stockin"><span class="ic">📥</span>Antre Estòk</div>
+      <div class="nav-item" data-view="inventory"><span class="ic">🗂️</span>Envantè</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Anyè</div>
+      <div class="nav-item" data-view="products"><span class="ic">📦</span>Pwodwi</div>
+      <div class="nav-item" data-view="suppliers"><span class="ic">🏭</span>Founisè</div>
+      <div class="nav-item" data-view="customers"><span class="ic">👥</span>Kliyan</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Vant</div>
+      <div class="nav-item" data-view="invoicing"><span class="ic">🧾</span>Faktirasyon</div>
+      <div class="nav-item" data-view="returns"><span class="ic">↩️</span>Retou Machandiz</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Finans Biznis</div>
+      <div class="nav-item" data-view="expenses"><span class="ic">🧮</span>Depans/Chaj</div>
+      <div class="nav-item" data-view="supplierOrders" id="navSupplierOrders"><span class="ic">📦</span>Kòmand Founisè</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Finans Kliyan</div>
+      <div class="nav-item" data-view="finance"><span class="ic">💰</span>Depo · Retrè · Prè</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Analiz</div>
+      <div class="nav-item" data-view="reports"><span class="ic">📈</span>Rapò</div>
+      <div class="nav-item" data-view="users" id="navUsers"><span class="ic">🔐</span>Itilizatè</div>
+      <div class="nav-item" data-view="auditlog" id="navAudit"><span class="ic">📜</span>Jounal Aktivite</div>
+      <div class="nav-item" data-view="orders"><span class="ic">🛍️</span>Kòmand An Atant</div>
+      <div class="nav-item" data-view="backup"><span class="ic">💾</span>Sovgad</div>
+      <div class="nav-item" data-view="serverConfig"><span class="ic">🌐</span>Sèvè / Backend</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="userchip">
+        <div class="av" id="userAvatar">A</div>
+        <div>
+          <div class="name" id="userNameChip">—</div>
+          <div class="role" id="userRoleChip">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Dekonekte</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div class="view-title" id="viewTitle">Dashboard</div>
+      </div>
+      <div class="topbar-right" id="serverStatusChip"></div>
+    </div>
+    <div class="content" id="content">
+      <!-- views injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ============ GENERIC MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<!-- ============ KLIYAN MODE (paj piblik san login — ?kliyan=1) ============ -->
+<div id="kliyanScreen">
+  <div class="kv-topbar" id="kvTopbarWrap">
+    <div class="mark">LeadStock</div>
+    <div class="sub">Katalòg & Kòmand</div>
+  </div>
+
+  <div class="kv-pagetabs">
+    <button class="kv-pagetab active" id="kvTabCatalogBtn" onclick="switchClientPage('catalog')">🛍️ Katalòg</button>
+    <button class="kv-pagetab" id="kvTabDebtBtn" onclick="switchClientPage('debt')">💳 Peye Dèt/Prè</button>
+  </div>
+
+  <div class="kv-wrap" id="kvPageCatalog">
+    <input class="kv-search-bar" id="kvSearchBox" placeholder="Chèche yon pwodwi..." oninput="renderClientCatalog()">
+    <div class="kv-grid" id="kvCatalogGrid"></div>
+  </div>
+
+  <div class="kv-wrap" id="kvPageDebt" style="display:none;">
+    <div class="kv-debt-card">
+      <div class="kv-field"><label>Nimewo Telefòn Ou</label><input id="kvDebtPhone" placeholder="509xxxxxxxx"></div>
+      <button class="kv-btn-full" onclick="lookupClientDebt()">Chèche Balans Mwen</button>
+      <div id="kvDebtResult" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <button class="kv-cart-fab" id="kvCartFab" onclick="openClientCartModal()" style="display:none;">
+    🛒 Panye <span class="count" id="kvCartCount">0</span>
+  </button>
+
+  <div class="kv-modal-overlay" id="kvCartOverlay">
+    <div class="kv-modal" id="kvCartModalBox"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   STOCKPRO ERP — DATA LAYER
+===================================================================== */
+const DB_KEY='stockpro_erp_db_v1';
+const SESSION_KEY='stockpro_erp_session_v1';
+
+function uid(p){return (p||'id')+'_'+Math.random().toString(36).slice(2,10);}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function nowStamp(){return new Date().toLocaleString('fr-FR');}
+function fmt(n){return 'HTG '+Number(n||0).toLocaleString('en-US');}
+function esc(s){return (s===undefined||s===null?'':s).toString().replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+
+function seedDB(){
+  const products=[
+    {id:uid('p'),code:'PRD-001',name:'Diri Sak 25lb',category:'Manje',unit:'sak',buyPrice:1200,sellPrice:1600,qty:48,minQty:15},
+    {id:uid('p'),code:'PRD-002',name:'Lwil Kwizin 1gal',category:'Manje',unit:'galon',buyPrice:650,sellPrice:900,qty:9,minQty:12},
+    {id:uid('p'),code:'PRD-003',name:'Farin Frans Sak',category:'Manje',unit:'sak',buyPrice:900,sellPrice:1250,qty:26,minQty:10},
+    {id:uid('p'),code:'PRD-004',name:'Sitèn Dlo 5gal',category:'Bwason',unit:'sitèn',buyPrice:150,sellPrice:250,qty:60,minQty:20}
+  ];
+  const suppliers=[
+    {id:uid('s'),name:'Founisè Nò SA',phone:'+509 3600 1122',address:'Cap-Haïtien',terms:'30 jou'},
+    {id:uid('s'),name:'Distribisyon Karayib',phone:'+509 4477 9090',address:'Pòtoprens',terms:'Kach'}
+  ];
+  const customers=[
+    {id:uid('c'),name:'Wilkens Pierre',phone:'50937124455',address:'Okap',walletBalance:5000,creditBalance:0},
+    {id:uid('c'),name:'Marie-Ange Louis',phone:'50944882201',address:'Milo',walletBalance:0,creditBalance:3200},
+    {id:uid('c'),name:'Kliyan Kès (Divès)',phone:'',address:'',walletBalance:0,creditBalance:0}
+  ];
+  return {
+    users:[
+      {id:uid('u'),username:'admin',password:'admin123',name:'Administratè',role:'admin'},
+      {id:uid('u'),username:'anplwaye',password:'anplwaye123',name:'Anplwaye Kès',role:'anplwaye'}
+    ],
+    products,suppliers,customers,
+    stockIn:[], stockOut:[], invoices:[], returns:[],
+    deposits:[], withdrawals:[], loans:[], loanPayments:[],
+    inventoryChecks:[], expenses:[], auditLog:[], supplierOrders:[], invoiceCounter:0, counters:{},
+    settings:{ logoDataUrl:null, receiptFormat:'a4', natcashNumber:'', moncashNumber:'' }
+  };
+}
+
+/* =====================================================================
+   BACKEND SYNC (opsyonèl) — si yon URL sèvè konfigire, done yo
+   senkronize otomatikman ak yon vrè sèvè (backend/server.js).
+   Si pa gen sèvè konfigire, aplikasyon an mache 100% ak localStorage
+   tankou anvan, san okenn chanjman nan konpòtman.
+===================================================================== */
+const API_BASE_KEY='stockpro_api_base_v1';
+const API_CREDS_KEY='stockpro_api_creds_v1';
+function getApiBase(){ return localStorage.getItem(API_BASE_KEY)||''; }
+function getApiCreds(){ return JSON.parse(sessionStorage.getItem(API_CREDS_KEY)||'null'); }
+function apiAuthHeader(){
+  const creds=getApiCreds();
+  if(!creds) return null;
+  return 'Basic '+btoa(creds.username+':'+creds.password);
+}
+async function apiPushDB(){
+  const base=getApiBase();
+  const auth=apiAuthHeader();
+  if(!base || !auth) return;
+  try{
+    await fetch(base.replace(/\/$/,'')+'/api/db',{
+      method:'PUT', headers:{'Content-Type':'application/json','Authorization':auth,'ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify(DB)
+    });
+    setServerStatus(true);
+  }catch(e){ setServerStatus(false); }
+}
+function setServerStatus(ok){
+  window._serverOnline=ok;
+  updateServerStatusChip();
+}
+function updateServerStatusChip(){
+  const el=document.getElementById('serverStatusChip');
+  if(!el) return;
+  const base=getApiBase();
+  if(!base){ el.innerHTML=''; return; }
+  const ok=window._serverOnline;
+  el.innerHTML=`<span class="srv-dot ${ok===true?'on':ok===false?'off':''}"></span> ${ok===true?'Sèvè Konekte':ok===false?'Sèvè Pa Reponn':'Sèvè Konfigire'}`;
+}
+
+let DB = JSON.parse(localStorage.getItem(DB_KEY) || 'null') || seedDB();
+if(!DB.returns) DB.returns=[];
+if(!DB.expenses) DB.expenses=[];
+if(!DB.auditLog) DB.auditLog=[];
+if(!DB.supplierOrders) DB.supplierOrders=[];
+if(!DB.invoiceCounter) DB.invoiceCounter=DB.invoices?DB.invoices.length:0;
+if(!DB.counters) DB.counters={};
+if(!DB.settings) DB.settings={ logoDataUrl:null, receiptFormat:'a4', natcashNumber:'', moncashNumber:'' };
+if(DB.settings.natcashNumber===undefined) DB.settings.natcashNumber='';
+if(DB.settings.moncashNumber===undefined) DB.settings.moncashNumber='';
+if(DB.settings.receiptFormat===undefined) DB.settings.receiptFormat='a4';
+function saveDB(){
+  localStorage.setItem(DB_KEY, JSON.stringify(DB));
+  apiPushDB(); // best-effort — pa bloke UI si sèvè a pa reponn
+}
+if(!localStorage.getItem(DB_KEY)) saveDB();
+
+function logActivity(action){
+  DB.auditLog.push({
+    id:uid('log'), date:todayISO(), time:new Date().toLocaleTimeString('fr-FR'),
+    user: currentUser?currentUser.name:'—', action
+  });
+  if(DB.auditLog.length>500) DB.auditLog=DB.auditLog.slice(-500);
+}
+
+let currentUser = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+let currentView = 'dashboard';
+let charts = {};
+const IS_KLIYAN_MODE = new URLSearchParams(window.location.search).get('kliyan')==='1';
+
+/* =====================================================================
+   AUTH
+===================================================================== */
+async function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const errBox=document.getElementById('loginError');
+  const base=getApiBase();
+
+  if(base){
+    try{
+      const res=await fetch(base.replace(/\/$/,'')+'/api/login',{
+        method:'POST', headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
+        body:JSON.stringify({username:u,password:p})
+      });
+      if(!res.ok){
+        errBox.textContent='Non itilizatè oswa modpas pa kòrèk (sèvè).';
+        errBox.style.display='block';
+        return;
+      }
+      const user=await res.json();
+      sessionStorage.setItem(API_CREDS_KEY, JSON.stringify({username:u,password:p}));
+      const dbRes=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':'Basic '+btoa(u+':'+p),'ngrok-skip-browser-warning':'true'}});
+      if(dbRes.ok){ DB=await dbRes.json(); localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
+      setServerStatus(true);
+      errBox.style.display='none';
+      currentUser=user;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      logActivity('Koneksyon (via sèvè)'); saveDB();
+      enterApp();
+      return;
+    }catch(e){
+      errBox.textContent='Pa ka jwenn sèvè a — verifye lyen an nan "Sèvè / Backend", oswa antre lokalman.';
+      errBox.style.display='block';
+      setServerStatus(false);
+      // kontinye pou eseye koneksyon lokal an ba a kòm sekou
+    }
+  }
+
+  const user=DB.users.find(x=>x.username===u && x.password===p);
+  if(!user){
+    errBox.textContent='Non itilizatè oswa modpas pa kòrèk.';
+    errBox.style.display='block';
+    return;
+  }
+  errBox.style.display='none';
+  currentUser=user;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  logActivity('Koneksyon (lokal)'); saveDB();
+  enterApp();
+}
+function doLogout(){
+  logActivity('Dekonekte'); saveDB();
+  currentUser=null;
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+function enterApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  document.getElementById('userNameChip').textContent=currentUser.name;
+  document.getElementById('userRoleChip').textContent=currentUser.role==='admin'?'Administratè':'Anplwaye';
+  document.getElementById('userAvatar').textContent=currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('navUsers').style.display=currentUser.role==='admin'?'flex':'none';
+  document.getElementById('navAudit').style.display=currentUser.role==='admin'?'flex':'none';
+  document.getElementById('navSupplierOrders').style.display=currentUser.role==='admin'?'flex':'none';
+  updateServerStatusChip();
+  goView('dashboard');
+}
+if(currentUser && !IS_KLIYAN_MODE){ enterApp(); }
+
+/* =====================================================================
+   KLIYAN MODE — paj piblik san login, aktive ak ?kliyan=1 nan URL la.
+   Sèvi ak menm fmt()/esc() ki deja defini pi wo a. Fetch relatif
+   ('/api/public/...') mache paske backend la sèvi fichye sa a
+   dirèkteman kòm yon fichye estatik (public/leadstock-erp.html).
+===================================================================== */
+let CLIENT_CATALOG={products:[], natcashNumber:'', moncashNumber:'', logoDataUrl:null};
+let clientCart=[];
+let currentClientDebtInfo=null;
+
+function switchClientPage(page){
+  document.getElementById('kvTabCatalogBtn').classList.toggle('active', page==='catalog');
+  document.getElementById('kvTabDebtBtn').classList.toggle('active', page==='debt');
+  document.getElementById('kvPageCatalog').style.display = page==='catalog'?'block':'none';
+  document.getElementById('kvPageDebt').style.display = page==='debt'?'block':'none';
+}
+
+async function lookupClientDebt(){
+  const phone=document.getElementById('kvDebtPhone').value.trim();
+  const resultBox=document.getElementById('kvDebtResult');
+  if(!phone){ resultBox.innerHTML='<div class="kv-error-box" style="display:block;">Antre nimewo telefòn ou.</div>'; return; }
+  resultBox.innerHTML='<p style="color:var(--text-faint);text-align:center;">Ap chèche...</p>';
+  try{
+    const res=await fetch('/api/public/customer-balance?phone='+encodeURIComponent(phone),{headers:{'ngrok-skip-browser-warning':'true'}});
+    const data=await res.json();
+    if(!data.found){
+      resultBox.innerHTML='<div class="kv-error-box" style="display:block;">Nou pa jwenn okenn kont ak nimewo sa a. Verifye nimewo a oswa kontakte biznis la.</div>';
+      currentClientDebtInfo=null;
+      return;
+    }
+    currentClientDebtInfo={phone, name:data.name};
+    const totalOwed=(data.creditBalance||0)+(data.totalLoanOutstanding||0);
+    resultBox.innerHTML=`
+      <div class="kv-debt-balance-box">
+        <div style="font-weight:700;margin-bottom:8px;">${esc(data.name)}</div>
+        <div class="row owe"><span>Dèt sou Kont (Dedwi)</span><b>${fmt(data.creditBalance)}</b></div>
+        <div class="row owe"><span>Prè ki Rete</span><b>${fmt(data.totalLoanOutstanding)}</b></div>
+        ${data.loans.length>0?data.loans.map(l=>`<div class="kv-loan-line">Prè: ${fmt(l.amount)} — rete ${fmt(l.rest)} (delè: ${l.dueDate||'—'})</div>`).join(''):''}
+        <div class="row" style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;"><span><b>Total Ou Dwe</b></span><b>${fmt(totalOwed)}</b></div>
+      </div>
+      ${totalOwed<=0?'<p style="text-align:center;color:var(--text-dim);">Ou pa dwe anyen kounye a 🎉</p>':`
+      <div class="kv-pay-instructions">
+        Voye montan w ap peye a sou youn nan nimewo sa yo, epi kenbe referans tranzaksyon an:<br><br>
+        ${CLIENT_CATALOG.natcashNumber?`📲 <b>NatCash:</b> ${esc(CLIENT_CATALOG.natcashNumber)}<br>`:''}
+        ${CLIENT_CATALOG.moncashNumber?`📲 <b>MonCash:</b> ${esc(CLIENT_CATALOG.moncashNumber)}`:''}
+      </div>
+      <div class="kv-field"><label>Montan w ap Peye (HTG) *</label><input id="kvDebtAmount" type="number" placeholder="${totalOwed}"></div>
+      <div class="kv-field">
+        <label>Mwen Peye Ak *</label>
+        <select id="kvDebtMethod">
+          ${CLIENT_CATALOG.natcashNumber?'<option value="natcash">NatCash</option>':''}
+          ${CLIENT_CATALOG.moncashNumber?'<option value="moncash">MonCash</option>':''}
+        </select>
+      </div>
+      <div class="kv-field"><label>Referans Tranzaksyon *</label><input id="kvDebtReference" placeholder="Nimewo referans ou resevwa a"></div>
+      <div class="kv-error-box" id="kvDebtSubmitError"></div>
+      <button class="kv-btn-full" onclick="submitClientDebtPayment()">Soumèt Peman</button>`}
+    `;
+  }catch(e){
+    resultBox.innerHTML='<div class="kv-error-box" style="display:block;">Pa ka konekte ak sèvè a. Eseye ankò.</div>';
+  }
+}
+async function submitClientDebtPayment(){
+  const amount=Number(document.getElementById('kvDebtAmount').value||0);
+  const method=document.getElementById('kvDebtMethod').value;
+  const reference=document.getElementById('kvDebtReference').value.trim();
+  const err=document.getElementById('kvDebtSubmitError');
+  if(!amount||amount<=0||!reference){
+    err.textContent='Tanpri ranpli montan an ak referans lan.';
+    err.style.display='block';
+    return;
+  }
+  err.style.display='none';
+  try{
+    const res=await fetch('/api/public/debt-payments',{
+      method:'POST', headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify({phone:currentClientDebtInfo.phone, name:currentClientDebtInfo.name, amount, reference, paymentMethod:method})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      err.textContent=data.error||'Yon erè rive. Eseye ankò.';
+      err.style.display='block';
+      return;
+    }
+    document.getElementById('kvDebtResult').innerHTML=`
+      <div class="kv-success-box">
+        <div class="ic">✅</div>
+        <h3>Peman Voye!</h3>
+        <p>Biznis la ap verifye peman ou epi mete ajou balans ou talè. Ou ap resevwa yon mesaj WhatsApp lè li konfime.</p>
+      </div>`;
+  }catch(e){
+    err.textContent='Pa ka konekte ak sèvè a.';
+    err.style.display='block';
+  }
+}
+
+async function loadClientCatalog(){
+  try{
+    const res=await fetch('/api/public/catalog',{headers:{'ngrok-skip-browser-warning':'true'}});
+    if(!res.ok) throw new Error('erè sèvè');
+    CLIENT_CATALOG=await res.json();
+    if(CLIENT_CATALOG.logoDataUrl){
+      document.getElementById('kvTopbarWrap').innerHTML=
+        `<img src="${CLIENT_CATALOG.logoDataUrl}"><div class="mark">LeadStock</div><div class="sub">Katalòg & Kòmand</div>`;
+    }
+    renderClientCatalog();
+  }catch(e){
+    document.getElementById('kvCatalogGrid').outerHTML=`<div class="kv-empty" id="kvCatalogGrid"><div class="big">Pa ka konekte ak katalòg la</div><div>Verifye lyen an oswa eseye ankò pita.</div></div>`;
+  }
+}
+function renderClientCatalog(){
+  const q=(document.getElementById('kvSearchBox').value||'').toLowerCase();
+  const items=CLIENT_CATALOG.products.filter(p=>!q || p.name.toLowerCase().includes(q));
+  const grid=document.getElementById('kvCatalogGrid');
+  if(items.length===0){
+    grid.outerHTML='<div class="kv-empty" id="kvCatalogGrid"><div class="big">Pa gen pwodwi</div><div>Eseye yon lòt rechèch.</div></div>';
+    return;
+  }
+  grid.innerHTML=items.map(p=>{
+    const out=p.qty<=0;
+    return `<div class="kv-card">
+      ${out?'<span class="kv-badge-out">Pa Disponib</span>':''}
+      ${p.photo?`<img src="${p.photo}">`:'<div class="noimg">📦</div>'}
+      <div class="name">${esc(p.name)}</div>
+      <div class="cat">${esc(p.category||'')}</div>
+      <div class="price">${fmt(p.sellPrice)}</div>
+      <div class="stockline">${out?'Fini pou kounye a':p.qty+' '+(p.unit||'')+' disponib'}</div>
+      <button class="kv-add-btn" ${out?'disabled':''} onclick="addToClientCart('${p.id}')">${out?'Pa Disponib':'+ Ajoute'}</button>
+    </div>`;
+  }).join('');
+}
+function addToClientCart(productId){
+  const p=CLIENT_CATALOG.products.find(x=>x.id===productId);
+  if(!p||p.qty<=0) return;
+  const existing=clientCart.find(c=>c.productId===productId);
+  if(existing){
+    if(existing.qty<p.qty) existing.qty++;
+  }else{
+    clientCart.push({productId:p.id, name:p.name, price:p.sellPrice, qty:1, maxQty:p.qty});
+  }
+  updateClientCartFab();
+}
+function updateClientCartFab(){
+  const totalQty=clientCart.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('kvCartFab').style.display=totalQty>0?'flex':'none';
+  document.getElementById('kvCartCount').textContent=totalQty;
+}
+function openClientCartModal(){
+  renderClientCartStep();
+  document.getElementById('kvCartOverlay').classList.add('open');
+}
+function closeClientCartModal(){ document.getElementById('kvCartOverlay').classList.remove('open'); }
+
+function renderClientCartStep(){
+  const total=clientCart.reduce((s,c)=>s+c.qty*c.price,0);
+  document.getElementById('kvCartModalBox').innerHTML=`
+    <div class="kv-modal-title">🛒 Panye Ou</div>
+    ${clientCart.length===0?'<p style="color:var(--text-faint);">Panye a vid.</p>':clientCart.map((c,i)=>`
+      <div class="kv-cart-row">
+        <div>
+          <div class="nm">${esc(c.name)}</div>
+          <div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);">${fmt(c.price)} chak</div>
+        </div>
+        <div class="kv-qtybox">
+          <button onclick="changeClientQty(${i},-1)">−</button>
+          <span class="mono" style="min-width:20px;text-align:center;">${c.qty}</span>
+          <button onclick="changeClientQty(${i},1)">+</button>
+        </div>
+      </div>`).join('')}
+    ${clientCart.length>0?`<div class="kv-cart-total">Total: ${fmt(total)}</div>
+    <button class="kv-btn-full" onclick="goToClientCheckout()">Kontinye pou Peman</button>`:''}
+    <button class="kv-btn-ghost-full" onclick="closeClientCartModal()">Fèmen</button>
+  `;
+}
+function changeClientQty(i,delta){
+  clientCart[i].qty+=delta;
+  if(clientCart[i].qty>clientCart[i].maxQty) clientCart[i].qty=clientCart[i].maxQty;
+  if(clientCart[i].qty<=0) clientCart.splice(i,1);
+  updateClientCartFab();
+  renderClientCartStep();
+}
+function goToClientCheckout(){
+  const total=clientCart.reduce((s,c)=>s+c.qty*c.price,0);
+  document.getElementById('kvCartModalBox').innerHTML=`
+    <div class="kv-modal-title">📱 Peman</div>
+    <div class="kv-error-box" id="kvCheckoutError"></div>
+    <div class="kv-pay-instructions">
+      Voye <b>${fmt(total)}</b> sou youn nan nimewo sa yo, epi kenbe referans tranzaksyon an:<br><br>
+      ${CLIENT_CATALOG.natcashNumber?`📲 <b>NatCash:</b> ${esc(CLIENT_CATALOG.natcashNumber)}<br>`:''}
+      ${CLIENT_CATALOG.moncashNumber?`📲 <b>MonCash:</b> ${esc(CLIENT_CATALOG.moncashNumber)}`:''}
+      ${(!CLIENT_CATALOG.natcashNumber && !CLIENT_CATALOG.moncashNumber)?'Kontakte biznis la pou enfòmasyon peman.':''}
+    </div>
+    <div class="kv-field"><label>Non Ou *</label><input id="kvCoName" placeholder="Non konplè"></div>
+    <div class="kv-field"><label>Telefòn Ou (WhatsApp) *</label><input id="kvCoPhone" placeholder="509xxxxxxxx"></div>
+    <div class="kv-field">
+      <label>Mwen Peye Ak *</label>
+      <select id="kvCoMethod">
+        ${CLIENT_CATALOG.natcashNumber?'<option value="natcash">NatCash</option>':''}
+        ${CLIENT_CATALOG.moncashNumber?'<option value="moncash">MonCash</option>':''}
+      </select>
+    </div>
+    <div class="kv-field"><label>Referans Tranzaksyon *</label><input id="kvCoRef" placeholder="Nimewo referans ou resevwa a"></div>
+    <button class="kv-btn-full" onclick="submitClientOrder(${total})">Soumèt Kòmand</button>
+    <button class="kv-btn-ghost-full" onclick="renderClientCartStep()">Retounen</button>
+  `;
+}
+async function submitClientOrder(total){
+  const name=document.getElementById('kvCoName').value.trim();
+  const phone=document.getElementById('kvCoPhone').value.trim();
+  const method=document.getElementById('kvCoMethod').value;
+  const reference=document.getElementById('kvCoRef').value.trim();
+  const err=document.getElementById('kvCheckoutError');
+  if(!name||!phone||!reference){
+    err.textContent='Tanpri ranpli tout chan obligatwa yo.';
+    err.style.display='block';
+    return;
+  }
+  err.style.display='none';
+  try{
+    const res=await fetch('/api/public/orders',{
+      method:'POST', headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify({
+        customerName:name, customerPhone:phone,
+        items:clientCart.map(c=>({productId:c.productId, qty:c.qty})),
+        reference, paymentMethod:method
+      })
+    });
+    const data=await res.json();
+    if(!res.ok){
+      err.textContent=data.error||'Yon erè rive. Eseye ankò.';
+      err.style.display='block';
+      return;
+    }
+    document.getElementById('kvCartModalBox').innerHTML=`
+      <div class="kv-success-box">
+        <div class="ic">✅</div>
+        <h3>Kòmand Voye!</h3>
+        <p>Biznis la ap verifye peman ou epi konfime kòmand ou a talè. Ou ap resevwa yon mesaj WhatsApp lè li konfime.</p>
+      </div>
+      <button class="kv-btn-full" onclick="finishClientOrder()">Retounen sou Katalòg</button>
+    `;
+    clientCart=[];
+    updateClientCartFab();
+  }catch(e){
+    err.textContent='Pa ka konekte ak sèvè a. Verifye koneksyon entènèt ou.';
+    err.style.display='block';
+  }
+}
+function finishClientOrder(){
+  closeClientCartModal();
+  loadClientCatalog();
+}
+
+function enterKliyanMode(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('kliyanScreen').style.display='block';
+  document.getElementById('kvCartOverlay').addEventListener('click',e=>{ if(e.target.id==='kvCartOverlay') closeClientCartModal(); });
+  loadClientCatalog();
+}
+if(IS_KLIYAN_MODE){ enterKliyanMode(); }
+
+/* =====================================================================
+   NAVIGATION / ROUTER
+===================================================================== */
+document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    goView(el.getAttribute('data-view'));
+    if(window.innerWidth<=960) document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+const VIEW_TITLES={
+  dashboard:'Dashboard', stockin:'Antre Estòk', inventory:'Envantè',
+  products:'Jesyon Pwodwi', suppliers:'Jesyon Founisè',
+  customers:'Jesyon Kliyan', invoicing:'Faktirasyon', returns:'Retou Machandiz',
+  expenses:'Depans/Chaj', finance:'Depo · Retrè · Prè',
+  reports:'Rapò', users:'Jesyon Itilizatè', auditlog:'Jounal Aktivite',
+  orders:'Kòmand An Atant', supplierOrders:'Kòmand Founisè',
+  backup:'Sovgad Done', serverConfig:'Sèvè / Backend'
+};
+
+function goView(view){
+  currentView=view;
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('data-view')===view);
+  });
+  document.getElementById('viewTitle').textContent=VIEW_TITLES[view]||view;
+  renderView(view);
+}
+
+function renderView(view){
+  const c=document.getElementById('content');
+  const renderers={
+    dashboard:renderDashboard, stockin:renderStockIn,
+    inventory:renderInventory, products:()=>renderEntityView('products'),
+    suppliers:()=>renderEntityView('suppliers'), customers:renderCustomers,
+    invoicing:renderInvoicing, returns:renderReturns, expenses:renderExpenses,
+    finance:renderFinance,
+    reports:renderReports, users:renderUsers, auditlog:renderAuditLog,
+    orders:renderOrders, supplierOrders:renderSupplierOrders,
+    backup:renderBackup, serverConfig:renderServerConfig
+  };
+  c.innerHTML='';
+  (renderers[view]||(()=>{c.innerHTML='<div class="empty-state">Vi pa jwenn.</div>';}))();
+}
+
+/* =====================================================================
+   MODAL HELPERS
+===================================================================== */
+function openModalHTML(html, narrow){
+  document.getElementById('modalBox').className='modal'+(narrow?' narrow':'');
+  document.getElementById('modalBox').innerHTML=html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.getElementById('modalOverlay').addEventListener('click',e=>{
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+/* =====================================================================
+   WHATSAPP + PDF RECEIPT ENGINE (règ jeneral pou tout modil)
+===================================================================== */
+function customerBalanceSummary(customer){
+  if(!customer) return {wallet:0, credit:0, loan:0};
+  const wallet=customer.walletBalance||0;
+  const credit=customer.creditBalance||0;
+  const loan=DB.loans.filter(l=>l.customerId===customer.id && l.status!=='solde')
+    .reduce((s,l)=>s+(l.amount-(l.paidAmount||0)),0);
+  return {wallet,credit,loan};
+}
+
+/* Bwat enfo tranzaksyon an — non Kliyan/Founisè, # Tranzaksyon, Dat —
+   an gra, soulinye, ankadre ansanm, plase adwat sou fòma A4. */
+function drawTxnInfoBoxA4(doc, pageWidth, partyLabel, partyName, txnNumber, dateStr){
+  const boxW=84, marginR=14, x=pageWidth-marginR-boxW, y=27, lineH=7.2, padX=4.5;
+  const rows=[[partyLabel, partyName||'—'], ['# Tranzaksyon', txnNumber||'—'], ['Dat', dateStr]];
+  const boxH=lineH*rows.length+7;
+  doc.setDrawColor(47,107,58); doc.setLineWidth(0.5);
+  doc.rect(x,y,boxW,boxH);
+  doc.setFont(undefined,'bold'); doc.setFontSize(9.5); doc.setTextColor(40,35,25);
+  let ty=y+7.5;
+  rows.forEach(([label,val])=>{
+    const text=label+': '+val;
+    doc.text(text,x+padX,ty);
+    const tw=doc.getTextWidth(text);
+    doc.setLineWidth(0.3);
+    doc.line(x+padX,ty+1,x+padX+tw,ty+1);
+    ty+=lineH;
+  });
+  doc.setFont(undefined,'normal');
+  return y+boxH;
+}
+/* Menm bwat la, men plen lajè, pou fòma tikè 80mm. */
+function drawTxnInfoBoxThermal(doc, partyLabel, partyName, txnNumber, dateStr, startY){
+  const x=4, boxW=72, lineH=5.2, padX=3;
+  const rows=[[partyLabel, partyName||'—'], ['# Tranzaksyon', txnNumber||'—'], ['Dat', dateStr]];
+  const boxH=lineH*rows.length+5;
+  doc.setDrawColor(47,107,58); doc.setLineWidth(0.4);
+  doc.rect(x,startY,boxW,boxH);
+  doc.setFont(undefined,'bold'); doc.setFontSize(7.3); doc.setTextColor(40,35,25);
+  let ty=startY+5.2;
+  rows.forEach(([label,val])=>{
+    const text=label+': '+val;
+    doc.text(text,x+padX,ty,{maxWidth:boxW-2*padX});
+    const tw=Math.min(doc.getTextWidth(text),boxW-2*padX);
+    doc.setLineWidth(0.25);
+    doc.line(x+padX,ty+0.8,x+padX+tw,ty+0.8);
+    ty+=lineH;
+  });
+  doc.setFont(undefined,'normal');
+  return startY+boxH;
+}
+
+function buildReceiptPDF(title, customer, lines, footerNote, txnNumber, partyLabel){
+  const format=(DB.settings && DB.settings.receiptFormat) || 'a4';
+  return format==='thermal80'
+    ? buildReceiptPDFThermal(title, customer, lines, footerNote, txnNumber, partyLabel)
+    : buildReceiptPDFA4(title, customer, lines, footerNote, txnNumber, partyLabel);
+}
+
+function buildReceiptPDFA4(title, customer, lines, footerNote, txnNumber, partyLabel){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const logo=DB.settings && DB.settings.logoDataUrl;
+  doc.setFillColor(47,107,58);
+  doc.rect(0,0,210,22,'F');
+  if(logo){
+    try{ doc.addImage(logo,'PNG',14,4,14,14); }catch(e){}
+  }
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(17);
+  doc.setFont(undefined,'bold');
+  doc.text('LeadStock', logo?32:14, 13);
+  doc.setFont(undefined,'normal');
+  doc.setFontSize(10.5);
+  doc.text(title,196,18,{align:'right'});
+
+  const boxBottom=drawTxnInfoBoxA4(doc,210,partyLabel||'Kliyan',customer?customer.name:null,txnNumber,nowStamp());
+  if(customer && customer.phone){
+    doc.setFontSize(8.5); doc.setTextColor(90,80,65);
+    doc.text('Tel: '+customer.phone,14,32);
+  }
+  doc.setDrawColor(216,201,163); doc.setLineWidth(0.3);
+  doc.line(14,boxBottom+2,196,boxBottom+2);
+
+  doc.autoTable({
+    startY:boxBottom+8,
+    head:[['Deskripsyon','Valè']],
+    body:lines,
+    styles:{fontSize:9.5},
+    headStyles:{fillColor:[47,107,58],textColor:[255,255,255]},
+    theme:'grid'
+  });
+  let y=(doc.lastAutoTable ? doc.lastAutoTable.finalY : boxBottom+20)+10;
+  const showBalance=customer && partyLabel!=='Founisè';
+  if(showBalance){
+    const bal=customerBalanceSummary(customer);
+    doc.setDrawColor(216,201,163); doc.line(14,y-4,196,y-4);
+    doc.setFontSize(10.5); doc.setFont(undefined,'bold'); doc.setTextColor(47,107,58);
+    doc.text('BALANS KONT KLIYAN AN',14,y); y+=6;
+    doc.setFont(undefined,'normal'); doc.setTextColor(40,35,25); doc.setFontSize(9.5);
+    doc.text('Balans Depo: '+fmt(bal.wallet),14,y); y+=5.5;
+    doc.text('Dèt sou Kont (Dedwi): '+fmt(bal.credit),14,y); y+=5.5;
+    doc.text('Balans Prè ki Rete: '+fmt(bal.loan),14,y); y+=5.5;
+  }
+  if(footerNote){
+    doc.setDrawColor(216,201,163); doc.line(14,y+2,196,y+2);
+    doc.setFontSize(8.5); doc.setTextColor(120,110,90);
+    doc.text(footerNote,14,y+8,{maxWidth:180});
+  }
+  return doc;
+}
+
+/* Fòma tikè 80mm — pou enprimant tèmik POS Android (Bluetooth/USB) */
+function buildReceiptPDFThermal(title, customer, lines, footerNote, txnNumber, partyLabel){
+  const {jsPDF}=window.jspdf;
+  const estimatedHeight=110 + lines.length*6 + (customer?24:0) + (footerNote?14:0);
+  const doc=new jsPDF({ unit:'mm', format:[80, Math.max(140,estimatedHeight)] });
+  const logo=DB.settings && DB.settings.logoDataUrl;
+  let y=8;
+  if(logo){
+    try{ doc.addImage(logo,'PNG',30,y,20,20); y+=22; }catch(e){}
+  }
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(40,35,25);
+  doc.text('LeadStock',40,y,{align:'center'}); y+=6;
+  doc.setFontSize(9);
+  doc.text(title,40,y,{align:'center'}); y+=5;
+  doc.setFont(undefined,'normal');
+  y+=2;
+
+  y=drawTxnInfoBoxThermal(doc, partyLabel||'Kliyan', customer?customer.name:null, txnNumber, nowStamp(), y)+5;
+  if(customer && customer.phone){ doc.setFontSize(7); doc.text('Tel: '+customer.phone,4,y); y+=4.5; }
+
+  doc.setDrawColor(180,170,140);
+  doc.line(4,y,76,y); y+=5;
+  doc.setFontSize(7.5);
+  lines.forEach(l=>{
+    const label=String(l[0]); const val=String(l[1]);
+    doc.text(label,4,y,{maxWidth:48});
+    doc.text(val,76,y,{align:'right'});
+    y+=5;
+  });
+  doc.line(4,y,76,y); y+=5;
+  const showBalance=customer && partyLabel!=='Founisè';
+  if(showBalance){
+    const bal=customerBalanceSummary(customer);
+    doc.setFontSize(7.8);
+    doc.text('BALANS KONT',4,y); y+=4.5;
+    doc.setFontSize(7.3);
+    doc.text('Depo: '+fmt(bal.wallet),4,y); y+=4;
+    doc.text('Dèt: '+fmt(bal.credit),4,y); y+=4;
+    doc.text('Prè: '+fmt(bal.loan),4,y); y+=4.5;
+  }
+  if(footerNote){
+    doc.setFontSize(6.8);
+    doc.setTextColor(110,100,85);
+    doc.text(footerNote,4,y,{maxWidth:72}); y+=8;
+  }
+  return doc;
+}
+
+/* Voye rezi a dirèkteman kòm yon FICHYE PDF sou WhatsApp lè aparèy la
+   sipòte l (Web Share API — Android/iOS resan). Si sa pa disponib,
+   nou tonbe tounen sou telechajman PDF + yon ti mesaj kout sou WhatsApp
+   ki mande moun nan tache fichye a li menm. */
+async function sendWhatsAppReceipt(customer, title, lines, footerNote, filename, txnNumber, partyLabel){
+  const doc=buildReceiptPDF(title, customer, lines, footerNote, txnNumber, partyLabel||'Kliyan');
+  const blob=doc.output('blob');
+  const cleanName=(filename||'Resi').replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
+  const file=new File([blob], cleanName, {type:'application/pdf'});
+  const caption=`LeadStock — ${title} — #${txnNumber||''}`;
+
+  let sharedDirectly=false;
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({files:[file], title:caption, text:caption});
+      sharedDirectly=true;
+    }catch(e){ /* moun nan anile pataj la — pa gen erè pou montre */ sharedDirectly=true; }
+  }
+  if(sharedDirectly) return;
+
+  // Fallback: pa gen Web Share API disponib (egzanp: òdinatè) — telechaje
+  // PDF la epi louvri WhatsApp ak yon ti mesaj kout ki mande tache fichye a.
+  doc.save(cleanName);
+  if(!customer || !customer.phone) return;
+  const msg=`*${caption}*\n_Resi PDF la telechaje sou aparèy la — tanpri tache l nan konvèsasyon sa a._`;
+  const phone=customer.phone.replace(/[^0-9]/g,'');
+  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+
+/* =====================================================================
+   PAYMENT MODAL — Kach / Dedwi / Depo (itilize pou Faktirasyon)
+===================================================================== */
+function askPaymentMethod(total, customerId, onConfirm){
+  const customer=DB.customers.find(c=>c.id===customerId);
+  const bal=customer?customerBalanceSummary(customer):{wallet:0,credit:0,loan:0};
+  openModalHTML(`
+    <div class="modal-title">Mòd Peman</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">Total pou peye: <b class="mono">${fmt(total)}</b></p>
+    <p class="pay-balance-note">Balans depo kliyan an: <b>${fmt(bal.wallet)}</b></p>
+    <div class="pay-options" id="payOpts">
+      <div class="pay-opt" data-m="kach" onclick="selectPayOpt('kach')"><span class="ic">💵</span>Kach</div>
+      <div class="pay-opt" data-m="dedwi" onclick="selectPayOpt('dedwi')"><span class="ic">📒</span>Dedwi (Sou Kont)</div>
+      <div class="pay-opt" data-m="depo" onclick="selectPayOpt('depo')"><span class="ic">🏦</span>Depo</div>
+    </div>
+    <div id="payExtra"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Anile</button>
+      <button class="btn btn-primary" onclick="confirmPayment()">Konfime Peman</button>
+    </div>
+  `);
+  window._payState={total, customerId, method:null, remainderMethod:null};
+  window._payConfirmCb=onConfirm;
+}
+function selectPayOpt(m){
+  window._payState.method=m;
+  document.querySelectorAll('#payOpts .pay-opt').forEach(el=>el.classList.toggle('selected', el.getAttribute('data-m')===m));
+  const extra=document.getElementById('payExtra');
+  const {total, customerId}=window._payState;
+  const customer=DB.customers.find(c=>c.id===customerId);
+  const bal=customer?customerBalanceSummary(customer):{wallet:0};
+  if(m==='depo' && bal.wallet < total){
+    const short=total-bal.wallet;
+    extra.innerHTML=`
+      <div style="background:var(--red-pale);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--red);margin-bottom:10px;">
+        Balans depo kliyan an (${fmt(bal.wallet)}) pa sifi. Manke ${fmt(short)}. Chwazi kijan pou konplete rès la:
+      </div>
+      <div class="pay-options" style="grid-template-columns:1fr 1fr;">
+        <div class="pay-opt" data-r="kach" onclick="selectRemainder('kach')"><span class="ic">💵</span>Kach pou rès la</div>
+        <div class="pay-opt" data-r="dedwi" onclick="selectRemainder('dedwi')"><span class="ic">📒</span>Dedwi pou rès la</div>
+      </div>`;
+  }else{
+    extra.innerHTML='';
+    window._payState.remainderMethod=null;
+  }
+}
+function selectRemainder(m){
+  window._payState.remainderMethod=m;
+  document.querySelectorAll('#payExtra .pay-opt').forEach(el=>el.classList.toggle('selected', el.getAttribute('data-r')===m));
+}
+function confirmPayment(){
+  const st=window._payState;
+  if(!st.method){ alert('Tanpri chwazi yon mòd peman.'); return; }
+  const customer=DB.customers.find(c=>c.id===st.customerId);
+  const bal=customer?customerBalanceSummary(customer):{wallet:0};
+  let breakdown={cash:0, credit:0, deposit:0};
+  if(st.method==='kach'){ breakdown.cash=st.total; }
+  else if(st.method==='dedwi'){ breakdown.credit=st.total; }
+  else if(st.method==='depo'){
+    if(bal.wallet>=st.total){ breakdown.deposit=st.total; }
+    else{
+      if(!st.remainderMethod){ alert('Tanpri chwazi kijan pou konplete rès la.'); return; }
+      breakdown.deposit=bal.wallet;
+      const short=st.total-bal.wallet;
+      if(st.remainderMethod==='kach') breakdown.cash=short; else breakdown.credit=short;
+    }
+  }
+  closeModal();
+  window._payConfirmCb(breakdown);
+}
+function applyPaymentToCustomer(customerId, breakdown){
+  const customer=DB.customers.find(c=>c.id===customerId);
+  if(!customer) return;
+  customer.walletBalance=(customer.walletBalance||0)-breakdown.deposit;
+  customer.creditBalance=(customer.creditBalance||0)+breakdown.credit;
+}
+function paymentSummaryLines(breakdown){
+  const lines=[];
+  if(breakdown.cash) lines.push(['Peye Kach', fmt(breakdown.cash)]);
+  if(breakdown.deposit) lines.push(['Peye ak Depo', fmt(breakdown.deposit)]);
+  if(breakdown.credit) lines.push(['Dedwi sou Kont', fmt(breakdown.credit)]);
+  return lines;
+}
+
+/* =====================================================================
+   GENERIC ENTITY CRUD (Pwodwi, Founisè)
+===================================================================== */
+const ENTITY_CONFIG={
+  products:{
+    label:'Pwodwi', singular:'Pwodwi', icon:'📦',
+    fields:[
+      {key:'code',label:'Kòd/SKU',type:'text'},
+      {key:'name',label:'Non Pwodwi',type:'text',required:true},
+      {key:'category',label:'Kategori',type:'text'},
+      {key:'unit',label:'Inite',type:'text',placeholder:'pyès, sak, boutèy'},
+      {key:'buyPrice',label:'Pri Acha (HTG)',type:'number'},
+      {key:'sellPrice',label:'Pri Vant (HTG)',type:'number'},
+      {key:'qty',label:'Kantite Estòk',type:'number'},
+      {key:'minQty',label:'Sèy Minimòm',type:'number'},
+      {key:'photo',label:'Foto Pwodwi (opsyonèl)',type:'photo',full:true}
+    ],
+    columns:[
+      {k:'photo',l:'',fmt:v=>v?`<img src="${v}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;">`:'<span style="color:var(--text-faint);">—</span>'},
+      {k:'code',l:'Kòd'},{k:'name',l:'Non'},{k:'category',l:'Kategori'},
+      {k:'qty',l:'Estòk',fmt:(v,row)=>`<span class="${row.qty<=row.minQty?'tag-low':''}">${row.qty} ${esc(row.unit||'')}</span>`},
+      {k:'sellPrice',l:'Pri Vant',fmt:v=>fmt(v)}
+    ]
+  },
+  suppliers:{
+    label:'Founisè', singular:'Founisè', icon:'🏭',
+    fields:[
+      {key:'name',label:'Non Founisè',type:'text',required:true},
+      {key:'phone',label:'Telefòn',type:'text'},
+      {key:'address',label:'Adrès',type:'text'},
+      {key:'terms',label:'Kondisyon Peman',type:'text',placeholder:'Kach, 30 jou...'}
+    ],
+    columns:[{k:'name',l:'Non'},{k:'phone',l:'Telefòn'},{k:'address',l:'Adrès'},{k:'terms',l:'Kondisyon'}]
+  }
+};
+
+/* Konprese yon imaj (foto pwodwi/prèv depans) an base64, limite lajè maks
+   pou pa gonfle localStorage/baz done a ak gwo fichye kamera telefòn. */
+function compressImageFile(file, maxWidth){
+  maxWidth=maxWidth||400;
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1, maxWidth/img.width);
+        const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',0.72));
+      };
+      img.onerror=reject;
+      img.src=e.target.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderEntityView(key, containerId){
+  const cfg=ENTITY_CONFIG[key];
+  const target=containerId?document.getElementById(containerId):document.getElementById('content');
+  target.innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">${cfg.icon} ${cfg.label} <span class="count" id="${key}Count"></span></span>
+        <button class="btn btn-primary" onclick="openEntityForm('${key}')">+ Nouvo ${cfg.singular}</button>
+      </div>
+      <div class="toolbar">
+        <input class="tb-input" id="${key}Search" placeholder="Chèche..." oninput="renderEntityTable('${key}')">
+      </div>
+      <div id="${key}TableWrap"></div>
+    </div>`;
+  renderEntityTable(key);
+}
+function renderEntityTable(key){
+  const cfg=ENTITY_CONFIG[key];
+  const q=(document.getElementById(key+'Search')?.value||'').toLowerCase();
+  const rows=DB[key].filter(r=>!q || JSON.stringify(r).toLowerCase().includes(q));
+  document.getElementById(key+'Count').textContent='('+rows.length+')';
+  const wrap=document.getElementById(key+'TableWrap');
+  if(rows.length===0){
+    wrap.innerHTML=`<div class="empty-state"><div class="big">Poko gen ${cfg.label.toLowerCase()}</div><div>Klike "+ Nouvo ${cfg.singular}" pou kòmanse.</div></div>`;
+    return;
+  }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table>
+    <thead><tr>${cfg.columns.map(c=>`<th>${c.l}</th>`).join('')}<th></th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      ${cfg.columns.map(c=>`<td>${c.fmt?c.fmt(r[c.k],r):esc(r[c.k])}</td>`).join('')}
+      <td class="row-actions">
+        <button class="icon-btn" onclick="openEntityForm('${key}','${r.id}')">Modifye</button>
+        <button class="icon-btn danger" onclick="deleteEntity('${key}','${r.id}')">Efase</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function openEntityForm(key,id){
+  const cfg=ENTITY_CONFIG[key];
+  const row=id?DB[key].find(r=>r.id===id):{};
+  openModalHTML(`
+    <div class="modal-title">${id?'Modifye':'Nouvo'} ${cfg.singular}</div>
+    <div class="form-grid">
+      ${cfg.fields.map(f=>{
+        if(f.type==='photo'){
+          return `<div class="field full">
+            <label>${f.label}</label>
+            <input type="file" id="ef_${f.key}_file" accept="image/*">
+            <input type="hidden" id="ef_${f.key}" value="${row[f.key]?esc(row[f.key]):''}">
+            ${row[f.key]?`<div style="margin-top:8px;"><img src="${row[f.key]}" style="height:60px;border-radius:6px;border:1px solid var(--line);"></div>`:''}
+          </div>`;
+        }
+        return `<div class="field ${f.full?'full':''}">
+          <label>${f.label}${f.required?' *':''}</label>
+          ${f.type==='select'
+            ? `<select id="ef_${f.key}">${f.options.map(o=>`<option value="${o}" ${row[f.key]===o?'selected':''}>${o}</option>`).join('')}</select>`
+            : `<input id="ef_${f.key}" type="${f.type}" placeholder="${f.placeholder||''}" value="${row[f.key]!==undefined?esc(row[f.key]):''}">`}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Anile</button>
+      <button class="btn btn-primary" onclick="saveEntity('${key}','${id||''}')">Anrejistre</button>
+    </div>
+  `);
+}
+async function saveEntity(key,id){
+  const cfg=ENTITY_CONFIG[key];
+  const data={};
+  for(const f of cfg.fields){
+    if(f.type==='photo'){
+      const fileInput=document.getElementById('ef_'+f.key+'_file');
+      const file=fileInput && fileInput.files[0];
+      if(file){
+        try{ data[f.key]=await compressImageFile(file,400); }
+        catch(e){ data[f.key]=document.getElementById('ef_'+f.key).value; }
+      }else{
+        data[f.key]=document.getElementById('ef_'+f.key).value;
+      }
+      continue;
+    }
+    const el=document.getElementById('ef_'+f.key);
+    data[f.key]=f.type==='number'?Number(el.value||0):el.value.trim();
+  }
+  if(cfg.fields.some(f=>f.required) && !data[cfg.fields.find(f=>f.required).key]){
+    alert('Tanpri ranpli chan obligatwa yo.'); return;
+  }
+  if(id){
+    const idx=DB[key].findIndex(r=>r.id===id);
+    DB[key][idx]={...DB[key][idx],...data};
+  }else{
+    DB[key].push({id:uid(key[0]),...data,...(key==='products'?{qty:data.qty||0}:{})});
+  }
+  saveDB(); closeModal();
+  if(document.getElementById(key+'TableWrap')) renderEntityTable(key);
+  else renderView(currentView);
+}
+function deleteEntity(key,id){
+  if(!confirm('Efase antre sa a?')) return;
+  DB[key]=DB[key].filter(r=>r.id!==id);
+  logActivity('Efase yon '+(ENTITY_CONFIG[key]?ENTITY_CONFIG[key].singular:key));
+  saveDB();
+  renderEntityTable(key);
+}
+
+/* =====================================================================
+   DASHBOARD
+===================================================================== */
+function renderDashboard(){
+  const today=todayISO();
+  const salesToday=DB.invoices.filter(i=>i.date===today).reduce((s,i)=>s+i.total,0);
+  const stockValue=DB.products.reduce((s,p)=>s+p.qty*p.sellPrice,0);
+  const lowStock=DB.products.filter(p=>p.qty<=p.minQty).length;
+  const unpaidCredit=DB.customers.reduce((s,c)=>s+(c.creditBalance||0),0);
+  const totalDeposits=DB.customers.reduce((s,c)=>s+(c.walletBalance||0),0);
+  const expensesToday=DB.expenses.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
+  const totalExpenses30=DB.expenses.filter(e=>e.date>=addDays(-30)).reduce((s,e)=>s+e.amount,0);
+  const totalSales30=DB.invoices.filter(i=>i.date>=addDays(-30)).reduce((s,i)=>s+i.total,0);
+  const netProfit30=totalSales30-totalExpenses30;
+
+  document.getElementById('content').innerHTML=`
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Vant Jodi a</div><div class="stat-value">${fmt(salesToday)}</div><div class="stat-sub">${DB.invoices.filter(i=>i.date===today).length} fakti</div></div>
+      <div class="stat-card gold"><div class="stat-label">Valè Estòk</div><div class="stat-value">${fmt(stockValue)}</div><div class="stat-sub">${DB.products.length} pwodwi</div></div>
+      <div class="stat-card red"><div class="stat-label">Estòk Ba</div><div class="stat-value">${lowStock}</div><div class="stat-sub">pwodwi anba sèy minimòm</div></div>
+      <div class="stat-card red"><div class="stat-label">Dèt Kliyan (Sou Kont)</div><div class="stat-value">${fmt(unpaidCredit)}</div><div class="stat-sub">${DB.customers.filter(c=>c.creditBalance>0).length} kliyan</div></div>
+      <div class="stat-card"><div class="stat-label">Total Depo Kliyan</div><div class="stat-value">${fmt(totalDeposits)}</div><div class="stat-sub">${DB.customers.filter(c=>c.walletBalance>0).length} kliyan ak balans</div></div>
+      <div class="stat-card red"><div class="stat-label">Depans Jodi a</div><div class="stat-value">${fmt(expensesToday)}</div><div class="stat-sub">${DB.expenses.filter(e=>e.date===today).length} depans</div></div>
+      <div class="stat-card ${netProfit30>=0?'':'red'}"><div class="stat-label">Pwofi Net (30 Jou)</div><div class="stat-value">${fmt(netProfit30)}</div><div class="stat-sub">Vant ${fmt(totalSales30)} − Depans ${fmt(totalExpenses30)}</div></div>
+    </div>
+    <div class="charts-row">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Vant 7 Dènye Jou</span></div>
+        <div class="chart-box"><canvas id="chartSales"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Mouvman Estòk</span></div>
+        <div class="chart-box"><canvas id="chartStock"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">⚠️ Pwodwi ak Estòk Ba</span></div>
+      ${lowStock===0?'<div class="empty-state">Tout pwodwi gen estòk sifizan.</div>':`
+      <table><thead><tr><th>Pwodwi</th><th>Estòk</th><th>Sèy Min.</th></tr></thead>
+      <tbody>${DB.products.filter(p=>p.qty<=p.minQty).map(p=>`<tr><td>${esc(p.name)}</td><td class="tag-low">${p.qty} ${esc(p.unit||'')}</td><td>${p.minQty}</td></tr>`).join('')}</tbody></table>`}
+    </div>
+  `;
+
+  const days=[...Array(7)].map((_,i)=>addDays(i-6));
+  const salesByDay=days.map(d=>DB.invoices.filter(i=>i.date===d).reduce((s,i)=>s+i.total,0));
+  if(charts.sales) charts.sales.destroy();
+  charts.sales=new Chart(document.getElementById('chartSales'),{
+    type:'bar',
+    data:{labels:days.map(d=>d.slice(5)),datasets:[{data:salesByDay,backgroundColor:'#2f6b3a',borderRadius:5}]},
+    options:{plugins:{legend:{display:false}},scales:{
+      x:{grid:{display:false},ticks:{color:'#6b5f47',font:{family:'JetBrains Mono',size:10}}},
+      y:{grid:{color:'#e5d9b8'},ticks:{color:'#6b5f47',font:{family:'JetBrains Mono',size:10}}}
+    }}
+  });
+
+  const inQty=days.map(d=>DB.stockIn.filter(s=>s.date===d).reduce((s,x)=>s+x.qty,0));
+  const outQty=days.map(d=>DB.stockOut.filter(s=>s.date===d).reduce((s,x)=>s+x.qty,0));
+  if(charts.stock) charts.stock.destroy();
+  charts.stock=new Chart(document.getElementById('chartStock'),{
+    type:'line',
+    data:{labels:days.map(d=>d.slice(5)),datasets:[
+      {label:'Antre',data:inQty,borderColor:'#2f6b3a',backgroundColor:'#2f6b3a',tension:.3},
+      {label:'Sòti',data:outQty,borderColor:'#a13d2f',backgroundColor:'#a13d2f',tension:.3}
+    ]},
+    options:{plugins:{legend:{labels:{color:'#6b5f47',font:{family:'Inter',size:11}}}},scales:{
+      x:{grid:{display:false},ticks:{color:'#6b5f47',font:{family:'JetBrains Mono',size:10}}},
+      y:{grid:{color:'#e5d9b8'},ticks:{color:'#6b5f47',font:{family:'JetBrains Mono',size:10}}}
+    }}
+  });
+}
+
+/* =====================================================================
+   ANTRE ESTÒK (Stock In)
+===================================================================== */
+function renderStockIn(){
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📥 Nouvo Antre Estòk</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Pwodwi *</label><select id="siProduct">${DB.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} ${esc(p.unit||'')})</option>`).join('')}</select></div>
+        <div class="field"><label>Kantite *</label><input id="siQty" type="number" placeholder="10"></div>
+        <div class="field"><label>Pri Inite (HTG)</label><input id="siPrice" type="number" placeholder="1200"></div>
+        <div class="field"><label>Founisè</label><select id="siSupplier"><option value="">—</option>${DB.suppliers.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Dat Ekspirasyon (opsyonèl)</label><input id="siExpiration" type="date"></div>
+        <div class="field"><label>Referans</label><input id="siRef" placeholder="Nimewo bon lakat"></div>
+        <div class="field full"><label>Nòt</label><input id="siNote"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveStockIn()">Anrejistre Antre</button></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Antre <span class="count">(${DB.stockIn.length})</span></span></div>
+      <div class="toolbar"><input class="tb-input" id="siSearch" placeholder="Chèche..." oninput="renderStockInTable()"></div>
+      <div id="stockInTableWrap"></div>
+    </div>`;
+  renderStockInTable();
+}
+function renderStockInTable(){
+  const q=(document.getElementById('siSearch')?.value||'').toLowerCase();
+  const rows=[...DB.stockIn].reverse().filter(r=>!q || JSON.stringify(r).toLowerCase().includes(q));
+  const wrap=document.getElementById('stockInTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen antre estòk.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Pwodwi</th><th>Kantite</th><th>Pri Inite</th><th>Founisè</th><th>Dat Ekspirasyon</th><th>Ref</th></tr></thead>
+  <tbody>${rows.map(r=>{
+    const p=DB.products.find(x=>x.id===r.productId);
+    const s=DB.suppliers.find(x=>x.id===r.supplierId);
+    const expSoon=r.expirationDate && r.expirationDate<=addDays(30);
+    return `<tr><td class="mono">${r.date}</td><td>${esc(p?p.name:'—')}</td><td class="mono">+${r.qty}</td><td class="mono">${fmt(r.unitPrice)}</td><td>${esc(s?s.name:'—')}</td><td class="mono ${expSoon?'tag-low':''}">${esc(r.expirationDate||'—')}</td><td class="mono">${esc(r.ref||'—')}</td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function saveStockIn(){
+  const productId=document.getElementById('siProduct').value;
+  const qty=Number(document.getElementById('siQty').value||0);
+  if(!productId || qty<=0){ alert('Chwazi pwodwi epi antre yon kantite valab.'); return; }
+  const p=DB.products.find(x=>x.id===productId);
+  p.qty+=qty;
+  DB.stockIn.push({
+    id:uid('si'), date:todayISO(), productId, qty,
+    unitPrice:Number(document.getElementById('siPrice').value||0),
+    supplierId:document.getElementById('siSupplier').value,
+    expirationDate:document.getElementById('siExpiration').value||'',
+    ref:document.getElementById('siRef').value.trim(),
+    note:document.getElementById('siNote').value.trim()
+  });
+  saveDB(); renderStockIn();
+}
+
+/* =====================================================================
+   ENVANTÈ (Physical count)
+===================================================================== */
+function renderInventory(){
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">🗂️ Envantè Fizik — Konparezon</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" onclick="printInventory()">🖨️ Enprime</button>
+          <button class="btn btn-sm" onclick="exportInventoryPDF()">⬇ PDF</button>
+        </div>
+      </div>
+      <div class="toolbar"><input class="tb-input" id="invSearch" placeholder="Chèche pwodwi..." oninput="renderInventoryTable()"></div>
+      <div id="invTableWrap"></div>
+    </div>`;
+  renderInventoryTable();
+}
+function renderInventoryTable(){
+  const q=(document.getElementById('invSearch')?.value||'').toLowerCase();
+  const rows=DB.products.filter(p=>!q||p.name.toLowerCase().includes(q));
+  document.getElementById('invTableWrap').innerHTML=`<div style="overflow-x:auto;"><table>
+    <thead><tr><th>Pwodwi</th><th>Kantite Sistèm</th><th>Kantite Reyèl (Kontwòl)</th><th>Diferans</th><th></th></tr></thead>
+    <tbody>${rows.map(p=>`<tr>
+      <td>${esc(p.name)}</td>
+      <td class="mono">${p.qty}</td>
+      <td><input class="tb-input" style="width:100px;" type="number" id="invCount_${p.id}" placeholder="${p.qty}"></td>
+      <td class="mono" id="invDiff_${p.id}">—</td>
+      <td><button class="icon-btn" onclick="applyInventoryAdjust('${p.id}')">Ajiste</button></td>
+    </tr>`).join('')}</tbody></table></div>`;
+  rows.forEach(p=>{
+    document.getElementById('invCount_'+p.id).addEventListener('input',e=>{
+      const val=Number(e.target.value||p.qty);
+      document.getElementById('invDiff_'+p.id).textContent=(val-p.qty>=0?'+':'')+(val-p.qty);
+    });
+  });
+}
+function applyInventoryAdjust(productId){
+  const p=DB.products.find(x=>x.id===productId);
+  const val=Number(document.getElementById('invCount_'+productId).value);
+  if(isNaN(val)){ alert('Antre yon kantite reyèl.'); return; }
+  const diff=val-p.qty;
+  DB.inventoryChecks.push({id:uid('ic'),date:todayISO(),productId,before:p.qty,after:val,diff});
+  p.qty=val;
+  saveDB(); renderInventoryTable();
+  alert(`Ajistman fèt pou ${p.name}: ${diff>=0?'+':''}${diff}`);
+}
+function buildInventoryPDFDoc(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Envantè Fizik',14,16);
+  doc.setFontSize(9.5); doc.setTextColor(120,110,90);
+  doc.text('Jenere: '+nowStamp(),14,22);
+  doc.autoTable({
+    startY:28,
+    head:[['Pwodwi','Kantite Sistèm','Kantite Reyèl','Diferans']],
+    body:DB.products.map(p=>[p.name, p.qty, '', '']),
+    styles:{fontSize:9.5},
+    headStyles:{fillColor:[47,107,58],textColor:[255,255,255]},
+    theme:'grid'
+  });
+  return doc;
+}
+function printInventory(){
+  const doc=buildInventoryPDFDoc();
+  doc.autoPrint();
+  window.open(doc.output('bloburl'),'_blank');
+}
+function exportInventoryPDF(){
+  const doc=buildInventoryPDFDoc();
+  doc.save('LeadStock_Envantè_'+todayISO()+'.pdf');
+}
+
+/* =====================================================================
+   KLIYAN (custom entity view with balance columns)
+===================================================================== */
+function renderCustomers(){
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">👥 Kliyan <span class="count" id="custCount"></span></span>
+        <button class="btn btn-primary" onclick="openCustomerForm()">+ Nouvo Kliyan</button>
+      </div>
+      <div class="toolbar"><input class="tb-input" id="custSearch" placeholder="Chèche non, telefòn..." oninput="renderCustomerTable()"></div>
+      <div id="custTableWrap"></div>
+    </div>`;
+  renderCustomerTable();
+}
+function renderCustomerTable(){
+  const q=(document.getElementById('custSearch')?.value||'').toLowerCase();
+  const rows=DB.customers.filter(c=>!q||(c.name+c.phone).toLowerCase().includes(q));
+  document.getElementById('custCount').textContent='('+rows.length+')';
+  const wrap=document.getElementById('custTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen kliyan.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table>
+    <thead><tr><th>Non</th><th>Telefòn</th><th>Balans Depo</th><th>Dèt Sou Kont</th><th>Prè ki Rete</th><th></th></tr></thead>
+    <tbody>${rows.map(c=>{
+      const bal=customerBalanceSummary(c);
+      return `<tr>
+        <td>${esc(c.name)}</td><td class="mono">${esc(c.phone||'—')}</td>
+        <td class="mono" style="color:var(--green);">${fmt(bal.wallet)}</td>
+        <td class="mono" style="color:${bal.credit>0?'var(--red)':'inherit'};">${fmt(bal.credit)}</td>
+        <td class="mono" style="color:${bal.loan>0?'var(--red)':'inherit'};">${fmt(bal.loan)}</td>
+        <td class="row-actions">
+          <button class="icon-btn" onclick="openCustomerForm('${c.id}')">Modifye</button>
+          <button class="icon-btn danger" onclick="deleteCustomer('${c.id}')">Efase</button>
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+function openCustomerForm(id){
+  const row=id?DB.customers.find(c=>c.id===id):{};
+  openModalHTML(`
+    <div class="modal-title">${id?'Modifye':'Nouvo'} Kliyan</div>
+    <div class="form-grid">
+      <div class="field"><label>Non *</label><input id="cf_name" value="${esc(row.name||'')}"></div>
+      <div class="field"><label>Telefòn (pou WhatsApp)</label><input id="cf_phone" value="${esc(row.phone||'')}" placeholder="50937xxxxxx"></div>
+      <div class="field full"><label>Adrès</label><input id="cf_address" value="${esc(row.address||'')}"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Anile</button>
+      <button class="btn btn-primary" onclick="saveCustomer('${id||''}')">Anrejistre</button>
+    </div>`);
+}
+function saveCustomer(id){
+  const name=document.getElementById('cf_name').value.trim();
+  if(!name){ alert('Tanpri antre non kliyan an.'); return; }
+  const data={name, phone:document.getElementById('cf_phone').value.trim(), address:document.getElementById('cf_address').value.trim()};
+  if(id){ const idx=DB.customers.findIndex(c=>c.id===id); DB.customers[idx]={...DB.customers[idx],...data}; }
+  else{ DB.customers.push({id:uid('c'),...data,walletBalance:0,creditBalance:0}); }
+  saveDB(); closeModal(); renderCustomerTable();
+}
+function deleteCustomer(id){
+  if(!confirm('Efase kliyan sa a?')) return;
+  DB.customers=DB.customers.filter(c=>c.id!==id);
+  logActivity('Efase yon kliyan');
+  saveDB(); renderCustomerTable();
+}
+
+/* =====================================================================
+   FAKTIRASYON (Invoicing)
+===================================================================== */
+let cart=[];
+function renderInvoicing(){
+  cart=[];
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🧾 Nouvo Fakti <span class="count">#${String((DB.invoiceCounter||0)+1).padStart(6,'0')}</span></span></div>
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field"><label>Kliyan *</label><select id="invCustomer">${DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end;">
+        <div class="field"><label>Pwodwi</label><select id="invProduct">${DB.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} ${esc(p.unit||'')})</option>`).join('')}</select></div>
+        <div class="field"><label>Kantite</label><input id="invQty" type="number" value="1" min="1"></div>
+        <div class="field"><label>Pri Vant</label><input id="invPrice" type="number"></div>
+        <div class="field"><button class="btn btn-primary" onclick="addToCart()">+ Ajoute</button></div>
+      </div>
+      <table class="cart-table"><thead><tr><th>Pwodwi</th><th>Kantite</th><th>Pri</th><th>Soutotal</th><th></th></tr></thead>
+      <tbody id="cartBody"><tr><td colspan="5" style="text-align:center;color:var(--text-faint);">Panye vid</td></tr></tbody></table>
+      <div class="total-row">Total: <span id="cartTotal">HTG 0</span></div>
+      <div class="field full" style="margin-top:10px;"><label>Kòmantè (opsyonèl)</label><textarea id="invComment" placeholder="Nòt sou fakti a..."></textarea></div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="completeInvoice()">Konplete Vant</button></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Fakti <span class="count">(${DB.invoices.length})</span></span></div>
+      <div class="toolbar"><input class="tb-input" id="invSearch" placeholder="Chèche..." oninput="renderInvoiceTable()"></div>
+      <div id="invoiceTableWrap"></div>
+    </div>`;
+  document.getElementById('invProduct').addEventListener('change', syncInvPrice);
+  syncInvPrice();
+  renderInvoiceTable();
+}
+function syncInvPrice(){
+  const p=DB.products.find(x=>x.id===document.getElementById('invProduct').value);
+  if(p) document.getElementById('invPrice').value=p.sellPrice;
+}
+function addToCart(){
+  const productId=document.getElementById('invProduct').value;
+  const qty=Number(document.getElementById('invQty').value||0);
+  const price=Number(document.getElementById('invPrice').value||0);
+  const p=DB.products.find(x=>x.id===productId);
+  if(!p||qty<=0){ alert('Chwazi yon pwodwi ak yon kantite valab.'); return; }
+  if(qty>p.qty){ alert('Kantite mande a depase estòk disponib ('+p.qty+').'); return; }
+  cart.push({productId, name:p.name, unit:p.unit, qty, price});
+  renderCart();
+}
+function renderCart(){
+  const body=document.getElementById('cartBody');
+  if(cart.length===0){ body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-faint);">Panye vid</td></tr>'; }
+  else{
+    body.innerHTML=cart.map((it,i)=>`<tr>
+      <td>${esc(it.name)}</td><td class="mono">${it.qty} ${esc(it.unit||'')}</td><td class="mono">${fmt(it.price)}</td>
+      <td class="mono">${fmt(it.qty*it.price)}</td>
+      <td><button class="icon-btn danger" onclick="removeCartItem(${i})">✕</button></td>
+    </tr>`).join('');
+  }
+  document.getElementById('cartTotal').textContent=fmt(cart.reduce((s,it)=>s+it.qty*it.price,0));
+}
+function removeCartItem(i){ cart.splice(i,1); renderCart(); }
+function nextTxnNumber(type, prefix){
+  if(!DB.counters) DB.counters={};
+  DB.counters[type]=(DB.counters[type]||0)+1;
+  return prefix+'-'+String(DB.counters[type]).padStart(6,'0');
+}
+function nextInvoiceNumber(){
+  DB.invoiceCounter=(DB.invoiceCounter||0)+1;
+  return 'FAK-'+String(DB.invoiceCounter).padStart(6,'0');
+}
+function completeInvoice(){
+  if(cart.length===0){ alert('Ajoute omwen yon pwodwi nan panye a.'); return; }
+  const customerId=document.getElementById('invCustomer').value;
+  const total=cart.reduce((s,it)=>s+it.qty*it.price,0);
+  const comment=document.getElementById('invComment').value.trim();
+  askPaymentMethod(total, customerId, (breakdown)=>{
+    const invoiceNumber=nextInvoiceNumber();
+    for(const it of cart){
+      const p=DB.products.find(x=>x.id===it.productId);
+      p.qty-=it.qty;
+      DB.stockOut.push({id:uid('so'), date:todayISO(), productId:it.productId, qty:it.qty, reason:'Vant (Fakti '+invoiceNumber+')', ref:invoiceNumber});
+    }
+    applyPaymentToCustomer(customerId, breakdown);
+    const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId, items:[...cart], total, breakdown, comment};
+    DB.invoices.push(invoice);
+    saveDB();
+    const customer=DB.customers.find(c=>c.id===customerId);
+    const lines=[...cart.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)])];
+    lines.push(...paymentSummaryLines(breakdown));
+    lines.push(['TOTAL', fmt(total)]);
+    if(comment) lines.push(['Kòmantè', comment]);
+    sendWhatsAppReceipt(customer, 'Fakti Vant', lines, 'Mèsi pou konfyans ou nan LeadStock!', invoiceNumber, invoiceNumber, 'Kliyan');
+    cart=[]; renderInvoicing();
+  });
+}
+function printInvoiceReceipt(invoiceId){
+  const invoice=DB.invoices.find(i=>i.id===invoiceId);
+  if(!invoice) return;
+  const customer=DB.customers.find(c=>c.id===invoice.customerId);
+  const lines=[...invoice.items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)])];
+  lines.push(...paymentSummaryLines(invoice.breakdown));
+  lines.push(['TOTAL', fmt(invoice.total)]);
+  if(invoice.comment) lines.push(['Kòmantè', invoice.comment]);
+  const doc=buildReceiptPDF('Fakti Vant', customer, lines, 'Mèsi pou konfyans ou nan LeadStock!', invoice.invoiceNumber||invoice.id, 'Kliyan');
+  doc.autoPrint();
+  window.open(doc.output('bloburl'),'_blank');
+}
+function renderInvoiceTable(){
+  const q=(document.getElementById('invSearch')?.value||'').toLowerCase();
+  const rows=[...DB.invoices].reverse().filter(r=>!q||JSON.stringify(r).toLowerCase().includes(q));
+  const wrap=document.getElementById('invoiceTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen fakti.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Dat</th><th>Kliyan</th><th>Atik</th><th>Total</th><th>Mòd Peman</th><th></th></tr></thead>
+  <tbody>${rows.map(r=>{
+    const c=DB.customers.find(x=>x.id===r.customerId);
+    const modes=[];
+    if(r.breakdown.cash) modes.push('Kach');
+    if(r.breakdown.deposit) modes.push('Depo');
+    if(r.breakdown.credit) modes.push('Dedwi');
+    return `<tr><td class="mono">${esc(r.invoiceNumber||'—')}</td><td class="mono">${r.date}</td><td>${esc(c?c.name:'—')}</td><td>${r.items.length} atik</td><td class="mono">${fmt(r.total)}</td><td>${modes.map(m=>`<span class="badge gray">${m}</span>`).join(' ')}</td>
+    <td><button class="icon-btn" onclick="printInvoiceReceipt('${r.id}')">🖨️ Enprime</button></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+/* =====================================================================
+   KÒMAND AN ATANT (Kòmand kliyan soti nan katalòg piblik la)
+   Fonksyon sa a mande koneksyon backend aktif — kòmand kliyan yo rete
+   nan yon tab SQL apa sou sèvè a, pa nan localStorage.
+===================================================================== */
+let ORDERS_CACHE=[];
+async function fetchOrders(){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base || !auth) return null;
+  try{
+    const res=await fetch(base.replace(/\/$/,'')+'/api/orders',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+async function pushOrderUpdate(orderId, payload){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base || !auth) return false;
+  try{
+    const res=await fetch(base.replace(/\/$/,'')+'/api/orders/'+orderId,{
+      method:'PUT', headers:{'Content-Type':'application/json','Authorization':auth,'ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify(payload)
+    });
+    return res.ok;
+  }catch(e){ return false; }
+}
+let DEBT_REQUESTS_CACHE=[];
+async function fetchDebtRequests(){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base || !auth) return null;
+  try{
+    const res=await fetch(base.replace(/\/$/,'')+'/api/debt-payment-requests',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+async function pushDebtRequestUpdate(requestId, payload){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base || !auth) return false;
+  try{
+    const res=await fetch(base.replace(/\/$/,'')+'/api/debt-payment-requests/'+requestId,{
+      method:'PUT', headers:{'Content-Type':'application/json','Authorization':auth,'ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify(payload)
+    });
+    return res.ok;
+  }catch(e){ return false; }
+}
+async function renderOrders(){
+  const base=getApiBase();
+  if(!base){
+    document.getElementById('content').innerHTML=`
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🛍️ Kòmand An Atant</span></div>
+        <div class="empty-state"><div class="big">Fonksyon sa a mande yon sèvè konekte</div>
+        <div>Kòmand ak peman kliyan yo soti nan katalòg piblik la (kliyan.html) epi yo rive dirèkteman sou sèvè a. Ale nan "Sèvè / Backend" pou konekte anvan.</div></div>
+      </div>`;
+    return;
+  }
+  document.getElementById('content').innerHTML=`
+    <div class="tabs">
+      <button class="tab-btn active" data-otab="orders" onclick="ordersTab('orders')">🛍️ Kòmand Pwodwi</button>
+      <button class="tab-btn" data-otab="debts" onclick="ordersTab('debts')">💳 Peman Dèt/Prè</button>
+    </div>
+    <div id="otabOrders" class="tab-pane active">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🛍️ Kòmand An Atant Verifikasyon</span></div>
+        <div id="ordersPendingWrap"><div class="empty-state">Ap chaje...</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Istorik Kòmand</span></div>
+        <div id="ordersHistoryWrap"><div class="empty-state">Ap chaje...</div></div>
+      </div>
+    </div>
+    <div id="otabDebts" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">💳 Peman Dèt/Prè An Atant</span></div>
+        <div id="debtsPendingWrap"><div class="empty-state">Ap chaje...</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Istorik Peman</span></div>
+        <div id="debtsHistoryWrap"><div class="empty-state">Ap chaje...</div></div>
+      </div>
+    </div>`;
+  const orders=await fetchOrders();
+  if(orders===null){
+    document.getElementById('ordersPendingWrap').innerHTML='<div class="empty-state">Pa ka konekte ak sèvè a. Verifye "Sèvè / Backend".</div>';
+    document.getElementById('ordersHistoryWrap').innerHTML='';
+  }else{
+    ORDERS_CACHE=orders;
+    renderOrdersLists();
+  }
+  const debts=await fetchDebtRequests();
+  if(debts===null){
+    document.getElementById('debtsPendingWrap').innerHTML='<div class="empty-state">Pa ka konekte ak sèvè a. Verifye "Sèvè / Backend".</div>';
+    document.getElementById('debtsHistoryWrap').innerHTML='';
+  }else{
+    DEBT_REQUESTS_CACHE=debts;
+    renderDebtRequestsLists();
+  }
+}
+function ordersTab(t){
+  document.querySelectorAll('[data-otab]').forEach(b=>b.classList.toggle('active', b.getAttribute('data-otab')===t));
+  document.getElementById('otabOrders').classList.toggle('active', t==='orders');
+  document.getElementById('otabDebts').classList.toggle('active', t==='debts');
+}
+function renderOrdersLists(){
+  const pending=ORDERS_CACHE.filter(o=>o.status==='an_atant');
+  const history=ORDERS_CACHE.filter(o=>o.status!=='an_atant');
+  const pendingWrap=document.getElementById('ordersPendingWrap');
+  pendingWrap.innerHTML = pending.length===0 ? '<div class="empty-state">Pa gen kòmand an atant kounye a.</div>' :
+    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Telefòn</th><th>Atik</th><th>Total</th><th>Mòd</th><th>Referans</th><th></th></tr></thead>
+    <tbody>${pending.map(o=>`<tr>
+      <td class="mono">${o.date}</td><td>${esc(o.customerName)}</td><td class="mono">${esc(o.customerPhone)}</td>
+      <td>${o.items.map(it=>`${esc(it.name)} x${it.qty}`).join(', ')}</td>
+      <td class="mono">${fmt(o.total)}</td>
+      <td><span class="badge gold">${o.paymentMethod==='natcash'?'NatCash':o.paymentMethod==='moncash'?'MonCash':esc(o.paymentMethod||'—')}</span></td>
+      <td class="mono">${esc(o.reference||'—')}</td>
+      <td class="row-actions">
+        <button class="icon-btn" onclick="validateOrder('${o.id}')">✅ Valide</button>
+        <button class="icon-btn danger" onclick="rejectOrder('${o.id}')">✕ Rejte</button>
+      </td>
+    </tr>`).join('')}</tbody></table></div>`;
+  const historyWrap=document.getElementById('ordersHistoryWrap');
+  historyWrap.innerHTML = history.length===0 ? '<div class="empty-state">Poko gen istorik.</div>' :
+    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Total</th><th>Estati</th><th>Nòt</th></tr></thead>
+    <tbody>${history.map(o=>`<tr>
+      <td class="mono">${o.date}</td><td>${esc(o.customerName)}</td><td class="mono">${fmt(o.total)}</td>
+      <td><span class="badge ${o.status==='konfime'?'green':'red'}">${o.status==='konfime'?'Konfime':'Rejte'}</span></td>
+      <td>${esc(o.rejectReason||'—')}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+async function validateOrder(orderId){
+  const order=ORDERS_CACHE.find(o=>o.id===orderId);
+  if(!order) return;
+  for(const it of order.items){
+    const p=DB.products.find(x=>x.id===it.productId);
+    if(!p){ alert('Pwodwi "'+it.name+'" pa jwenn ankò nan sistèm nan.'); return; }
+    if(it.qty>p.qty){ alert('Estòk "'+p.name+'" pa sifi ankò ('+p.qty+' disponib, '+it.qty+' mande).'); return; }
+  }
+  if(!confirm('Konfime kòmand sa a? Estòk ap desann e yon fakti ap kreye pou '+order.customerName+'.')) return;
+
+  let customer=DB.customers.find(c=>c.phone===order.customerPhone);
+  if(!customer){
+    customer={id:uid('c'), name:order.customerName, phone:order.customerPhone, address:'', walletBalance:0, creditBalance:0};
+    DB.customers.push(customer);
+  }
+  order.items.forEach(it=>{
+    const p=DB.products.find(x=>x.id===it.productId);
+    p.qty-=it.qty;
+  });
+  const breakdown={cash:order.total, credit:0, deposit:0}; // Kòmand konfime trete tankou Kach
+  const invoiceNumber=nextInvoiceNumber();
+  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy'};
+  DB.invoices.push(invoice);
+  logActivity('Valide kòmand an liy #'+order.id+' pou '+order.customerName+' — '+fmt(order.total));
+  saveDB();
+
+  const ok=await pushOrderUpdate(order.id, {status:'konfime', invoiceId:invoice.id});
+  if(!ok){ alert('Fakti a kreye lokalman, men mizajou estati kòmand la sou sèvè a echwe — reesye pita.'); }
+
+  const lines=order.items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)]);
+  lines.push(['Referans Peman', order.reference||'—']);
+  lines.push(['TOTAL', fmt(order.total)]);
+  sendWhatsAppReceipt(customer, 'Fakti — Kòmand Konfime', lines, 'Kòmand ou an konfime. Mèsi pou konfyans ou nan LeadStock!', invoiceNumber, invoiceNumber, 'Kliyan');
+
+  await renderOrders();
+}
+async function rejectOrder(orderId){
+  const reason=prompt('Rezon rejè a (opsyonèl):','Peman pa jwenn/verifye');
+  if(reason===null) return;
+  const ok=await pushOrderUpdate(orderId, {status:'rejte', rejectReason:reason||''});
+  logActivity('Rejte kòmand an liy #'+orderId+(reason?' — '+reason:''));
+  if(!ok){ alert('Echèk mizajou sou sèvè a — reesye pita.'); return; }
+  await renderOrders();
+}
+
+function renderDebtRequestsLists(){
+  const pending=DEBT_REQUESTS_CACHE.filter(r=>r.status==='an_atant');
+  const history=DEBT_REQUESTS_CACHE.filter(r=>r.status!=='an_atant');
+  const pendingWrap=document.getElementById('debtsPendingWrap');
+  pendingWrap.innerHTML = pending.length===0 ? '<div class="empty-state">Pa gen peman dèt/prè an atant kounye a.</div>' :
+    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Telefòn</th><th>Montan</th><th>Mòd</th><th>Referans</th><th></th></tr></thead>
+    <tbody>${pending.map(r=>`<tr>
+      <td class="mono">${r.date}</td><td>${esc(r.customerName||'—')}</td><td class="mono">${esc(r.customerPhone)}</td>
+      <td class="mono">${fmt(r.amount)}</td>
+      <td><span class="badge gold">${r.paymentMethod==='natcash'?'NatCash':r.paymentMethod==='moncash'?'MonCash':esc(r.paymentMethod||'—')}</span></td>
+      <td class="mono">${esc(r.reference||'—')}</td>
+      <td class="row-actions">
+        <button class="icon-btn" onclick="validateDebtRequest('${r.id}')">✅ Valide</button>
+        <button class="icon-btn danger" onclick="rejectDebtRequest('${r.id}')">✕ Rejte</button>
+      </td>
+    </tr>`).join('')}</tbody></table></div>`;
+  const historyWrap=document.getElementById('debtsHistoryWrap');
+  historyWrap.innerHTML = history.length===0 ? '<div class="empty-state">Poko gen istorik.</div>' :
+    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Montan</th><th>Aplike Sou</th><th>Estati</th><th>Nòt</th></tr></thead>
+    <tbody>${history.map(r=>`<tr>
+      <td class="mono">${r.date}</td><td>${esc(r.customerName||'—')}</td><td class="mono">${fmt(r.amount)}</td>
+      <td>${r.appliedTo==='dedwi'?'Dèt sou Kont':r.appliedTo?'Prè #'+r.appliedTo:'—'}</td>
+      <td><span class="badge ${r.status==='konfime'?'green':'red'}">${r.status==='konfime'?'Konfime':'Rejte'}</span></td>
+      <td>${esc(r.rejectReason||'—')}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+async function validateDebtRequest(requestId){
+  const req=DEBT_REQUESTS_CACHE.find(r=>r.id===requestId);
+  if(!req) return;
+  const customer=DB.customers.find(c=>(c.phone||'').replace(/\D/g,'')===(req.customerPhone||'').replace(/\D/g,''));
+  if(!customer){ alert('Kliyan sa a pa jwenn ankò nan sistèm lokal la — senkwonize DB la anvan.'); return; }
+  const activeLoans=DB.loans.filter(l=>l.customerId===customer.id && l.status!=='solde');
+  let target=null;
+  if(activeLoans.length===0){
+    target='dedwi';
+  }else{
+    const options=['dedwi — Dèt Jeneral (sou Kont)', ...activeLoans.map((l,i)=>(i+1)+' — Prè '+fmt(l.amount)+' (rete '+fmt(l.amount-(l.paidAmount||0))+')')];
+    const choice=prompt('Peman sa a aplike sou ki bagay?\n\n'+options.join('\n')+'\n\nTape "dedwi" pou dèt jeneral, oswa nimewo prè a (1, 2, elt.):','dedwi');
+    if(choice===null) return;
+    if(choice.trim().toLowerCase()==='dedwi'){ target='dedwi'; }
+    else{
+      const idx=Number(choice.trim())-1;
+      if(isNaN(idx)||!activeLoans[idx]){ alert('Chwa envalid.'); return; }
+      target=activeLoans[idx].id;
+    }
+  }
+  if(!confirm('Konfime peman '+fmt(req.amount)+' bay '+customer.name+'?')) return;
+
+  if(target==='dedwi'){
+    customer.creditBalance=Math.max(0,(customer.creditBalance||0)-req.amount);
+  }else{
+    const loan=DB.loans.find(l=>l.id===target);
+    loan.paidAmount=(loan.paidAmount||0)+req.amount;
+    if(loan.paidAmount>=loan.amount) loan.status='solde'; else loan.status='pasyèl';
+    DB.loanPayments.push({id:uid('rp'), date:todayISO(), loanId:loan.id, amount:req.amount, source:'Peman An Liy'});
+  }
+  const txnNumber=nextTxnNumber('debtPayment','PDL');
+  logActivity('Valide peman dèt/prè an liy #'+req.id+' — '+fmt(req.amount)+' pou '+customer.name);
+  saveDB();
+
+  const ok=await pushDebtRequestUpdate(req.id, {status:'konfime', appliedTo:target});
+  if(!ok){ alert('Balans mete ajou lokalman, men senkwonizasyon sou sèvè a echwe — reesye pita.'); }
+
+  const lines=[['Montan Peye', fmt(req.amount)], ['Aplike Sou', target==='dedwi'?'Dèt sou Kont':'Prè'], ['Referans', req.reference||'—']];
+  sendWhatsAppReceipt(customer, 'Resi Peman Dèt/Prè', lines, 'Mèsi pou peman ou. Balans ou mete ajou.', txnNumber, txnNumber, 'Kliyan');
+
+  await renderOrders();
+  ordersTab('debts');
+}
+async function rejectDebtRequest(requestId){
+  const reason=prompt('Rezon rejè a (opsyonèl):','Peman pa jwenn/verifye');
+  if(reason===null) return;
+  const ok=await pushDebtRequestUpdate(requestId, {status:'rejte', rejectReason:reason||''});
+  logActivity('Rejte peman dèt/prè an liy #'+requestId+(reason?' — '+reason:''));
+  if(!ok){ alert('Echèk mizajou sou sèvè a — reesye pita.'); return; }
+  await renderOrders();
+  ordersTab('debts');
+}
+
+/* =====================================================================
+   RETOU MACHANDIZ (Merchandise Returns)
+===================================================================== */
+function returnedQtyForItem(invoiceId, productId){
+  return DB.returns.filter(r=>r.invoiceId===invoiceId)
+    .reduce((s,r)=>s + r.items.filter(it=>it.productId===productId).reduce((s2,it)=>s2+it.qty,0), 0);
+}
+function renderReturns(){
+  const invoiceOptions=[...DB.invoices].reverse().map(i=>{
+    const c=DB.customers.find(x=>x.id===i.customerId);
+    return `<option value="${i.id}">${i.date} — ${esc(c?c.name:'—')} — ${fmt(i.total)}</option>`;
+  }).join('');
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">↩️ Nouvo Retou Machandiz</span></div>
+      ${DB.invoices.length===0?'<div class="empty-state">Pa gen okenn fakti disponib pou fè yon retou.</div>':`
+      <div class="form-grid">
+        <div class="field full"><label>Chwazi Fakti *</label><select id="retInvoice" onchange="loadInvoiceForReturn()">
+          <option value="">— Chwazi yon fakti —</option>${invoiceOptions}
+        </select></div>
+      </div>
+      <div id="retItemsWrap" style="margin-top:14px;"></div>
+      <div id="retSummaryWrap"></div>`}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Retou <span class="count">(${DB.returns.length})</span></span></div>
+      <div id="returnsTableWrap"></div>
+    </div>`;
+  renderReturnsTable();
+}
+function loadInvoiceForReturn(){
+  const invoiceId=document.getElementById('retInvoice').value;
+  const wrap=document.getElementById('retItemsWrap');
+  document.getElementById('retSummaryWrap').innerHTML='';
+  if(!invoiceId){ wrap.innerHTML=''; return; }
+  const inv=DB.invoices.find(i=>i.id===invoiceId);
+  wrap.innerHTML=`
+    <table class="cart-table"><thead><tr><th>Pwodwi</th><th>Vann</th><th>Deja Retounen</th><th>Pri</th><th>Kantite Pou Retounen</th></tr></thead>
+    <tbody>${inv.items.map((it,i)=>{
+      const already=returnedQtyForItem(invoiceId, it.productId);
+      const maxReturn=it.qty-already;
+      return `<tr>
+        <td>${esc(it.name)}</td><td class="mono">${it.qty}</td><td class="mono">${already}</td><td class="mono">${fmt(it.price)}</td>
+        <td><input class="tb-input" style="width:90px;" type="number" min="0" max="${maxReturn}" value="0" id="retQty_${i}" data-pid="${it.productId}" data-price="${it.price}" data-name="${esc(it.name)}" data-max="${maxReturn}" oninput="recalcReturnTotal('${invoiceId}')"></td>
+      </tr>`;
+    }).join('')}</tbody></table>
+    <div class="form-grid" style="margin-top:14px;">
+      <div class="field full"><label>Rezon Retou</label><input id="retReason" placeholder="Pwodwi domaje, erè kòmand, elt."></div>
+    </div>
+    <div class="total-row">Total Ranbouse: <span id="retTotal">HTG 0</span></div>
+  `;
+}
+function recalcReturnTotal(invoiceId){
+  const inv=DB.invoices.find(i=>i.id===invoiceId);
+  let total=0;
+  inv.items.forEach((it,i)=>{
+    const el=document.getElementById('retQty_'+i);
+    let v=Number(el.value||0);
+    const max=Number(el.getAttribute('data-max'));
+    if(v>max){ v=max; el.value=max; }
+    if(v<0){ v=0; el.value=0; }
+    total+=v*it.price;
+  });
+  document.getElementById('retTotal').textContent=fmt(total);
+  const summary=document.getElementById('retSummaryWrap');
+  if(total>0){
+    summary.innerHTML=`
+      <div class="pay-options" id="retPayOpts">
+        <div class="pay-opt" data-rm="depo" onclick="selectReturnMethod('depo')"><span class="ic">🏦</span>Kredite Depo</div>
+        <div class="pay-opt" data-rm="dedwi" onclick="selectReturnMethod('dedwi')"><span class="ic">📒</span>Diminye Dèt (Dedwi)</div>
+        <div class="pay-opt" data-rm="kach" onclick="selectReturnMethod('kach')"><span class="ic">💵</span>Ranbouse Kach</div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="confirmReturn('${invoiceId}')">Konfime Retou</button></div>`;
+  } else {
+    summary.innerHTML='';
+  }
+}
+function selectReturnMethod(m){
+  window._returnMethod=m;
+  document.querySelectorAll('#retPayOpts .pay-opt').forEach(el=>el.classList.toggle('selected', el.getAttribute('data-rm')===m));
+}
+function confirmReturn(invoiceId){
+  const inv=DB.invoices.find(i=>i.id===invoiceId);
+  if(!window._returnMethod){ alert('Chwazi kijan pou ranbouse kliyan an.'); return; }
+  const items=[];
+  inv.items.forEach((it,i)=>{
+    const el=document.getElementById('retQty_'+i);
+    const qty=Number(el.value||0);
+    if(qty>0) items.push({productId:it.productId, name:it.name, qty, price:it.price});
+  });
+  if(items.length===0){ alert('Antre omwen yon kantite pou retounen.'); return; }
+  const total=items.reduce((s,it)=>s+it.qty*it.price,0);
+  const method=window._returnMethod;
+  items.forEach(it=>{
+    const p=DB.products.find(x=>x.id===it.productId);
+    if(p) p.qty+=it.qty;
+  });
+  const customer=DB.customers.find(c=>c.id===inv.customerId);
+  if(method==='depo') customer.walletBalance=(customer.walletBalance||0)+total;
+  else if(method==='dedwi') customer.creditBalance=Math.max(0,(customer.creditBalance||0)-total);
+  const txnNumber=nextTxnNumber('return','RM');
+  const rec={id:uid('ret'), txnNumber, date:todayISO(), invoiceId, customerId:inv.customerId, items, total, method,
+    reason:document.getElementById('retReason').value.trim()};
+  DB.returns.push(rec);
+  saveDB();
+  const methodLabel=method==='depo'?'Kredite sou Depo':method==='dedwi'?'Diminye Dèt sou Kont':'Ranbouse Kach';
+  const lines=items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)]);
+  lines.push(['Mòd Ranbousman', methodLabel]);
+  lines.push(['TOTAL', fmt(total)]);
+  sendWhatsAppReceipt(customer, 'Resi Retou Machandiz', lines, rec.reason?('Rezon: '+rec.reason):'', txnNumber, txnNumber, 'Kliyan');
+  window._returnMethod=null;
+  renderReturns();
+}
+function renderReturnsTable(){
+  const rows=[...DB.returns].reverse();
+  const wrap=document.getElementById('returnsTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen retou machandiz.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Atik</th><th>Total</th><th>Mòd</th><th>Rezon</th></tr></thead>
+  <tbody>${rows.map(r=>{
+    const c=DB.customers.find(x=>x.id===r.customerId);
+    const methodLabel=r.method==='depo'?'Depo':r.method==='dedwi'?'Dedwi':'Kach';
+    return `<tr><td class="mono">${r.date}</td><td>${esc(c?c.name:'—')}</td><td>${r.items.length} atik</td>
+      <td class="mono">${fmt(r.total)}</td><td><span class="badge gray">${methodLabel}</span></td><td>${esc(r.reason||'—')}</td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+/* =====================================================================
+   FINANS KLIYAN — Depo, Retrè, Prete Lajan, Ranbousman
+===================================================================== */
+function renderFinance(){
+  document.getElementById('content').innerHTML=`
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="depo" onclick="finTab('depo')">Depo</button>
+      <button class="tab-btn" data-tab="retre" onclick="finTab('retre')">Retrè</button>
+      <button class="tab-btn" data-tab="prete" onclick="finTab('prete')">Prete Lajan</button>
+      <button class="tab-btn" data-tab="ranbouse" onclick="finTab('ranbouse')">Ranbousman Prè</button>
+    </div>
+    <div id="finTabDepo" class="tab-pane active"></div>
+    <div id="finTabRetre" class="tab-pane"></div>
+    <div id="finTabPrete" class="tab-pane"></div>
+    <div id="finTabRanbouse" class="tab-pane"></div>
+  `;
+  renderFinDepo(); renderFinRetre(); renderFinPrete(); renderFinRanbouse();
+}
+function finTab(t){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.getAttribute('data-tab')===t));
+  ['depo','retre','prete','ranbouse'].forEach(k=>{
+    document.getElementById('finTab'+k.charAt(0).toUpperCase()+k.slice(1)).classList.toggle('active', k===t);
+  });
+}
+function custOptions(){ return DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); }
+
+function renderFinDepo(){
+  document.getElementById('finTabDepo').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🏦 Nouvo Depo</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Kliyan *</label><select id="depCustomer">${custOptions()}</select></div>
+        <div class="field"><label>Montan (HTG) *</label><input id="depAmount" type="number"></div>
+        <div class="field full"><label>Ajan ki Resevwa</label><input id="depAgent" value="${esc(currentUser?currentUser.name:'')}"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveDeposit()">Konfime Depo</button></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Depo <span class="count">(${DB.deposits.length})</span></span></div>
+      <div id="depTableWrap"></div>
+    </div>`;
+  renderFinHistTable('deposits','depTableWrap',['Dat','Kliyan','Montan','Ajan'],r=>{
+    const c=DB.customers.find(x=>x.id===r.customerId);
+    return [r.date, c?c.name:'—', fmt(r.amount), r.agent||'—'];
+  });
+}
+function saveDeposit(){
+  const customerId=document.getElementById('depCustomer').value;
+  const amount=Number(document.getElementById('depAmount').value||0);
+  if(amount<=0){ alert('Antre yon montan valab.'); return; }
+  const customer=DB.customers.find(c=>c.id===customerId);
+  customer.walletBalance=(customer.walletBalance||0)+amount;
+  const txnNumber=nextTxnNumber('deposit','DEP');
+  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, agent:document.getElementById('depAgent').value.trim()};
+  DB.deposits.push(rec); saveDB();
+  sendWhatsAppReceipt(customer,'Resi Depo',[['Montan Depoze',fmt(amount)],['Ajan',rec.agent||'—']],'Mèsi pou depo w la.',txnNumber,txnNumber,'Kliyan');
+  renderFinance(); finTab('depo');
+}
+
+function renderFinRetre(){
+  document.getElementById('finTabRetre').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💸 Nouvo Retrè</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Kliyan *</label><select id="wdCustomer">${custOptions()}</select></div>
+        <div class="field"><label>Montan (HTG) *</label><input id="wdAmount" type="number"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveWithdrawal()">Konfime Retrè</button></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Retrè <span class="count">(${DB.withdrawals.length})</span></span></div>
+      <div id="wdTableWrap"></div>
+    </div>`;
+  renderFinHistTable('withdrawals','wdTableWrap',['Dat','Kliyan','Montan'],r=>{
+    const c=DB.customers.find(x=>x.id===r.customerId);
+    return [r.date, c?c.name:'—', fmt(r.amount)];
+  });
+}
+function saveWithdrawal(){
+  const customerId=document.getElementById('wdCustomer').value;
+  const amount=Number(document.getElementById('wdAmount').value||0);
+  const customer=DB.customers.find(c=>c.id===customerId);
+  if(amount<=0){ alert('Antre yon montan valab.'); return; }
+  if(amount>(customer.walletBalance||0)){ alert('Balans depo kliyan an pa sifi pou retrè sa a.'); return; }
+  customer.walletBalance-=amount;
+  const txnNumber=nextTxnNumber('withdrawal','RET');
+  const rec={id:uid('wd'), txnNumber, date:todayISO(), customerId, amount};
+  DB.withdrawals.push(rec); saveDB();
+  sendWhatsAppReceipt(customer,'Resi Retrè',[['Montan Retire',fmt(amount)]],'Tranzaksyon retrè konfime.',txnNumber,txnNumber,'Kliyan');
+  renderFinance(); finTab('retre');
+}
+
+function renderFinPrete(){
+  document.getElementById('finTabPrete').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📄 Nouvo Prè</span></div>
+      <div style="background:var(--red-pale);color:var(--red);border-radius:8px;padding:9px 12px;font-size:12.5px;margin-bottom:14px;">
+        🔒 Chak prè dwe otorize pa yon Administratè. ${currentUser.role==='admin'?'Ou konekte kòm Admin — prè a ap konfime dirèkteman.':'Ou konekte kòm Anplwaye — sistèm nan ap mande modpas yon Admin anvan prè a konfime.'}
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Kliyan *</label><select id="loCustomer">${custOptions()}</select></div>
+        <div class="field"><label>Montan Prè (HTG) *</label><input id="loAmount" type="number"></div>
+        <div class="field"><label>To Enterè (%)</label><input id="loRate" type="number" value="0"></div>
+        <div class="field"><label>Dat Ranbousman Planifye</label><input id="loDue" type="date" value="${addDays(30)}"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveLoan()">Konfime Prè</button></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Prè Aktif <span class="count">(${DB.loans.length})</span></span></div>
+      <div id="loanTableWrap"></div>
+    </div>`;
+  const rows=[...DB.loans].reverse();
+  const wrap=document.getElementById('loanTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen prè.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Montan</th><th>Peye</th><th>Rete</th><th>Dat Rebousman</th><th>Otorize Pa</th><th>Estati</th></tr></thead>
+  <tbody>${rows.map(l=>{
+    const c=DB.customers.find(x=>x.id===l.customerId);
+    const rest=l.amount-(l.paidAmount||0);
+    const overdue=l.status!=='solde' && l.dueDate<todayISO();
+    return `<tr><td class="mono">${l.date}</td><td>${esc(c?c.name:'—')}</td><td class="mono">${fmt(l.amount)}</td><td class="mono">${fmt(l.paidAmount||0)}</td>
+    <td class="mono ${rest>0?'tag-low':''}">${fmt(rest)}</td><td class="mono ${overdue?'tag-low':''}">${l.dueDate}</td>
+    <td>${esc(l.authorizedBy||'—')}</td>
+    <td><span class="badge ${l.status==='solde'?'green':overdue?'red':'gold'}">${l.status==='solde'?'Solde':overdue?'An Reta':'Aktif'}</span></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function saveLoan(){
+  const customerId=document.getElementById('loCustomer').value;
+  const amount=Number(document.getElementById('loAmount').value||0);
+  if(!customerId){ alert('Chwazi yon kliyan.'); return; }
+  if(amount<=0){ alert('Antre yon montan valab.'); return; }
+  const loanData={
+    customerId, amount,
+    interestRate:Number(document.getElementById('loRate').value||0),
+    dueDate:document.getElementById('loDue').value
+  };
+  if(currentUser.role==='admin'){
+    createLoanRecord(loanData, currentUser.name);
+  }else{
+    requireAdminAuthorization('otorize yon nouvo prè pou '+fmt(amount), (adminName)=>{
+      createLoanRecord(loanData, adminName);
+    });
+  }
+}
+function createLoanRecord(loanData, authorizedBy){
+  const txnNumber=nextTxnNumber('loan','PRE');
+  const rec={id:uid('lo'), txnNumber, date:todayISO(), status:'aktif', paidAmount:0, authorizedBy, ...loanData};
+  DB.loans.push(rec);
+  logActivity('Prè kreye ('+fmt(rec.amount)+') — otorize pa '+authorizedBy);
+  saveDB();
+  const customer=DB.customers.find(c=>c.id===rec.customerId);
+  sendWhatsAppReceipt(customer,'Kontra Prè',[['Montan Prete',fmt(rec.amount)],['To Enterè',rec.interestRate+'%'],['Dat Ranbousman',rec.dueDate],['Otorize Pa',authorizedBy]],'Tanpri respekte dat ranbousman an.',txnNumber,txnNumber,'Kliyan');
+  renderFinance(); finTab('prete');
+}
+
+/* =====================================================================
+   OTORIZASYON ADMINISTRATÈ (required for sensitive actions like loans)
+===================================================================== */
+function requireAdminAuthorization(actionLabel, onAuthorized){
+  openModalHTML(`
+    <div class="modal-title">🔒 Otorizasyon Administratè Egzije</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">
+      Aksyon sa a (${esc(actionLabel)}) mande yon Administratè konekte pou konfime l. Tanpri antre idantifyan yon Admin.
+    </p>
+    <div class="form-grid">
+      <div class="field"><label>Non Itilizatè Admin</label><input id="authAdminUser" placeholder="admin"></div>
+      <div class="field"><label>Modpas Admin</label><input id="authAdminPass" type="password"></div>
+    </div>
+    <div id="authError" style="display:none;background:var(--red-pale);color:var(--red);border-radius:7px;padding:9px 12px;font-size:12.5px;margin-top:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Anile</button>
+      <button class="btn btn-primary" onclick="confirmAdminAuthorization()">Otorize</button>
+    </div>
+  `, true);
+  window._adminAuthCallback=onAuthorized;
+}
+function confirmAdminAuthorization(){
+  const u=document.getElementById('authAdminUser').value.trim();
+  const p=document.getElementById('authAdminPass').value;
+  const admin=DB.users.find(x=>x.username===u && x.password===p && x.role==='admin');
+  const err=document.getElementById('authError');
+  if(!admin){
+    err.textContent='Idantifyan Admin pa kòrèk, oswa itilizatè sa a pa gen wòl Admin.';
+    err.style.display='block';
+    return;
+  }
+  closeModal();
+  const cb=window._adminAuthCallback;
+  window._adminAuthCallback=null;
+  if(cb) cb(admin.name);
+}
+
+function renderFinRanbouse(){
+  const activeLoans=DB.loans.filter(l=>l.status!=='solde');
+  document.getElementById('finTabRanbouse').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">✅ Ranbousman Prè</span></div>
+      ${activeLoans.length===0?'<div class="empty-state">Pa gen prè aktif pou ranbouse.</div>':`
+      <div class="form-grid">
+        <div class="field full"><label>Prè *</label><select id="rpLoan">${activeLoans.map(l=>{
+          const c=DB.customers.find(x=>x.id===l.customerId);
+          return `<option value="${l.id}">${esc(c?c.name:'—')} — Rete: ${fmt(l.amount-(l.paidAmount||0))}</option>`;
+        }).join('')}</select></div>
+        <div class="field"><label>Montan Ranbouse (HTG) *</label><input id="rpAmount" type="number"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveLoanPayment()">Konfime Ranbousman</button></div>`}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Ranbousman <span class="count">(${DB.loanPayments.length})</span></span></div>
+      <div id="rpTableWrap"></div>
+    </div>`;
+  renderFinHistTable('loanPayments','rpTableWrap',['Dat','Kliyan','Montan'],r=>{
+    const l=DB.loans.find(x=>x.id===r.loanId);
+    const c=l?DB.customers.find(x=>x.id===l.customerId):null;
+    return [r.date, c?c.name:'—', fmt(r.amount)];
+  });
+}
+function saveLoanPayment(){
+  const loanId=document.getElementById('rpLoan').value;
+  const amount=Number(document.getElementById('rpAmount').value||0);
+  const loan=DB.loans.find(l=>l.id===loanId);
+  if(amount<=0){ alert('Antre yon montan valab.'); return; }
+  loan.paidAmount=(loan.paidAmount||0)+amount;
+  if(loan.paidAmount>=loan.amount) loan.status='solde'; else loan.status='pasyèl';
+  const txnNumber=nextTxnNumber('loanPayment','RBS');
+  const rec={id:uid('rp'), txnNumber, date:todayISO(), loanId, amount};
+  DB.loanPayments.push(rec); saveDB();
+  const customer=DB.customers.find(c=>c.id===loan.customerId);
+  sendWhatsAppReceipt(customer,'Resi Ranbousman Prè',[['Montan Peye',fmt(amount)],['Rete sou Prè a',fmt(loan.amount-loan.paidAmount)]],'Mèsi pou ranbousman an.',txnNumber,txnNumber,'Kliyan');
+  renderFinance(); finTab('ranbouse');
+}
+function renderFinHistTable(dbKey, wrapId, headers, rowFn){
+  const rows=[...DB[dbKey]].reverse();
+  const wrap=document.getElementById(wrapId);
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen tranzaksyon.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+  <tbody>${rows.map(r=>`<tr>${rowFn(r).map((v,i)=>`<td class="${i===2?'mono':''}">${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+/* =====================================================================
+   RAPÒ
+===================================================================== */
+function renderReports(){
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🔔 Rapèl Kliyan an Reta</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Kliyan ki gen dèt sou kont oswa prè an reta — voye yon rapèl WhatsApp yon sèl klik.</p>
+      <div id="overdueRemindersWrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📈 Rapò Vant</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Total vant: <b class="mono">${fmt(DB.invoices.reduce((s,i)=>s+i.total,0))}</b> — ${DB.invoices.length} fakti</p>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportSalesExcel()">⬇ Excel</button>
+        <button class="btn" onclick="exportSalesPDF()">⬇ PDF</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🧮 Rapò Depans</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Total depans: <b class="mono">${fmt(DB.expenses.reduce((s,e)=>s+e.amount,0))}</b> — ${DB.expenses.length} depans anrejistre</p>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportExpensesExcel()">⬇ Excel</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📦 Rapò Estòk</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Valè total estòk: <b class="mono">${fmt(DB.products.reduce((s,p)=>s+p.qty*p.sellPrice,0))}</b> — ${DB.products.filter(p=>p.qty<=p.minQty).length} pwodwi ba</p>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportStockExcel()">⬇ Excel</button>
+        <button class="btn" onclick="exportStockPDF()">⬇ PDF</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📅 Rapò Dat Ekspirasyon pa Kategori</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Tout antre estòk ki gen yon dat ekspirasyon, gwoupe pa kategori pwodwi.</p>
+      <div id="expirationReportWrap"></div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportExpirationExcel()">⬇ Excel</button>
+        <button class="btn" onclick="exportExpirationPDF()">⬇ PDF</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💳 Rapò Kliyan an Dèt</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Total dèt sou kont: <b class="mono">${fmt(DB.customers.reduce((s,c)=>s+(c.creditBalance||0),0))}</b></p>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportDebtExcel()">⬇ Excel</button>
+        <button class="btn" onclick="exportDebtPDF()">⬇ PDF</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🧾 Deklarasyon Kont Kliyan (Statement)</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Jenere yon rezime tout aktivite yon kliyan (vant, depo, retrè, prè, ranbousman) sou yon peryòd.</p>
+      <div class="form-grid">
+        <div class="field"><label>Kliyan *</label><select id="stmtCustomer">${DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Dat Kòmanse</label><input id="stmtFrom" type="date" value="${addDays(-30)}"></div>
+        <div class="field"><label>Dat Fini</label><input id="stmtTo" type="date" value="${todayISO()}"></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="generateStatement()">👁 Wè Deklarasyon</button>
+        <button class="btn" onclick="exportStatementPDF()">⬇ PDF</button>
+      </div>
+      <div id="statementResult" style="margin-top:16px;"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">⚡ Rapò Rapid pa Pwodwi</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Wè mouvman ak pèfòmans yon pwodwi espesifik: antre, sòti, vant ak revni.</p>
+      <div class="form-grid">
+        <div class="field full"><label>Pwodwi *</label><select id="prodReportSelect">${DB.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="generateProductReport()">👁 Wè Rapò</button>
+        <button class="btn" onclick="exportProductReportPDF()">⬇ PDF</button>
+      </div>
+      <div id="productReportResult" style="margin-top:16px;"></div>
+    </div>`;
+  renderExpirationReportTable();
+}
+function getExpirationRows(){
+  return DB.stockIn.filter(r=>r.expirationDate).map(r=>{
+    const p=DB.products.find(x=>x.id===r.productId);
+    return {
+      category: p?(p.category||'San Kategori'):'San Kategori',
+      productName: p?p.name:'—',
+      qty:r.qty, unit:p?p.unit:'',
+      expirationDate:r.expirationDate,
+      daysLeft: Math.ceil((new Date(r.expirationDate)-new Date(todayISO()))/86400000)
+    };
+  }).sort((a,b)=>a.expirationDate.localeCompare(b.expirationDate));
+}
+function renderExpirationReportTable(){
+  const rows=getExpirationRows();
+  const wrap=document.getElementById('expirationReportWrap');
+  if(!wrap) return;
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Pa gen antre estòk ak dat ekspirasyon anrejistre.</div>'; return; }
+  const byCategory={};
+  rows.forEach(r=>{ (byCategory[r.category]=byCategory[r.category]||[]).push(r); });
+  wrap.innerHTML=Object.keys(byCategory).sort().map(cat=>`
+    <div style="margin-bottom:14px;">
+      <div style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-faint);margin-bottom:6px;">${esc(cat)}</div>
+      <table><thead><tr><th>Pwodwi</th><th>Kantite</th><th>Dat Ekspirasyon</th><th>Jou Ki Rete</th></tr></thead>
+      <tbody>${byCategory[cat].map(r=>`<tr>
+        <td>${esc(r.productName)}</td><td class="mono">${r.qty} ${esc(r.unit||'')}</td>
+        <td class="mono ${r.daysLeft<=30?'tag-low':''}">${r.expirationDate}</td>
+        <td class="mono ${r.daysLeft<=30?'tag-low':''}">${r.daysLeft<0?'Ekspire':r.daysLeft+' jou'}</td>
+      </tr>`).join('')}</tbody></table>
+    </div>`).join('');
+}
+function exportExpirationExcel(){
+  const rows=getExpirationRows().map(r=>({
+    Kategori:r.category, Pwodwi:r.productName, Kantite:r.qty,
+    'Dat Ekspirasyon':r.expirationDate, 'Jou Ki Rete':r.daysLeft<0?'Ekspire':r.daysLeft
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Ekspirasyon'); XLSX.writeFile(wb,'LeadStock_Rapo_Ekspirasyon_'+todayISO()+'.xlsx');
+}
+function exportExpirationPDF(){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò Dat Ekspirasyon pa Kategori',14,16);
+  doc.autoTable({startY:24, head:[['Kategori','Pwodwi','Kantite','Dat Ekspirasyon','Jou Ki Rete']],
+    body:getExpirationRows().map(r=>[r.category,r.productName,r.qty,r.expirationDate,r.daysLeft<0?'Ekspire':r.daysLeft+' jou']),
+    headStyles:{fillColor:[47,107,58]}});
+  doc.save('LeadStock_Rapo_Ekspirasyon_'+todayISO()+'.pdf');
+}
+function collectCustomerLedger(customerId, from, to){
+  const c=DB.customers.find(x=>x.id===customerId);
+  const rows=[];
+  DB.invoices.filter(i=>i.customerId===customerId && i.date>=from && i.date<=to)
+    .forEach(i=>rows.push({date:i.date, type:'Vant (Fakti)', detail:i.items.length+' atik', amount:i.total}));
+  DB.deposits.filter(d=>d.customerId===customerId && d.date>=from && d.date<=to)
+    .forEach(d=>rows.push({date:d.date, type:'Depo', detail:d.agent||'—', amount:d.amount}));
+  DB.withdrawals.filter(w=>w.customerId===customerId && w.date>=from && w.date<=to)
+    .forEach(w=>rows.push({date:w.date, type:'Retrè', detail:'—', amount:-w.amount}));
+  DB.loans.filter(l=>l.customerId===customerId && l.date>=from && l.date<=to)
+    .forEach(l=>rows.push({date:l.date, type:'Prè Resevwa', detail:'To: '+l.interestRate+'%', amount:l.amount}));
+  DB.loanPayments.filter(rp=>{
+      const loan=DB.loans.find(l=>l.id===rp.loanId);
+      return loan && loan.customerId===customerId && rp.date>=from && rp.date<=to;
+    }).forEach(rp=>rows.push({date:rp.date, type:'Ranbousman Prè', detail:'—', amount:-rp.amount}));
+  rows.sort((a,b)=>a.date.localeCompare(b.date));
+  return {customer:c, rows};
+}
+function generateStatement(){
+  const customerId=document.getElementById('stmtCustomer').value;
+  const from=document.getElementById('stmtFrom').value;
+  const to=document.getElementById('stmtTo').value;
+  const {customer, rows}=collectCustomerLedger(customerId, from, to);
+  const bal=customerBalanceSummary(customer);
+  const totalMovement=rows.reduce((s,r)=>s+r.amount,0);
+  const html=`
+    <div class="panel" style="background:var(--bg-panel2);">
+      <div class="panel-head"><span class="panel-title" style="font-size:15px;">Deklarasyon: ${esc(customer.name)} <span class="count">(${from} → ${to})</span></span></div>
+      ${rows.length===0?'<div class="empty-state">Pa gen aktivite pou peryòd sa a.</div>':`
+      <div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Tip</th><th>Detay</th><th>Montan</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td class="mono">${r.date}</td><td>${r.type}</td><td>${esc(r.detail)}</td>
+        <td class="mono" style="color:${r.amount<0?'var(--green)':'var(--text)'};font-weight:700;">${r.amount<0?'':''}${fmt(r.amount)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="total-row">Total Mouvman: <b>${fmt(totalMovement)}</b></div>`}
+      <p style="font-size:12.5px;margin-top:10px;color:var(--text-dim);">
+        Balans Depo Aktyèl: <b>${fmt(bal.wallet)}</b> · Dèt sou Kont: <b>${fmt(bal.credit)}</b> · Prè ki Rete: <b>${fmt(bal.loan)}</b>
+      </p>
+    </div>`;
+  document.getElementById('statementResult').innerHTML=html;
+}
+function exportStatementPDF(){
+  const customerId=document.getElementById('stmtCustomer').value;
+  const from=document.getElementById('stmtFrom').value;
+  const to=document.getElementById('stmtTo').value;
+  const {customer, rows}=collectCustomerLedger(customerId, from, to);
+  const bal=customerBalanceSummary(customer);
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFillColor(47,107,58); doc.rect(0,0,210,22,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.text('LeadStock — Deklarasyon Kont',14,14);
+  doc.setTextColor(40,35,25); doc.setFontSize(10);
+  doc.text(`Kliyan: ${customer.name}   Peryòd: ${from} → ${to}`,14,30);
+  doc.autoTable({startY:36, head:[['Dat','Tip','Detay','Montan']],
+    body:rows.map(r=>[r.date, r.type, r.detail, fmt(r.amount)]),
+    headStyles:{fillColor:[47,107,58]}});
+  let y=(doc.lastAutoTable?doc.lastAutoTable.finalY:44)+10;
+  doc.setFontSize(10.5); doc.setTextColor(47,107,58); doc.text('BALANS AKTYÈL',14,y); y+=6;
+  doc.setTextColor(40,35,25); doc.setFontSize(9.5);
+  doc.text('Depo: '+fmt(bal.wallet),14,y); y+=5.5;
+  doc.text('Dèt sou Kont: '+fmt(bal.credit),14,y); y+=5.5;
+  doc.text('Prè ki Rete: '+fmt(bal.loan),14,y);
+  doc.save('LeadStock_Deklarasyon_'+customer.name.replace(/\s+/g,'_')+'_'+todayISO()+'.pdf');
+}
+function generateProductReport(){
+  const productId=document.getElementById('prodReportSelect').value;
+  const p=DB.products.find(x=>x.id===productId);
+  const inRows=DB.stockIn.filter(s=>s.productId===productId);
+  const outRows=DB.stockOut.filter(s=>s.productId===productId);
+  const soldItems=[];
+  DB.invoices.forEach(i=>i.items.filter(it=>it.productId===productId).forEach(it=>soldItems.push({date:i.date, qty:it.qty, revenue:it.qty*it.price})));
+  const totalIn=inRows.reduce((s,r)=>s+r.qty,0);
+  const totalOut=outRows.reduce((s,r)=>s+r.qty,0);
+  const totalSoldQty=soldItems.reduce((s,r)=>s+r.qty,0);
+  const totalRevenue=soldItems.reduce((s,r)=>s+r.revenue,0);
+  document.getElementById('productReportResult').innerHTML=`
+    <div class="panel" style="background:var(--bg-panel2);">
+      <div class="panel-head"><span class="panel-title" style="font-size:15px;">${esc(p.name)}</span></div>
+      <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+        <div class="stat-card"><div class="stat-label">Estòk Aktyèl</div><div class="stat-value ${p.qty<=p.minQty?'tag-low':''}">${p.qty} ${esc(p.unit||'')}</div></div>
+        <div class="stat-card"><div class="stat-label">Total Antre</div><div class="stat-value">${totalIn}</div></div>
+        <div class="stat-card red"><div class="stat-label">Total Sòti</div><div class="stat-value">${totalOut}</div></div>
+        <div class="stat-card gold"><div class="stat-label">Total Vann</div><div class="stat-value">${totalSoldQty}</div><div class="stat-sub">${fmt(totalRevenue)}</div></div>
+      </div>
+    </div>`;
+}
+function exportProductReportPDF(){
+  const productId=document.getElementById('prodReportSelect').value;
+  const p=DB.products.find(x=>x.id===productId);
+  const inRows=DB.stockIn.filter(s=>s.productId===productId);
+  const outRows=DB.stockOut.filter(s=>s.productId===productId);
+  const soldItems=[];
+  DB.invoices.forEach(i=>i.items.filter(it=>it.productId===productId).forEach(it=>soldItems.push({date:i.date, qty:it.qty, revenue:it.qty*it.price})));
+  const totalIn=inRows.reduce((s,r)=>s+r.qty,0);
+  const totalOut=outRows.reduce((s,r)=>s+r.qty,0);
+  const totalSoldQty=soldItems.reduce((s,r)=>s+r.qty,0);
+  const totalRevenue=soldItems.reduce((s,r)=>s+r.revenue,0);
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò Rapid Pwodwi: '+p.name,14,16);
+  doc.setFontSize(10);
+  doc.text(`Estòk Aktyèl: ${p.qty} ${p.unit||''}   Total Antre: ${totalIn}   Total Sòti: ${totalOut}   Total Vann: ${totalSoldQty}   Revni: ${fmt(totalRevenue)}`,14,24,{maxWidth:180});
+  doc.autoTable({startY:34, head:[['Dat','Kantite Vann','Revni']],
+    body:soldItems.map(s=>[s.date, s.qty, fmt(s.revenue)]),
+    headStyles:{fillColor:[47,107,58]}});
+  doc.save('LeadStock_Rapo_Pwodwi_'+p.name.replace(/\s+/g,'_')+'_'+todayISO()+'.pdf');
+}
+function exportSalesExcel(){
+  const rows=DB.invoices.map(i=>{
+    const c=DB.customers.find(x=>x.id===i.customerId);
+    return {Dat:i.date, Kliyan:c?c.name:'—', Atik:i.items.length, 'Total (HTG)':i.total};
+  });
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Vant'); XLSX.writeFile(wb,'LeadStock_Rapo_Vant_'+todayISO()+'.xlsx');
+}
+function exportSalesPDF(){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò Vant',14,16);
+  doc.autoTable({startY:24, head:[['Dat','Kliyan','Atik','Total']],
+    body:DB.invoices.map(i=>{const c=DB.customers.find(x=>x.id===i.customerId);return [i.date,c?c.name:'—',i.items.length,fmt(i.total)];}),
+    headStyles:{fillColor:[47,107,58]}});
+  doc.save('LeadStock_Rapo_Vant_'+todayISO()+'.pdf');
+}
+function exportStockExcel(){
+  const rows=DB.products.map(p=>({Kòd:p.code,Non:p.name,Kategori:p.category,Estòk:p.qty,'Sèy Min':p.minQty,'Pri Vant':p.sellPrice,'Valè Total':p.qty*p.sellPrice}));
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Estòk'); XLSX.writeFile(wb,'LeadStock_Rapo_Estok_'+todayISO()+'.xlsx');
+}
+function exportStockPDF(){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò Estòk',14,16);
+  doc.autoTable({startY:24, head:[['Kòd','Non','Estòk','Pri Vant','Valè Total']],
+    body:DB.products.map(p=>[p.code,p.name,p.qty,fmt(p.sellPrice),fmt(p.qty*p.sellPrice)]),
+    headStyles:{fillColor:[47,107,58]}});
+  doc.save('LeadStock_Rapo_Estok_'+todayISO()+'.pdf');
+}
+function exportDebtExcel(){
+  const rows=DB.customers.filter(c=>c.creditBalance>0).map(c=>({Non:c.name,Telefòn:c.phone,'Dèt (HTG)':c.creditBalance}));
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Dèt'); XLSX.writeFile(wb,'LeadStock_Rapo_Det_'+todayISO()+'.xlsx');
+}
+function exportDebtPDF(){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò Kliyan an Dèt',14,16);
+  doc.autoTable({startY:24, head:[['Non','Telefòn','Dèt']],
+    body:DB.customers.filter(c=>c.creditBalance>0).map(c=>[c.name,c.phone||'—',fmt(c.creditBalance)]),
+    headStyles:{fillColor:[161,61,47]}});
+  doc.save('LeadStock_Rapo_Det_'+todayISO()+'.pdf');
+}
+function exportExpensesExcel(){
+  const rows=DB.expenses.map(e=>({Dat:e.date,Kategori:e.category,Deskripsyon:e.description,'Montan (HTG)':e.amount,'Peye Pa':e.paidBy||'—'}));
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Depans'); XLSX.writeFile(wb,'LeadStock_Rapo_Depans_'+todayISO()+'.xlsx');
+}
+
+/* =====================================================================
+   ITILIZATÈ (Admin sèlman)
+===================================================================== */
+function renderUsers(){
+  if(currentUser.role!=='admin'){
+    document.getElementById('content').innerHTML='<div class="empty-state">Sèlman Admin gen aksè nan seksyon sa a.</div>';
+    return;
+  }
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">🔐 Itilizatè <span class="count">(${DB.users.length})</span></span>
+        <button class="btn btn-primary" onclick="openUserForm()">+ Nouvo Itilizatè</button>
+      </div>
+      <div id="usersTableWrap"></div>
+    </div>`;
+  renderUsersTable();
+}
+function renderUsersTable(){
+  document.getElementById('usersTableWrap').innerHTML=`<div style="overflow-x:auto;"><table>
+    <thead><tr><th>Non</th><th>Non Itilizatè</th><th>Wòl</th><th></th></tr></thead>
+    <tbody>${DB.users.map(u=>`<tr><td>${esc(u.name)}</td><td class="mono">${esc(u.username)}</td>
+      <td><span class="badge ${u.role==='admin'?'gold':'gray'}">${u.role}</span></td>
+      <td class="row-actions"><button class="icon-btn" onclick="openUserForm('${u.id}')">Modifye</button>
+      ${u.id!==currentUser.id?`<button class="icon-btn danger" onclick="deleteUser('${u.id}')">Efase</button>`:''}</td></tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function openUserForm(id){
+  const row=id?DB.users.find(u=>u.id===id):{};
+  openModalHTML(`
+    <div class="modal-title">${id?'Modifye':'Nouvo'} Itilizatè</div>
+    <div class="form-grid">
+      <div class="field"><label>Non Konplè *</label><input id="uf_name" value="${esc(row.name||'')}"></div>
+      <div class="field"><label>Non Itilizatè *</label><input id="uf_username" value="${esc(row.username||'')}"></div>
+      <div class="field"><label>Modpas *</label><input id="uf_password" type="text" value="${esc(row.password||'')}"></div>
+      <div class="field"><label>Wòl</label><select id="uf_role"><option value="admin" ${row.role==='admin'?'selected':''}>Admin</option><option value="anplwaye" ${row.role==='anplwaye'?'selected':''}>Anplwaye</option></select></div>
+    </div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Anile</button><button class="btn btn-primary" onclick="saveUser('${id||''}')">Anrejistre</button></div>`);
+}
+function saveUser(id){
+  const data={name:document.getElementById('uf_name').value.trim(), username:document.getElementById('uf_username').value.trim(),
+    password:document.getElementById('uf_password').value, role:document.getElementById('uf_role').value};
+  if(!data.name||!data.username||!data.password){ alert('Ranpli tout chan yo.'); return; }
+  if(id){ const idx=DB.users.findIndex(u=>u.id===id); DB.users[idx]={...DB.users[idx],...data}; }
+  else{ DB.users.push({id:uid('u'),...data}); }
+  logActivity('Kreye/modifye yon itilizatè: '+data.username);
+  saveDB(); closeModal(); renderUsersTable();
+}
+function deleteUser(id){
+  if(!confirm('Efase itilizatè sa a?')) return;
+  DB.users=DB.users.filter(u=>u.id!==id);
+  logActivity('Efase yon itilizatè');
+  saveDB(); renderUsersTable();
+}
+
+/* =====================================================================
+   SOVGAD DONE
+===================================================================== */
+function renderBackup(){
+  const logo=DB.settings && DB.settings.logoDataUrl;
+  const format=(DB.settings && DB.settings.receiptFormat) || 'a4';
+  const natcash=(DB.settings && DB.settings.natcashNumber) || '';
+  const moncash=(DB.settings && DB.settings.moncashNumber) || '';
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🖼️ Logo ak Fòma Resi</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Logo a parèt sou tout resi PDF (fakti, depo, retrè, prè, ranbousman, retou) e sou katalòg piblik kliyan an. Fòma a kontwole gwosè paj PDF la — chwazi "Tikè 80mm" si w ap enprime sou yon enprimant tèmik POS Android.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>Logo Biznis (PNG/JPG, kare pi bon)</label>
+          <input type="file" id="logoFile" accept="image/png,image/jpeg">
+        </div>
+        <div class="field">
+          <label>Fòma Resi PDF</label>
+          <select id="receiptFormatSelect">
+            <option value="a4" ${format==='a4'?'selected':''}>Paj Konplè (A4) — pou enprimant/imel nòmal</option>
+            <option value="thermal80" ${format==='thermal80'?'selected':''}>Tikè 80mm — pou enprimant POS/tèmik</option>
+          </select>
+        </div>
+      </div>
+      ${logo?`<div style="margin:12px 0;"><img src="${logo}" style="height:50px;border:1px solid var(--line);border-radius:6px;padding:4px;background:#fff;"><button class="icon-btn danger" style="margin-left:10px;" onclick="removeLogo()">Retire Logo</button></div>`:''}
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="saveReceiptSettings()">Anrejistre Paramèt</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📲 Peman Mobil (Katalòg Kliyan)</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Nimewo sa yo parèt bay kliyan lè yo ap kòmande sou katalòg piblik la (kliyan.html), pou yo konnen ki kote pou voye lajan an.</p>
+      <div class="form-grid">
+        <div class="field"><label>Nimewo NatCash</label><input id="natcashInput" value="${esc(natcash)}" placeholder="509xxxxxxxx"></div>
+        <div class="field"><label>Nimewo MonCash</label><input id="moncashInput" value="${esc(moncash)}" placeholder="509xxxxxxxx"></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="saveMobilePaySettings()">Anrejistre Nimewo yo</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💾 Ekspòte Backup</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Telechaje tout done aplikasyon an nan yon fichye JSON pou konsève oswa transfere sou yon lòt aparèy.</p>
+      <button class="btn btn-primary" onclick="exportBackup()">⬇ Telechaje Backup (JSON)</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📤 Enpòte Backup</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Chwazi yon fichye backup JSON pou restore done yo. Sa ap ranplase done ki la kounye a.</p>
+      <input type="file" id="backupFile" accept="application/json">
+      <div class="modal-actions" style="justify-content:flex-start;margin-top:12px;"><button class="btn btn-red" onclick="importBackup()">Restore Backup</button></div>
+    </div>`;
+}
+function saveMobilePaySettings(){
+  if(!DB.settings) DB.settings={};
+  DB.settings.natcashNumber=document.getElementById('natcashInput').value.trim();
+  DB.settings.moncashNumber=document.getElementById('moncashInput').value.trim();
+  saveDB();
+  alert('Nimewo peman mobil anrejistre.');
+}
+function saveReceiptSettings(){
+  if(!DB.settings) DB.settings={};
+  DB.settings.receiptFormat=document.getElementById('receiptFormatSelect').value;
+  const fileInput=document.getElementById('logoFile');
+  const file=fileInput.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      DB.settings.logoDataUrl=e.target.result;
+      saveDB();
+      alert('Paramèt resi anrejistre — logo mete ajou.');
+      renderBackup();
+    };
+    reader.readAsDataURL(file);
+  }else{
+    saveDB();
+    alert('Paramèt resi anrejistre.');
+  }
+}
+function removeLogo(){
+  if(!confirm('Retire logo a sou resi yo?')) return;
+  DB.settings.logoDataUrl=null;
+  saveDB();
+  renderBackup();
+}
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='LeadStock_Backup_'+todayISO()+'.json';
+  a.click();
+}
+function importBackup(){
+  const file=document.getElementById('backupFile').files[0];
+  if(!file){ alert('Chwazi yon fichye backup dabò.'); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!confirm('Sa ap ranplase TOUT done ki la kounye a. Kontinye?')) return;
+      DB=data;
+      if(!DB.expenses) DB.expenses=[];
+      if(!DB.auditLog) DB.auditLog=[];
+      if(!DB.supplierOrders) DB.supplierOrders=[];
+      if(!DB.invoiceCounter) DB.invoiceCounter=DB.invoices?DB.invoices.length:0;
+      if(!DB.counters) DB.counters={};
+      logActivity('Restore Backup soti nan fichye JSON');
+      saveDB();
+      alert('Backup restore avèk siksè.');
+      renderView(currentView);
+    }catch(err){ alert('Fichye a pa valab.'); }
+  };
+  reader.readAsText(file);
+}
+
+/* =====================================================================
+   SÈVÈ / BACKEND (senkronizasyon opsyonèl ak yon vrè sèvè)
+===================================================================== */
+function renderServerConfig(){
+  const base=getApiBase();
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🌐 Sèvè / Backend</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">
+        Pa default, LeadStock konsève done l sèlman nan navigatè a (localStorage) — chak aparèy gen pwòp done pa l.
+        Si w lanse sèvè backend ki vini ak app la (dosye <code>backend/</code>, fichye <code>server.js</code>),
+        antre lyen li a la a pou tout aparèy pataje menm done yo an tan reyèl.
+      </p>
+      <div class="form-grid">
+        <div class="field full"><label>Lyen Sèvè a (egzanp: http://localhost:3001 oswa https://stockpro.onrender.com)</label>
+          <input id="srvUrl" value="${esc(base)}" placeholder="http://localhost:3001"></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn btn-primary" onclick="testAndSaveServer()">🔌 Konekte / Teste</button>
+        ${base?'<button class="btn btn-red" onclick="disconnectServer()">Dekonekte Sèvè</button>':''}
+      </div>
+      <div id="srvResult" style="margin-top:12px;"></div>
+    </div>
+    ${base?`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Senkronizasyon Manyèl</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">
+        Aplikasyon an ap eseye voye chak chanjman bay sèvè a otomatikman. Si w bezwen fòse yon senkronizasyon:
+      </p>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="pushToServer()">⬆ Voye Done Lokal yo Bay Sèvè a</button>
+        <button class="btn" onclick="pullFromServer()">⬇ Ranplase ak Done Sèvè a</button>
+      </div>
+    </div>`:''}
+  `;
+}
+async function testAndSaveServer(){
+  const url=document.getElementById('srvUrl').value.trim().replace(/\/$/,'');
+  const resBox=document.getElementById('srvResult');
+  if(!url){ resBox.innerHTML='<div class="empty-state">Antre yon lyen sèvè.</div>'; return; }
+  try{
+    const res=await fetch(url+'/api/health',{headers:{'ngrok-skip-browser-warning':'true'}});
+    if(!res.ok) throw new Error('bad');
+    localStorage.setItem(API_BASE_KEY, url);
+    setServerStatus(true);
+    resBox.innerHTML='<div style="color:var(--green);font-weight:700;font-size:13px;">✅ Konekte avèk siksè! Dekonekte epi rekonekte pou senkronize done yo.</div>';
+    renderServerConfig();
+  }catch(e){
+    setServerStatus(false);
+    resBox.innerHTML='<div style="color:var(--red);font-weight:700;font-size:13px;">❌ Pa ka jwenn sèvè a sou lyen sa a. Verifye l ap mache epi lyen an kòrèk.</div>';
+  }
+}
+function disconnectServer(){
+  localStorage.removeItem(API_BASE_KEY);
+  sessionStorage.removeItem(API_CREDS_KEY);
+  window._serverOnline=undefined;
+  updateServerStatusChip();
+  renderServerConfig();
+}
+async function pushToServer(){
+  await apiPushDB();
+  alert(window._serverOnline?'Done voye bay sèvè a avèk siksè.':'Pa t kapab rive nan sèvè a.');
+}
+async function pullFromServer(){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base||!auth){ alert('Rekonekte dabò.'); return; }
+  if(!confirm('Sa ap ranplase done lokal yo ak sa ki sou sèvè a. Kontinye?')) return;
+  try{
+    const res=await fetch(base+'/api/db',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    if(!res.ok) throw new Error('bad');
+    DB=await res.json();
+    localStorage.setItem(DB_KEY, JSON.stringify(DB));
+    setServerStatus(true);
+    alert('Done chaje soti nan sèvè a.');
+    renderView(currentView);
+  }catch(e){ setServerStatus(false); alert('Pa t kapab rive nan sèvè a.'); }
+}
+
+/* =====================================================================
+   DEPANS / CHAJ (Business Expenses)
+===================================================================== */
+const EXPENSE_CATEGORIES=['Lwaye','Salè','Gaz/Transpò','Sèvis Piblik (Kouran/Dlo)','Antretyen','Piblisite','Lòt'];
+function renderExpenses(){
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🧮 Nouvo Depans</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Dat</label><input id="expDate" type="date" value="${todayISO()}"></div>
+        <div class="field"><label>Kategori</label><select id="expCategory">${EXPENSE_CATEGORIES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+        <div class="field full"><label>Deskripsyon</label><input id="expDesc" placeholder="Egzanp: Peman lwaye mwa Out"></div>
+        <div class="field"><label>Montan (HTG) *</label><input id="expAmount" type="number"></div>
+        <div class="field"><label>Prèv (Foto Resi/Fakti, opsyonèl)</label><input id="expProof" type="file" accept="image/*" capture="environment"></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveExpense()">Anrejistre Depans</button></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Istorik Depans <span class="count">(${DB.expenses.length})</span></span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Total tout depans: <b class="mono">${fmt(DB.expenses.reduce((s,e)=>s+e.amount,0))}</b></p>
+      <div class="toolbar"><input class="tb-input" id="expSearch" placeholder="Chèche..." oninput="renderExpensesTable()"></div>
+      <div id="expTableWrap"></div>
+    </div>`;
+  renderExpensesTable();
+}
+function renderExpensesTable(){
+  const q=(document.getElementById('expSearch')?.value||'').toLowerCase();
+  const rows=[...DB.expenses].reverse().filter(r=>!q||JSON.stringify(r).toLowerCase().includes(q));
+  const wrap=document.getElementById('expTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen depans anrejistre.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kategori</th><th>Deskripsyon</th><th>Montan</th><th>Prèv</th><th></th></tr></thead>
+  <tbody>${rows.map(r=>`<tr><td class="mono">${r.date}</td><td><span class="badge gray">${esc(r.category)}</span></td>
+    <td>${esc(r.description||'—')}</td><td class="mono">${fmt(r.amount)}</td>
+    <td>${r.proofPhoto?`<img src="${r.proofPhoto}" onclick="viewProofPhoto('${r.id}')" style="width:32px;height:32px;object-fit:cover;border-radius:5px;cursor:pointer;border:1px solid var(--line);">`:'<span style="color:var(--text-faint);">—</span>'}</td>
+    <td><button class="icon-btn danger" onclick="deleteExpense('${r.id}')">Efase</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function viewProofPhoto(id){
+  const exp=DB.expenses.find(e=>e.id===id);
+  if(!exp||!exp.proofPhoto) return;
+  openModalHTML(`
+    <div class="modal-title">Prèv Depans — ${esc(exp.description||exp.category)}</div>
+    <img src="${exp.proofPhoto}" style="width:100%;border-radius:8px;border:1px solid var(--line);">
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Fèmen</button></div>
+  `);
+}
+async function saveExpense(){
+  const amount=Number(document.getElementById('expAmount').value||0);
+  if(amount<=0){ alert('Antre yon montan valab.'); return; }
+  let proofPhoto=null;
+  const fileInput=document.getElementById('expProof');
+  const file=fileInput && fileInput.files[0];
+  if(file){
+    try{ proofPhoto=await compressImageFile(file,500); }catch(e){}
+  }
+  DB.expenses.push({
+    id:uid('exp'), date:document.getElementById('expDate').value||todayISO(),
+    category:document.getElementById('expCategory').value,
+    description:document.getElementById('expDesc').value.trim(),
+    amount, proofPhoto
+  });
+  logActivity('Ajoute depans: '+fmt(amount));
+  saveDB(); renderExpenses();
+}
+function deleteExpense(id){
+  if(!confirm('Efase depans sa a?')) return;
+  DB.expenses=DB.expenses.filter(e=>e.id!==id);
+  logActivity('Efase yon depans');
+  saveDB(); renderExpensesTable();
+}
+
+/* =====================================================================
+   KÒMAND FOUNISÈ (Supplier Purchase Orders) — Admin sèlman
+===================================================================== */
+let supplierCart=[];
+function renderSupplierOrders(){
+  supplierCart=[];
+  if(!DB.supplierOrders) DB.supplierOrders=[];
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📦 Nouvo Kòmand Founisè</span></div>
+      ${DB.suppliers.length===0?'<div class="empty-state">Ajoute omwen yon founisè anvan (nan "Anyè → Founisè").</div>':`
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="field full"><label>Founisè *</label><select id="soFounisè">${DB.suppliers.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end;">
+        <div class="field"><label>Pwodwi</label><select id="soProduct">${DB.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Kantite</label><input id="soQty" type="number" value="1" min="1"></div>
+        <div class="field"><label>Pri Inite (HTG)</label><input id="soPrice" type="number"></div>
+        <div class="field"><button class="btn btn-primary" onclick="addSupplierOrderItem()">+ Ajoute</button></div>
+      </div>
+      <table class="cart-table"><thead><tr><th>Pwodwi</th><th>Kantite</th><th>Pri</th><th>Soutotal</th><th></th></tr></thead>
+      <tbody id="soCartBody"><tr><td colspan="5" style="text-align:center;color:var(--text-faint);">Panye vid</td></tr></tbody></table>
+      <div class="total-row">Total: <span id="soCartTotal">HTG 0</span></div>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="saveSupplierOrder()">Kreye Kòmand</button></div>`}
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Kòmand Founisè <span class="count">(${DB.supplierOrders.length})</span></span></div>
+      <div id="supplierOrdersTableWrap"></div>
+    </div>`;
+  if(DB.suppliers.length>0){
+    document.getElementById('soProduct').addEventListener('change', syncSupplierOrderPrice);
+    syncSupplierOrderPrice();
+  }
+  renderSupplierOrdersTable();
+}
+function syncSupplierOrderPrice(){
+  const p=DB.products.find(x=>x.id===document.getElementById('soProduct').value);
+  if(p) document.getElementById('soPrice').value=p.buyPrice||0;
+}
+function addSupplierOrderItem(){
+  const productId=document.getElementById('soProduct').value;
+  const qty=Number(document.getElementById('soQty').value||0);
+  const price=Number(document.getElementById('soPrice').value||0);
+  const p=DB.products.find(x=>x.id===productId);
+  if(!p||qty<=0){ alert('Chwazi yon pwodwi ak yon kantite valab.'); return; }
+  supplierCart.push({productId, name:p.name, unit:p.unit, qty, unitPrice:price});
+  renderSupplierCart();
+}
+function renderSupplierCart(){
+  const body=document.getElementById('soCartBody');
+  if(supplierCart.length===0){ body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-faint);">Panye vid</td></tr>'; }
+  else{
+    body.innerHTML=supplierCart.map((it,i)=>`<tr>
+      <td>${esc(it.name)}</td><td class="mono">${it.qty} ${esc(it.unit||'')}</td><td class="mono">${fmt(it.unitPrice)}</td>
+      <td class="mono">${fmt(it.qty*it.unitPrice)}</td>
+      <td><button class="icon-btn danger" onclick="removeSupplierCartItem(${i})">✕</button></td>
+    </tr>`).join('');
+  }
+  document.getElementById('soCartTotal').textContent=fmt(supplierCart.reduce((s,it)=>s+it.qty*it.unitPrice,0));
+}
+function removeSupplierCartItem(i){ supplierCart.splice(i,1); renderSupplierCart(); }
+function saveSupplierOrder(){
+  if(supplierCart.length===0){ alert('Ajoute omwen yon pwodwi nan kòmand la.'); return; }
+  const supplierId=document.getElementById('soFounisè').value;
+  const total=supplierCart.reduce((s,it)=>s+it.qty*it.unitPrice,0);
+  const txnNumber=nextTxnNumber('supplierOrder','KF');
+  const order={id:uid('supo'), txnNumber, date:todayISO(), supplierId, items:[...supplierCart], total, status:'an_atant'};
+  DB.supplierOrders.push(order);
+  logActivity('Kreye kòmand founisè pou '+fmt(total));
+  saveDB();
+  supplierCart=[];
+  renderSupplierOrders();
+}
+function renderSupplierOrdersTable(){
+  const rows=[...DB.supplierOrders].reverse();
+  const wrap=document.getElementById('supplierOrdersTableWrap');
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen kòmand founisè.</div>'; return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Dat</th><th>Founisè</th><th>Atik</th><th>Total</th><th>Referans Peman</th><th>Estati</th><th></th></tr></thead>
+  <tbody>${rows.map(o=>{
+    const s=DB.suppliers.find(x=>x.id===o.supplierId);
+    const statusBadge=o.status==='resevwa'?'green':o.status==='voye'?'gold':'gray';
+    const statusLabel=o.status==='resevwa'?'Resevwa':o.status==='voye'?'Voye':'An Atant';
+    return `<tr>
+      <td class="mono">${esc(o.txnNumber||'—')}</td>
+      <td class="mono">${o.date}</td><td>${esc(s?s.name:'—')}</td>
+      <td>${o.items.map(it=>`${esc(it.name)} x${it.qty}`).join(', ')}</td>
+      <td class="mono">${fmt(o.total)}</td>
+      <td class="mono">${esc(o.paymentReference||'—')}</td>
+      <td><span class="badge ${statusBadge}">${statusLabel}</span></td>
+      <td class="row-actions">
+        ${o.status==='an_atant'?`<button class="icon-btn" onclick="markSupplierOrderSent('${o.id}')">Make Voye</button>`:''}
+        ${o.status==='voye'?`<button class="icon-btn" onclick="openReceiveOrderModal('${o.id}')">✅ Resevwa</button>`:''}
+      </td>
+    </tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function markSupplierOrderSent(orderId){
+  const order=DB.supplierOrders.find(o=>o.id===orderId);
+  if(!order) return;
+  const method=prompt('Kijan lajan an voye? Tape: natcash oswa moncash oswa kach oswa vireman', 'natcash');
+  if(method===null) return;
+  const reference=prompt('Referans tranzaksyon an (opsyonèl):', '');
+  if(reference===null) return;
+  order.status='voye';
+  order.paymentMethod=method.trim();
+  order.paymentReference=reference.trim();
+  order.sentDate=todayISO();
+  logActivity('Make kòmand founisè voye — '+fmt(order.total));
+  saveDB();
+  renderSupplierOrders();
+}
+function openReceiveOrderModal(orderId){
+  const order=DB.supplierOrders.find(o=>o.id===orderId);
+  if(!order) return;
+  const supplier=DB.suppliers.find(s=>s.id===order.supplierId);
+  openModalHTML(`
+    <div class="modal-title">✅ Konfime Resepsyon Machandiz</div>
+    <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:12px;">Founisè: <b>${esc(supplier?supplier.name:'—')}</b> — ${order.items.length} pwodwi, total ${fmt(order.total)}</p>
+    <div class="form-grid">
+      <div class="field full"><label>Adrès Livrezon</label><input id="rcvAddress" placeholder="Kote machandiz la livre"></div>
+      <div class="field"><label>Chofè</label><input id="rcvDriver" placeholder="Non chofè a"></div>
+      <div class="field"><label>Imatrikilasyon</label><input id="rcvPlate" placeholder="Nimewo plak machin"></div>
+      <div class="field"><label>NIF</label><input id="rcvNif" placeholder="Nimewo NIF"></div>
+      <div class="field"><label>Verifikatè *</label><input id="rcvVerifier" value="${esc(currentUser?currentUser.name:'')}"></div>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-faint);margin:14px 0 8px;">Kantite pa Ranje (opsyonèl, pou chak pwodwi)</p>
+    ${order.items.map((it,i)=>`
+      <div class="field" style="margin-bottom:8px;">
+        <label>${esc(it.name)} (${it.qty} ${esc(it.unit||'')})</label>
+        <input id="rcvRow_${i}" placeholder="Egzanp: 4 ranje x 12">
+      </div>`).join('')}
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Anile</button>
+      <button class="btn btn-primary" onclick="confirmReceiveOrder('${orderId}')">Konfime Resepsyon</button>
+    </div>
+  `);
+}
+function confirmReceiveOrder(orderId){
+  const order=DB.supplierOrders.find(o=>o.id===orderId);
+  if(!order) return;
+  const verifier=document.getElementById('rcvVerifier').value.trim();
+  if(!verifier){ alert('Non verifikatè a obligatwa.'); return; }
+  const receiving={
+    address:document.getElementById('rcvAddress').value.trim(),
+    driver:document.getElementById('rcvDriver').value.trim(),
+    plate:document.getElementById('rcvPlate').value.trim(),
+    nif:document.getElementById('rcvNif').value.trim(),
+    verifier
+  };
+  const itemRows=order.items.map((it,i)=>({
+    ...it, rowNote:document.getElementById('rcvRow_'+i).value.trim()
+  }));
+  itemRows.forEach(it=>{
+    const p=DB.products.find(x=>x.id===it.productId);
+    if(p){
+      p.qty+=it.qty;
+      DB.stockIn.push({
+        id:uid('si'), date:todayISO(), productId:it.productId, qty:it.qty,
+        unitPrice:it.unitPrice, supplierId:order.supplierId, ref:'Kòmand Founisè #'+(order.txnNumber||order.id), note:it.rowNote||''
+      });
+    }
+  });
+  order.status='resevwa';
+  order.receivedDate=todayISO();
+  order.receiving=receiving;
+  order.items=itemRows;
+  logActivity('Resevwa kòmand founisè — estòk ogmante pou '+order.items.length+' atik, verifye pa '+verifier);
+  saveDB();
+  closeModal();
+
+  const supplier=DB.suppliers.find(s=>s.id===order.supplierId);
+  sendSupplierReceivingConfirmation(order, supplier, receiving);
+
+  renderSupplierOrders();
+}
+function sendSupplierReceivingConfirmation(order, supplier, receiving){
+  const linesForPDF=order.items.map(it=>[it.name+' — '+it.qty+' '+(it.unit||''), it.rowNote||'—']);
+  linesForPDF.push(['Chofè', receiving.driver||'—']);
+  linesForPDF.push(['Imatrikilasyon', receiving.plate||'—']);
+  linesForPDF.push(['NIF', receiving.nif||'—']);
+  linesForPDF.push(['Verifikatè', receiving.verifier]);
+  if(receiving.address) linesForPDF.push(['Adrès', receiving.address]);
+
+  const party=supplier?{name:supplier.name, phone:supplier.phone}:null;
+  const doc=buildReceiptPDF('Konfimasyon Resepsyon', party, linesForPDF, 'Nou konfime nou resevwa machandiz la jan sa dekri anwo a. Mèsi!', order.txnNumber||order.id, 'Founisè');
+  finalizeSupplierDoc(doc, supplier, order);
+}
+function finalizeSupplierDoc(doc, supplier, order){
+  const blob=doc.output('blob');
+  const cleanName=('Resepsyon_'+(order.txnNumber||order.id)).replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
+  const file=new File([blob], cleanName, {type:'application/pdf'});
+  const caption=`LeadStock — Konfimasyon Resepsyon — #${order.txnNumber||order.id}`;
+
+  const trySend=async()=>{
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:caption, text:caption}); return; }
+      catch(e){ /* moun nan anile — ok */ return; }
+    }
+    doc.save(cleanName);
+    if(!supplier || !supplier.phone) return;
+    const msg=`*${caption}*\n_Resi PDF la telechaje sou aparèy la — tanpri tache l nan konvèsasyon sa a._`;
+    const phone=supplier.phone.replace(/[^0-9]/g,'');
+    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+    window.open(url,'_blank');
+  };
+  trySend();
+}
+
+/* =====================================================================
+   JOUNAL AKTIVITE (Audit Log) — Admin sèlman
+===================================================================== */
+function renderAuditLog(){
+  if(currentUser.role!=='admin'){
+    document.getElementById('content').innerHTML='<div class="empty-state">Sèlman Admin gen aksè nan seksyon sa a.</div>';
+    return;
+  }
+  const rows=[...DB.auditLog].reverse();
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📜 Jounal Aktivite <span class="count">(${rows.length})</span></span></div>
+      ${rows.length===0?'<div class="empty-state">Pa gen okenn aktivite anrejistre.</div>':`
+      <div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Lè</th><th>Itilizatè</th><th>Aksyon</th></tr></thead>
+      <tbody>${rows.slice(0,300).map(r=>`<tr><td class="mono">${r.date}</td><td class="mono">${r.time}</td><td>${esc(r.user)}</td><td>${esc(r.action)}</td></tr>`).join('')}</tbody></table></div>`}
+    </div>`;
+}
+</script>
+
+</body>
+</html>
