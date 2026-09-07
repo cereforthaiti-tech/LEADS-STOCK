@@ -35,7 +35,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
   background-color: var(--bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='6' y='6' width='228' height='108' rx='10' fill='none' stroke='%232f6b3a' stroke-width='2' stroke-opacity='0.12'/%3E%3Ctext x='120' y='78' font-family='Georgia,serif' font-size='54' font-weight='700' fill='%232f6b3a' fill-opacity='0.09' text-anchor='middle'%3E100%3C/text%3E%3Ctext x='24' y='32' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10'%3E%24%3C/text%3E%3Ctext x='216' y='104' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10' text-anchor='end'%3E%24%3C/text%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect x='10' y='14' width='140' height='34' fill='%23002d62' fill-opacity='0.10'/%3E%3Crect x='10' y='48' width='140' height='34' fill='%23d21034' fill-opacity='0.10'/%3E%3C/svg%3E");
   background-repeat: repeat;
   color:var(--text);
   font-family:var(--font-body);
@@ -53,7 +53,7 @@ a{color:inherit;}
 /* ============ LOGIN ============ */
 #loginScreen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background-image: radial-gradient(circle at 30% 20%,#faf3de,var(--bg) 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='6' y='6' width='228' height='108' rx='10' fill='none' stroke='%232f6b3a' stroke-width='2' stroke-opacity='0.12'/%3E%3Ctext x='120' y='78' font-family='Georgia,serif' font-size='54' font-weight='700' fill='%232f6b3a' fill-opacity='0.09' text-anchor='middle'%3E100%3C/text%3E%3Ctext x='24' y='32' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10'%3E%24%3C/text%3E%3Ctext x='216' y='104' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10' text-anchor='end'%3E%24%3C/text%3E%3C/svg%3E");
+  background-image: radial-gradient(circle at 30% 20%,#faf3de,var(--bg) 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect x='10' y='14' width='140' height='34' fill='%23002d62' fill-opacity='0.10'/%3E%3Crect x='10' y='48' width='140' height='34' fill='%23d21034' fill-opacity='0.10'/%3E%3C/svg%3E");
   background-repeat: no-repeat, repeat;
   padding:20px;
 }
@@ -558,9 +558,13 @@ async function fetchLatestDBFromServer(){
   const base=getApiBase(); const auth=apiAuthHeader();
   if(!base || !auth) return null;
   try{
-    const res=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    const controller=new AbortController();
+    const timeoutId=setTimeout(()=>controller.abort(), 8000);
+    const res=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}, signal:controller.signal});
+    clearTimeout(timeoutId);
     if(!res.ok) return null;
-    return await res.json();
+    const data=await res.json();
+    return applyDBDefaults(data);
   }catch(e){ return null; }
 }
 function setServerStatus(ok){
@@ -576,17 +580,81 @@ function updateServerStatusChip(){
   el.innerHTML=`<span class="srv-dot ${ok===true?'on':ok===false?'off':''}"></span> ${ok===true?'Sèvè Konekte':ok===false?'Sèvè Pa Reponn':'Sèvè Konfigire'}`;
 }
 
-let DB = JSON.parse(localStorage.getItem(DB_KEY) || 'null') || seedDB();
-if(!DB.returns) DB.returns=[];
-if(!DB.expenses) DB.expenses=[];
-if(!DB.auditLog) DB.auditLog=[];
-if(!DB.supplierOrders) DB.supplierOrders=[];
-if(!DB.invoiceCounter) DB.invoiceCounter=DB.invoices?DB.invoices.length:0;
-if(!DB.counters) DB.counters={};
-if(!DB.settings) DB.settings={ logoDataUrl:null, receiptFormat:'a4', natcashNumber:'', moncashNumber:'' };
-if(DB.settings.natcashNumber===undefined) DB.settings.natcashNumber='';
-if(DB.settings.moncashNumber===undefined) DB.settings.moncashNumber='';
-if(DB.settings.receiptFormat===undefined) DB.settings.receiptFormat='a4';
+/* =====================================================================
+   SENKWONIZASYON OTOMATIK — chak navigatè/tèminal rafrechi done yo
+   soti nan sèvè a san moun nan pa bezwen fè anyen. Sa asire si yon
+   lòt aparèy chanje yon bagay (kliyan, pri, balans, elt.), tout lòt
+   tèminal ki konekte wè chanjman an nan kèk segond, san yo pa bezwen
+   dekonekte/rekonekte.
+   Views ki gen yon panye/fòm anndan paj la (pa nan yon modal) rete
+   EKSKLI pou re-afiche a — sa ta efase sa moun nan ap tape kounye a.
+   Done yo toujou mete ajou an background pou pwochen fwa yo navige. */
+const SAFE_AUTOREFRESH_VIEWS=new Set(['dashboard','products','suppliers','customers','reports','users','auditlog','orders','backup','serverConfig']);
+let _autoSyncTimer=null;
+async function autoSyncTick(){
+  if(!currentUser || IS_KLIYAN_MODE) return;
+  if(!getApiBase()) return;
+  const modalOpen=document.getElementById('modalOverlay')?.classList.contains('open');
+  if(modalOpen) return;
+  // Pa re-afiche si moun nan gen tèks nan yon bwat rechèch kounye a —
+  // sa ta efase sa yo ap chèche a. Done yo mete ajou pandanm.
+  const activeSearch=[...document.querySelectorAll('.tb-input')].some(el=>el.value && el.value.trim().length>0);
+  const fresh=await fetchLatestDBFromServer();
+  if(!fresh){ setServerStatus(false); return; }
+  setServerStatus(true);
+  DB=fresh;
+  localStorage.setItem(DB_KEY, JSON.stringify(DB));
+  if(SAFE_AUTOREFRESH_VIEWS.has(currentView) && !activeSearch){
+    renderView(currentView);
+  }
+}
+function startAutoSync(){
+  if(_autoSyncTimer) return;
+  _autoSyncTimer=setInterval(autoSyncTick, 20000);
+  document.addEventListener('visibilitychange', _autoSyncOnVisible);
+  window.addEventListener('focus', autoSyncTick);
+}
+function stopAutoSync(){
+  if(_autoSyncTimer){ clearInterval(_autoSyncTimer); _autoSyncTimer=null; }
+  document.removeEventListener('visibilitychange', _autoSyncOnVisible);
+  window.removeEventListener('focus', autoSyncTick);
+}
+function _autoSyncOnVisible(){ if(!document.hidden) autoSyncTick(); }
+
+/* Yon SÈL fonksyon ki asire tout chan DB dwe genyen egziste — rele l
+   CHAK fwa DB chanje (premye chajman, chak fwa nou rale done fre sou
+   sèvè a, ak enpòte backup). Anvan sa, sekirite sa yo te sèlman aplike
+   yon sèl fwa nan chajman inisyal la, donk yon chan ki manke apre yon
+   senkwonizasyon te ka fè yon seksyon "sispann mache" san mesaj erè. */
+function applyDBDefaults(data){
+  if(!data) return data;
+  if(!data.products) data.products=[];
+  if(!data.suppliers) data.suppliers=[];
+  if(!data.customers) data.customers=[];
+  if(!data.users) data.users=[];
+  if(!data.stockIn) data.stockIn=[];
+  if(!data.stockOut) data.stockOut=[];
+  if(!data.invoices) data.invoices=[];
+  if(!data.returns) data.returns=[];
+  if(!data.deposits) data.deposits=[];
+  if(!data.withdrawals) data.withdrawals=[];
+  if(!data.loans) data.loans=[];
+  if(!data.loanPayments) data.loanPayments=[];
+  if(!data.inventoryChecks) data.inventoryChecks=[];
+  if(!data.expenses) data.expenses=[];
+  if(!data.auditLog) data.auditLog=[];
+  if(!data.supplierOrders) data.supplierOrders=[];
+  if(!data.invoiceCounter) data.invoiceCounter=data.invoices.length;
+  if(!data.counters) data.counters={};
+  if(!data.settings) data.settings={};
+  if(data.settings.logoDataUrl===undefined) data.settings.logoDataUrl=null;
+  if(data.settings.receiptFormat===undefined) data.settings.receiptFormat='a4';
+  if(data.settings.natcashNumber===undefined) data.settings.natcashNumber='';
+  if(data.settings.moncashNumber===undefined) data.settings.moncashNumber='';
+  return data;
+}
+
+let DB = applyDBDefaults(JSON.parse(localStorage.getItem(DB_KEY) || 'null') || seedDB());
 function saveDB(){
   localStorage.setItem(DB_KEY, JSON.stringify(DB));
   apiPushDB(); // best-effort — pa bloke UI si sèvè a pa reponn
@@ -629,7 +697,7 @@ async function doLogin(){
       const user=await res.json();
       sessionStorage.setItem(API_CREDS_KEY, JSON.stringify({username:u,password:p}));
       const dbRes=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':'Basic '+btoa(u+':'+p),'ngrok-skip-browser-warning':'true'}});
-      if(dbRes.ok){ DB=await dbRes.json(); localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
+      if(dbRes.ok){ DB=applyDBDefaults(await dbRes.json()); localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
       setServerStatus(true);
       errBox.style.display='none';
       currentUser=user;
@@ -659,6 +727,7 @@ async function doLogin(){
 }
 function doLogout(){
   logActivity('Dekonekte'); saveDB();
+  stopAutoSync();
   currentUser=null;
   sessionStorage.removeItem(SESSION_KEY);
   document.getElementById('appShell').style.display='none';
@@ -676,6 +745,7 @@ function enterApp(){
   document.getElementById('navAudit').style.display=currentUser.role==='admin'?'flex':'none';
   document.getElementById('navSupplierOrders').style.display=currentUser.role==='admin'?'flex':'none';
   updateServerStatusChip();
+  startAutoSync();
   goView('dashboard');
 }
 if(currentUser && !IS_KLIYAN_MODE){ enterApp(); }
@@ -1170,30 +1240,49 @@ function buildReceiptPDFThermal(title, customer, lines, footerNote, txnNumber, p
    sipòte l (Web Share API — Android/iOS resan). Si sa pa disponib,
    nou tonbe tounen sou telechajman PDF + yon ti mesaj kout sou WhatsApp
    ki mande moun nan tache fichye a li menm. */
-async function sendWhatsAppReceipt(customer, title, lines, footerNote, filename, txnNumber, partyLabel){
+/* Konfimasyon tranzaksyon: si kliyan an gen yon nimewo telefòn, nou
+   TOUJOU voye yon mesaj tèks WhatsApp otomatikman (metòd ki pi fyab
+   la, li mache sou tout aparèy san eksepsyon), ansanm ak yon kopi PDF
+   ki telechaje pou achiv. Si kliyan an PA gen WhatsApp disponib (pa
+   gen nimewo telefòn), PDF la enprime otomatikman olye l jis
+   telechaje an silans. */
+function sendWhatsAppReceipt(customer, title, lines, footerNote, filename, txnNumber, partyLabel){
   const doc=buildReceiptPDF(title, customer, lines, footerNote, txnNumber, partyLabel||'Kliyan');
-  const blob=doc.output('blob');
   const cleanName=(filename||'Resi').replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
-  const file=new File([blob], cleanName, {type:'application/pdf'});
-  const caption=`LeadStock — ${title} — #${txnNumber||''}`;
 
-  let sharedDirectly=false;
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{
-      await navigator.share({files:[file], title:caption, text:caption});
-      sharedDirectly=true;
-    }catch(e){ /* moun nan anile pataj la — pa gen erè pou montre */ sharedDirectly=true; }
+  if(customer && customer.phone){
+    doc.save(cleanName);
+    const isTotalLabel=l=>/^total$/i.test((l+'').trim());
+    const normalLines=lines.filter(l=>!isTotalLabel(l[0]));
+    const totalLines=lines.filter(l=>isTotalLabel(l[0]));
+    let msg=`*LeadStock — ${title}*\n`;
+    msg+=`${partyLabel||'Kliyan'}: *${customer.name}*\n`;
+    msg+=`# Tranzaksyon: *${txnNumber||'—'}*\n`;
+    msg+=`Dat: ${nowStamp()}\n\n`;
+    normalLines.forEach(l=>{
+      const val=(l[1]+'').toString().startsWith('HTG') ? `*${l[1]}*` : l[1];
+      msg+=`${l[0]}: ${val}\n`;
+    });
+    if(totalLines.length){
+      msg+=`——————————————\n`;
+      totalLines.forEach(l=>{ msg+=`*${l[0]}: ${l[1]}*\n`; });
+    }
+    if(partyLabel!=='Founisè'){
+      const bal=customerBalanceSummary(customer);
+      msg+=`\n*Balans Kont Ou:*\n`;
+      msg+=`• Depo: *${fmt(bal.wallet)}*\n`;
+      msg+=`• Dèt sou Kont: *${fmt(bal.credit)}*\n`;
+      msg+=`• Prè ki Rete: *${fmt(bal.loan)}*\n`;
+    }
+    if(footerNote) msg+=`\n${footerNote}\n`;
+    msg+=`\n_Tranzaksyon an konfime. Yon kopi PDF telechaje sou aparèy la._`;
+    const phone=customer.phone.replace(/[^0-9]/g,'');
+    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+    window.open(url,'_blank');
+  }else{
+    doc.autoPrint();
+    window.open(doc.output('bloburl'),'_blank');
   }
-  if(sharedDirectly) return;
-
-  // Fallback: pa gen Web Share API disponib (egzanp: òdinatè) — telechaje
-  // PDF la epi louvri WhatsApp ak yon ti mesaj kout ki mande tache fichye a.
-  doc.save(cleanName);
-  if(!customer || !customer.phone) return;
-  const msg=`*${caption}*\n_Resi PDF la telechaje sou aparèy la — tanpri tache l nan konvèsasyon sa a._`;
-  const phone=customer.phone.replace(/[^0-9]/g,'');
-  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
-  window.open(url,'_blank');
 }
 
 /* =====================================================================
@@ -1437,7 +1526,17 @@ async function saveEntity(key,id){
   if(document.getElementById(key+'TableWrap')) renderEntityTable(key);
   else renderView(currentView);
 }
+/* Gadyen jeneral: Anplwaye pa gen dwa efase/anile okenn bagay ki deja
+   anrejistre nan app la — sèlman Admin ka fè sa. */
+function requireAdminOrBlock(actionLabel){
+  if(currentUser.role!=='admin'){
+    alert('Sèlman Admin ka '+actionLabel+'. Kontakte yon Administratè si w bezwen sa fèt.');
+    return false;
+  }
+  return true;
+}
 function deleteEntity(key,id){
+  if(!requireAdminOrBlock('efase '+(ENTITY_CONFIG[key]?ENTITY_CONFIG[key].singular.toLowerCase():'antre sa a'))) return;
   if(!confirm('Efase antre sa a?')) return;
   DB[key]=DB[key].filter(r=>r.id!==id);
   logActivity('Efase yon '+(ENTITY_CONFIG[key]?ENTITY_CONFIG[key].singular:key));
@@ -1695,19 +1794,34 @@ function openCustomerForm(id){
       <button class="btn btn-primary" onclick="saveCustomer('${id||''}')">Anrejistre</button>
     </div>`);
 }
-function saveCustomer(id){
+async function saveCustomer(id){
   const name=document.getElementById('cf_name').value.trim();
   if(!name){ alert('Tanpri antre non kliyan an.'); return; }
   const data={name, phone:document.getElementById('cf_phone').value.trim(), address:document.getElementById('cf_address').value.trim()};
-  if(id){ const idx=DB.customers.findIndex(c=>c.id===id); DB.customers[idx]={...DB.customers[idx],...data}; }
-  else{ DB.customers.push({id:uid('c'),...data,walletBalance:0,creditBalance:0}); }
-  saveDB(); closeModal(); renderCustomerTable();
+  try{
+    const fresh=await fetchLatestDBFromServer();
+    if(fresh) DB=fresh;
+    if(id){ const idx=DB.customers.findIndex(c=>c.id===id); if(idx>=0) DB.customers[idx]={...DB.customers[idx],...data}; else DB.customers.push({id,...data,walletBalance:0,creditBalance:0}); }
+    else{ DB.customers.push({id:uid('c'),...data,walletBalance:0,creditBalance:0}); }
+    saveDB(); closeModal(); renderCustomerTable();
+  }catch(e){
+    alert('Yon erè rive pandan anrejistreman an. Eseye ankò.');
+    console.error(e);
+  }
 }
-function deleteCustomer(id){
+async function deleteCustomer(id){
+  if(!requireAdminOrBlock('efase yon kliyan')) return;
   if(!confirm('Efase kliyan sa a?')) return;
-  DB.customers=DB.customers.filter(c=>c.id!==id);
-  logActivity('Efase yon kliyan');
-  saveDB(); renderCustomerTable();
+  try{
+    const fresh=await fetchLatestDBFromServer();
+    if(fresh) DB=fresh;
+    DB.customers=DB.customers.filter(c=>c.id!==id);
+    logActivity('Efase yon kliyan');
+    saveDB(); renderCustomerTable();
+  }catch(e){
+    alert('Yon erè rive pandan efase a. Eseye ankò.');
+    console.error(e);
+  }
 }
 
 /* =====================================================================
@@ -1792,7 +1906,7 @@ function completeInvoice(){
       DB.stockOut.push({id:uid('so'), date:todayISO(), productId:it.productId, qty:it.qty, reason:'Vant (Fakti '+invoiceNumber+')', ref:invoiceNumber});
     }
     applyPaymentToCustomer(customerId, breakdown);
-    const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId, items:[...cart], total, breakdown, comment};
+    const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId, items:[...cart], total, breakdown, comment, createdBy:currentUser.name};
     DB.invoices.push(invoice);
     saveDB();
     const customer=DB.customers.find(c=>c.id===customerId);
@@ -1985,7 +2099,7 @@ async function validateOrder(orderId){
   });
   const breakdown={cash:order.total, credit:0, deposit:0}; // Kòmand konfime trete tankou Kach
   const invoiceNumber=nextInvoiceNumber();
-  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy'};
+  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy', createdBy:currentUser.name};
   DB.invoices.push(invoice);
   logActivity('Valide kòmand an liy #'+order.id+' pou '+order.customerName+' — '+fmt(order.total));
   saveDB();
@@ -2063,7 +2177,7 @@ async function validateDebtRequest(requestId){
     const loan=DB.loans.find(l=>l.id===target);
     loan.paidAmount=(loan.paidAmount||0)+req.amount;
     if(loan.paidAmount>=loan.amount) loan.status='solde'; else loan.status='pasyèl';
-    DB.loanPayments.push({id:uid('rp'), date:todayISO(), loanId:loan.id, amount:req.amount, source:'Peman An Liy'});
+    DB.loanPayments.push({id:uid('rp'), date:todayISO(), loanId:loan.id, amount:req.amount, source:'Peman An Liy', createdBy:currentUser.name});
   }
   const txnNumber=nextTxnNumber('debtPayment','PDL');
   logActivity('Valide peman dèt/prè an liy #'+req.id+' — '+fmt(req.amount)+' pou '+customer.name);
@@ -2190,7 +2304,7 @@ function confirmReturn(invoiceId){
   else if(method==='dedwi') customer.creditBalance=Math.max(0,(customer.creditBalance||0)-total);
   const txnNumber=nextTxnNumber('return','RM');
   const rec={id:uid('ret'), txnNumber, date:todayISO(), invoiceId, customerId:inv.customerId, items, total, method,
-    reason:document.getElementById('retReason').value.trim()};
+    reason:document.getElementById('retReason').value.trim(), createdBy:currentUser.name};
   DB.returns.push(rec);
   saveDB();
   const methodLabel=method==='depo'?'Kredite sou Depo':method==='dedwi'?'Diminye Dèt sou Kont':'Ranbouse Kach';
@@ -2267,7 +2381,7 @@ function saveDeposit(){
   const customer=DB.customers.find(c=>c.id===customerId);
   customer.walletBalance=(customer.walletBalance||0)+amount;
   const txnNumber=nextTxnNumber('deposit','DEP');
-  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, agent:document.getElementById('depAgent').value.trim()};
+  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, agent:document.getElementById('depAgent').value.trim(), createdBy:currentUser.name};
   DB.deposits.push(rec); saveDB();
   sendWhatsAppReceipt(customer,'Resi Depo',[['Montan Depoze',fmt(amount)],['Ajan',rec.agent||'—']],'Mèsi pou depo w la.',txnNumber,txnNumber,'Kliyan');
   renderFinance(); finTab('depo');
@@ -2300,7 +2414,7 @@ function saveWithdrawal(){
   if(amount>(customer.walletBalance||0)){ alert('Balans depo kliyan an pa sifi pou retrè sa a.'); return; }
   customer.walletBalance-=amount;
   const txnNumber=nextTxnNumber('withdrawal','RET');
-  const rec={id:uid('wd'), txnNumber, date:todayISO(), customerId, amount};
+  const rec={id:uid('wd'), txnNumber, date:todayISO(), customerId, amount, createdBy:currentUser.name};
   DB.withdrawals.push(rec); saveDB();
   sendWhatsAppReceipt(customer,'Resi Retrè',[['Montan Retire',fmt(amount)]],'Tranzaksyon retrè konfime.',txnNumber,txnNumber,'Kliyan');
   renderFinance(); finTab('retre');
@@ -2359,7 +2473,7 @@ function saveLoan(){
 }
 function createLoanRecord(loanData, authorizedBy){
   const txnNumber=nextTxnNumber('loan','PRE');
-  const rec={id:uid('lo'), txnNumber, date:todayISO(), status:'aktif', paidAmount:0, authorizedBy, ...loanData};
+  const rec={id:uid('lo'), txnNumber, date:todayISO(), status:'aktif', paidAmount:0, authorizedBy, createdBy:currentUser.name, ...loanData};
   DB.loans.push(rec);
   logActivity('Prè kreye ('+fmt(rec.amount)+') — otorize pa '+authorizedBy);
   saveDB();
@@ -2438,7 +2552,7 @@ function saveLoanPayment(){
   loan.paidAmount=(loan.paidAmount||0)+amount;
   if(loan.paidAmount>=loan.amount) loan.status='solde'; else loan.status='pasyèl';
   const txnNumber=nextTxnNumber('loanPayment','RBS');
-  const rec={id:uid('rp'), txnNumber, date:todayISO(), loanId, amount};
+  const rec={id:uid('rp'), txnNumber, date:todayISO(), loanId, amount, createdBy:currentUser.name};
   DB.loanPayments.push(rec); saveDB();
   const customer=DB.customers.find(c=>c.id===loan.customerId);
   sendWhatsAppReceipt(customer,'Resi Ranbousman Prè',[['Montan Peye',fmt(amount)],['Rete sou Prè a',fmt(loan.amount-loan.paidAmount)]],'Mèsi pou ranbousman an.',txnNumber,txnNumber,'Kliyan');
@@ -2461,6 +2575,21 @@ function renderReports(){
       <div class="panel-head"><span class="panel-title">🔔 Rapèl Kliyan an Reta</span></div>
       <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Kliyan ki gen dèt sou kont oswa prè an reta — voye yon rapèl WhatsApp yon sèl klik.</p>
       <div id="overdueRemindersWrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">👤 Rapò pa Itilizatè</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Detay aktivite chak itilizatè: kantite fakti, vant total, depo/retrè, depans, ak kòmand founisè yo trete. Konpare pèfòmans yo kòt pou kòt sou nenpòt peryòd.</p>
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="field"><label>Dat Kòmanse</label><input id="urFrom" type="date" value="${addDays(-30)}" onchange="renderUserReportTable()"></div>
+        <div class="field"><label>Dat Fini</label><input id="urTo" type="date" value="${todayISO()}" onchange="renderUserReportTable()"></div>
+        <div class="field"><button class="btn btn-sm" style="margin-top:22px;" onclick="document.getElementById('urFrom').value='2000-01-01';renderUserReportTable();">Tout Peryòd</button></div>
+      </div>
+      <div class="chart-box" style="height:200px;margin-bottom:14px;"><canvas id="userCompareChart"></canvas></div>
+      <div id="userReportWrap"></div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportUserReportExcel()">⬇ Excel</button>
+        <button class="btn" onclick="exportUserReportPDF()">⬇ PDF</button>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-head"><span class="panel-title">📈 Rapò Vant</span></div>
@@ -2529,6 +2658,85 @@ function renderReports(){
       <div id="productReportResult" style="margin-top:16px;"></div>
     </div>`;
   renderExpirationReportTable();
+  renderUserReportTable();
+}
+function getUserReportRows(from, to){
+  from=from||'2000-01-01'; to=to||'9999-12-31';
+  const inRange=d=>d>=from && d<=to;
+  const users=[...new Set([
+    ...DB.invoices.map(i=>i.createdBy),
+    ...DB.deposits.map(d=>d.createdBy),
+    ...DB.withdrawals.map(w=>w.createdBy),
+    ...DB.loans.map(l=>l.createdBy),
+    ...DB.loanPayments.map(p=>p.createdBy),
+    ...DB.returns.map(r=>r.createdBy),
+    ...DB.expenses.map(e=>e.createdBy),
+    ...DB.supplierOrders.map(o=>o.createdBy)
+  ].filter(Boolean))];
+  return users.sort().map(name=>{
+    const userInvoices=DB.invoices.filter(i=>i.createdBy===name && inRange(i.date));
+    return {
+      name,
+      invoiceCount:userInvoices.length,
+      salesTotal:userInvoices.reduce((s,i)=>s+i.total,0),
+      depositsTotal:DB.deposits.filter(d=>d.createdBy===name && inRange(d.date)).reduce((s,d)=>s+d.amount,0),
+      withdrawalsTotal:DB.withdrawals.filter(w=>w.createdBy===name && inRange(w.date)).reduce((s,w)=>s+w.amount,0),
+      loansTotal:DB.loans.filter(l=>l.createdBy===name && inRange(l.date)).reduce((s,l)=>s+l.amount,0),
+      loanPaymentsTotal:DB.loanPayments.filter(p=>p.createdBy===name && inRange(p.date)).reduce((s,p)=>s+p.amount,0),
+      returnsTotal:DB.returns.filter(r=>r.createdBy===name && inRange(r.date)).reduce((s,r)=>s+r.total,0),
+      expensesTotal:DB.expenses.filter(e=>e.createdBy===name && inRange(e.date)).reduce((s,e)=>s+e.amount,0),
+      supplierOrdersCount:DB.supplierOrders.filter(o=>o.createdBy===name && inRange(o.date)).length
+    };
+  });
+}
+function renderUserReportTable(){
+  const from=document.getElementById('urFrom')?.value||'2000-01-01';
+  const to=document.getElementById('urTo')?.value||todayISO();
+  const rows=getUserReportRows(from,to);
+  const wrap=document.getElementById('userReportWrap');
+  if(!wrap) return;
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Pa gen istorik pou peryòd sa a (fonksyon sa a swiv sèlman tranzaksyon ki fèt apre dènye mizajou a).</div>'; if(charts.userCompare){charts.userCompare.destroy();charts.userCompare=null;} return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Itilizatè</th><th>Fakti</th><th>Total Vant</th><th>Depo</th><th>Retrè</th><th>Prè Bay</th><th>Ranbousman</th><th>Retou</th><th>Depans</th><th>Kòmand Founisè</th></tr></thead>
+  <tbody>${rows.map(r=>`<tr>
+    <td>${esc(r.name)}</td><td class="mono">${r.invoiceCount}</td><td class="mono">${fmt(r.salesTotal)}</td>
+    <td class="mono">${fmt(r.depositsTotal)}</td><td class="mono">${fmt(r.withdrawalsTotal)}</td>
+    <td class="mono">${fmt(r.loansTotal)}</td><td class="mono">${fmt(r.loanPaymentsTotal)}</td>
+    <td class="mono">${fmt(r.returnsTotal)}</td><td class="mono">${fmt(r.expensesTotal)}</td>
+    <td class="mono">${r.supplierOrdersCount}</td>
+  </tr>`).join('')}</tbody></table></div>`;
+  const ctx=document.getElementById('userCompareChart');
+  if(ctx){
+    if(charts.userCompare) charts.userCompare.destroy();
+    charts.userCompare=new Chart(ctx,{
+      type:'bar',
+      data:{labels:rows.map(r=>r.name),datasets:[{label:'Total Vant',data:rows.map(r=>r.salesTotal),backgroundColor:'#2f6b3a',borderRadius:5}]},
+      options:{plugins:{legend:{display:false}},scales:{
+        x:{grid:{display:false},ticks:{color:'#6b5f47',font:{family:'Inter',size:11}}},
+        y:{grid:{color:'#e5d9b8'},ticks:{color:'#6b5f47',font:{family:'JetBrains Mono',size:10}}}
+      }}
+    });
+  }
+}
+function exportUserReportExcel(){
+  const from=document.getElementById('urFrom')?.value; const to=document.getElementById('urTo')?.value;
+  const rows=getUserReportRows(from,to).map(r=>({
+    Itilizatè:r.name, Fakti:r.invoiceCount, 'Total Vant':r.salesTotal, Depo:r.depositsTotal,
+    Retrè:r.withdrawalsTotal, 'Prè Bay':r.loansTotal, Ranbousman:r.loanPaymentsTotal,
+    Retou:r.returnsTotal, Depans:r.expensesTotal, 'Kòmand Founisè':r.supplierOrdersCount
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Pa Itilizatè'); XLSX.writeFile(wb,'LeadStock_Rapo_Itilizatè_'+todayISO()+'.xlsx');
+}
+function exportUserReportPDF(){
+  const from=document.getElementById('urFrom')?.value; const to=document.getElementById('urTo')?.value;
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò pa Itilizatè',14,16);
+  doc.setFontSize(9); doc.setTextColor(120,110,90);
+  doc.text('Peryòd: '+(from||'—')+' → '+(to||'—'),14,22);
+  doc.autoTable({startY:28, head:[['Itilizatè','Fakti','Total Vant','Depo','Retrè','Prè Bay','Ranbousman','Retou','Depans','Kòm. Founisè']],
+    body:getUserReportRows(from,to).map(r=>[r.name,r.invoiceCount,fmt(r.salesTotal),fmt(r.depositsTotal),fmt(r.withdrawalsTotal),fmt(r.loansTotal),fmt(r.loanPaymentsTotal),fmt(r.returnsTotal),fmt(r.expensesTotal),r.supplierOrdersCount]),
+    styles:{fontSize:8}, headStyles:{fillColor:[47,107,58]}});
+  doc.save('LeadStock_Rapo_Itilizatè_'+todayISO()+'.pdf');
 }
 function getExpirationRows(){
   return DB.stockIn.filter(r=>r.expirationDate).map(r=>{
@@ -3041,12 +3249,13 @@ async function saveExpense(){
     id:uid('exp'), date:document.getElementById('expDate').value||todayISO(),
     category:document.getElementById('expCategory').value,
     description:document.getElementById('expDesc').value.trim(),
-    amount, proofPhoto
+    amount, proofPhoto, createdBy:currentUser.name
   });
   logActivity('Ajoute depans: '+fmt(amount));
   saveDB(); renderExpenses();
 }
 function deleteExpense(id){
+  if(!requireAdminOrBlock('efase yon depans')) return;
   if(!confirm('Efase depans sa a?')) return;
   DB.expenses=DB.expenses.filter(e=>e.id!==id);
   logActivity('Efase yon depans');
@@ -3119,7 +3328,7 @@ function saveSupplierOrder(){
   const supplierId=document.getElementById('soFounisè').value;
   const total=supplierCart.reduce((s,it)=>s+it.qty*it.unitPrice,0);
   const txnNumber=nextTxnNumber('supplierOrder','KF');
-  const order={id:uid('supo'), txnNumber, date:todayISO(), supplierId, items:[...supplierCart], total, status:'an_atant'};
+  const order={id:uid('supo'), txnNumber, date:todayISO(), supplierId, items:[...supplierCart], total, status:'an_atant', createdBy:currentUser.name};
   DB.supplierOrders.push(order);
   logActivity('Kreye kòmand founisè pou '+fmt(total));
   saveDB();
@@ -3237,28 +3446,8 @@ function sendSupplierReceivingConfirmation(order, supplier, receiving){
   if(receiving.address) linesForPDF.push(['Adrès', receiving.address]);
 
   const party=supplier?{name:supplier.name, phone:supplier.phone}:null;
-  const doc=buildReceiptPDF('Konfimasyon Resepsyon', party, linesForPDF, 'Nou konfime nou resevwa machandiz la jan sa dekri anwo a. Mèsi!', order.txnNumber||order.id, 'Founisè');
-  finalizeSupplierDoc(doc, supplier, order);
-}
-function finalizeSupplierDoc(doc, supplier, order){
-  const blob=doc.output('blob');
-  const cleanName=('Resepsyon_'+(order.txnNumber||order.id)).replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
-  const file=new File([blob], cleanName, {type:'application/pdf'});
-  const caption=`LeadStock — Konfimasyon Resepsyon — #${order.txnNumber||order.id}`;
-
-  const trySend=async()=>{
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file], title:caption, text:caption}); return; }
-      catch(e){ /* moun nan anile — ok */ return; }
-    }
-    doc.save(cleanName);
-    if(!supplier || !supplier.phone) return;
-    const msg=`*${caption}*\n_Resi PDF la telechaje sou aparèy la — tanpri tache l nan konvèsasyon sa a._`;
-    const phone=supplier.phone.replace(/[^0-9]/g,'');
-    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
-    window.open(url,'_blank');
-  };
-  trySend();
+  const txnNumber=order.txnNumber||order.id;
+  sendWhatsAppReceipt(party, 'Konfimasyon Resepsyon', linesForPDF, 'Nou konfime nou resevwa machandiz la jan sa dekri anwo a. Mèsi!', txnNumber, txnNumber, 'Founisè');
 }
 
 /* =====================================================================
