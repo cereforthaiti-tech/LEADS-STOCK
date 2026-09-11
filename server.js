@@ -182,7 +182,7 @@ app.get('/api/public/catalog', ah(async (req, res) => {
   const settings = data.settings || {};
   const products = (data.products || []).map(p => ({
     id: p.id, name: p.name, category: p.category, unit: p.unit,
-    sellPrice: p.sellPrice, qty: p.qty, photo: p.photo || null
+    sellPrice: p.sellPrice, qty: p.qty, photo: p.photo || null, blocked: !!p.blocked
   }));
   res.json({
     products,
@@ -202,6 +202,18 @@ app.post('/api/public/orders', ah(async (req, res) => {
   }
   const stateRaw = await redisGet(KEYS.appState);
   const data = stateRaw ? JSON.parse(stateRaw) : emptyState();
+  const blockedItem = items.find(it => {
+    const p = (data.products || []).find(x => x.id === it.productId);
+    return p && p.blocked;
+  });
+  if (blockedItem) {
+    return res.status(400).json({ error: 'Youn nan pwodwi yo pa disponib pou kòmande.' });
+  }
+  const norm0 = p => (p || '').replace(/\D/g, '');
+  const orderingCustomer = (data.customers || []).find(c => norm0(c.phone) === norm0(customerPhone));
+  if (orderingCustomer && orderingCustomer.blocked) {
+    return res.status(403).json({ error: 'Kont sa a pa ka fè kòmand kounye a. Kontakte biznis la.' });
+  }
   const priced = items.map(it => {
     const p = (data.products || []).find(x => x.id === it.productId);
     return { productId: it.productId, name: p ? p.name : '—', qty: Number(it.qty), price: p ? p.sellPrice : 0 };
@@ -316,9 +328,7 @@ app.get('/api/health', ah(async (req, res) => {
 // -------------------- STATIC (paj kliyan mòd ?kliyan=1) --------------------
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/', (req, res) => {
-  res.redirect('/leadstock-erp.html');
-});
+
 // -------------------- GESTIONÈ ERÈ --------------------
 app.use((err, req, res, next) => {
   console.error('Erè sèvè:', err.message);
