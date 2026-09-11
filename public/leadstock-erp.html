@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LeadStock ERP — Jesyon Estòk, Vant & Finans</title>
+
+<!-- ====== Icon sou ekran akèy telefòn (PWA) ====== -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#2f6b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LeadStock">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -869,21 +878,21 @@ function renderClientCatalog(){
     return;
   }
   grid.innerHTML=items.map(p=>{
-    const out=p.qty<=0;
+    const out=p.qty<=0 || p.blocked;
     return `<div class="kv-card">
       ${out?'<span class="kv-badge-out">Pa Disponib</span>':''}
       ${p.photo?`<img src="${p.photo}">`:'<div class="noimg">📦</div>'}
       <div class="name">${esc(p.name)}</div>
       <div class="cat">${esc(p.category||'')}</div>
       <div class="price">${fmt(p.sellPrice)}</div>
-      <div class="stockline">${out?'Fini pou kounye a':p.qty+' '+(p.unit||'')+' disponib'}</div>
+      <div class="stockline">${p.blocked?'Pa disponib kounye a':out?'Fini pou kounye a':p.qty+' '+(p.unit||'')+' disponib'}</div>
       <button class="kv-add-btn" ${out?'disabled':''} onclick="addToClientCart('${p.id}')">${out?'Pa Disponib':'+ Ajoute'}</button>
     </div>`;
   }).join('');
 }
 function addToClientCart(productId){
   const p=CLIENT_CATALOG.products.find(x=>x.id===productId);
-  if(!p||p.qty<=0) return;
+  if(!p||p.qty<=0||p.blocked) return;
   const existing=clientCart.find(c=>c.productId===productId);
   if(existing){
     if(existing.qty<p.qty) existing.qty++;
@@ -1390,7 +1399,8 @@ const ENTITY_CONFIG={
       {k:'photo',l:'',fmt:v=>v?`<img src="${v}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;">`:'<span style="color:var(--text-faint);">—</span>'},
       {k:'code',l:'Kòd'},{k:'name',l:'Non'},{k:'category',l:'Kategori'},
       {k:'qty',l:'Estòk',fmt:(v,row)=>`<span class="${row.qty<=row.minQty?'tag-low':''}">${row.qty} ${esc(row.unit||'')}</span>`},
-      {k:'sellPrice',l:'Pri Vant',fmt:v=>fmt(v)}
+      {k:'sellPrice',l:'Pri Vant',fmt:v=>fmt(v)},
+      {k:'blocked',l:'Statut',fmt:v=>v?'<span class="badge red">Bloqué</span>':'<span class="badge green">Actif</span>'}
     ]
   },
   suppliers:{
@@ -1436,7 +1446,7 @@ function renderEntityView(key, containerId){
     <div class="panel">
       <div class="panel-head">
         <span class="panel-title">${cfg.icon} ${cfg.label} <span class="count" id="${key}Count"></span></span>
-        <button class="btn btn-primary" onclick="openEntityForm('${key}')">+ Nouvo ${cfg.singular}</button>
+        ${key==='suppliers' && currentUser.role!=='admin' ? '' : `<button class="btn btn-primary" onclick="openEntityForm('${key}')">+ Nouvo ${cfg.singular}</button>`}
       </div>
       <div class="toolbar">
         <input class="tb-input" id="${key}Search" placeholder="Chèche..." oninput="renderEntityTable('${key}')">
@@ -1462,11 +1472,24 @@ function renderEntityTable(key){
       <td class="row-actions">
         <button class="icon-btn" onclick="openEntityForm('${key}','${r.id}')">Modifye</button>
         <button class="icon-btn danger" onclick="deleteEntity('${key}','${r.id}')">Efase</button>
+        ${key==='products' && currentUser.role==='admin' ? `<button class="icon-btn" onclick="toggleProductBlock('${r.id}')">${r.blocked?'Débloquer':'Bloquer'}</button>` : ''}
       </td>
     </tr>`).join('')}</tbody>
   </table></div>`;
 }
+/* L'Admin seul a le droit de bloquer un produit — un produit bloqué
+   ne peut pas être ajouté à une nouvelle facture ni au catalogue client. */
+function toggleProductBlock(id){
+  if(!requireAdminOrBlock('bloquer/débloquer un produit')) return;
+  const p=DB.products.find(x=>x.id===id);
+  if(!p) return;
+  p.blocked=!p.blocked;
+  logActivity((p.blocked?'Bloqué':'Débloqué')+' le produit: '+p.name);
+  saveDB();
+  renderEntityTable('products');
+}
 function openEntityForm(key,id){
+  if(key==='suppliers' && !id && !requireAdminOrBlock('ajoute yon nouvo founisè')) return;
   const cfg=ENTITY_CONFIG[key];
   const row=id?DB[key].find(r=>r.id===id):{};
   openModalHTML(`
@@ -1548,10 +1571,34 @@ function deleteEntity(key,id){
    DASHBOARD
 ===================================================================== */
 function renderDashboard(){
+  const lowStock=DB.products.filter(p=>p.qty<=p.minQty).length;
+  const blockedProducts=DB.products.filter(p=>p.blocked).length;
+  const blockedCustomers=DB.customers.filter(c=>c.blocked).length;
+  const loansOutstanding=DB.loans.filter(l=>l.status!=='solde').reduce((s,l)=>s+(l.amount-(l.paidAmount||0)),0);
+
+  if(currentUser.role!=='admin'){
+    document.getElementById('content').innerHTML=`
+      <div class="stats">
+        <div class="stat-card red"><div class="stat-label">Alerte Stock</div><div class="stat-value">${lowStock}</div><div class="stat-sub">produits sous le seuil minimum</div></div>
+        <div class="stat-card red"><div class="stat-label">Client Bloqué</div><div class="stat-value">${blockedCustomers}</div><div class="stat-sub">client(s) bloqué(s)</div></div>
+        <div class="stat-card red"><div class="stat-label">Marchandise Bloquée</div><div class="stat-value">${blockedProducts}</div><div class="stat-sub">produit(s) bloqué(s)</div></div>
+        <div class="stat-card gold"><div class="stat-label">Prêt en Cours</div><div class="stat-value">${fmt(loansOutstanding)}</div><div class="stat-sub">total des prêts actifs</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">⚠️ Produits en Stock Bas</span></div>
+        ${lowStock===0?'<div class="empty-state">Tous les produits ont un stock suffisant.</div>':`
+        <table><thead><tr><th>Produit</th><th>Stock</th><th>Seuil Min.</th></tr></thead>
+        <tbody>${DB.products.filter(p=>p.qty<=p.minQty).map(p=>`<tr><td>${esc(p.name)}</td><td class="tag-low">${p.qty} ${esc(p.unit||'')}</td><td>${p.minQty}</td></tr>`).join('')}</tbody></table>`}
+      </div>`;
+    return;
+  }
+
   const today=todayISO();
   const salesToday=DB.invoices.filter(i=>i.date===today).reduce((s,i)=>s+i.total,0);
   const stockValue=DB.products.reduce((s,p)=>s+p.qty*p.sellPrice,0);
-  const lowStock=DB.products.filter(p=>p.qty<=p.minQty).length;
+  const totalPurchases=DB.stockIn.reduce((s,r)=>s+r.qty*(r.unitPrice||0),0);
+  const totalSales=DB.invoices.reduce((s,i)=>s+i.total,0);
+  const margeGlobale=totalSales-totalPurchases;
   const unpaidCredit=DB.customers.reduce((s,c)=>s+(c.creditBalance||0),0);
   const totalDeposits=DB.customers.reduce((s,c)=>s+(c.walletBalance||0),0);
   const expensesToday=DB.expenses.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
@@ -1561,11 +1608,22 @@ function renderDashboard(){
 
   document.getElementById('content').innerHTML=`
     <div class="stats">
+      <div class="stat-card gold"><div class="stat-label">Valeur Stock</div><div class="stat-value">${fmt(stockValue)}</div><div class="stat-sub">${DB.products.length} produits</div></div>
+      <div class="stat-card"><div class="stat-label">Valeur Achat</div><div class="stat-value">${fmt(totalPurchases)}</div><div class="stat-sub">total historique des achats</div></div>
+      <div class="stat-card"><div class="stat-label">Valeur Vente</div><div class="stat-value">${fmt(totalSales)}</div><div class="stat-sub">total historique des ventes</div></div>
+      <div class="stat-card ${margeGlobale>=0?'':'red'}"><div class="stat-label">Marge Globale</div><div class="stat-value">${fmt(margeGlobale)}</div><div class="stat-sub">Vente − Achat</div></div>
+      <div class="stat-card red"><div class="stat-label">Alerte Stock</div><div class="stat-value">${lowStock}</div><div class="stat-sub">produits sous le seuil minimum</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💰 Finance Client</span></div>
+      <div class="stats" style="margin-bottom:0;">
+        <div class="stat-card"><div class="stat-label">Total Solde</div><div class="stat-value">${fmt(totalDeposits)}</div><div class="stat-sub">${DB.customers.filter(c=>c.walletBalance>0).length} client(s) avec solde</div></div>
+        <div class="stat-card gold"><div class="stat-label">Prêts en Cours</div><div class="stat-value">${fmt(loansOutstanding)}</div><div class="stat-sub">${DB.loans.filter(l=>l.status!=='solde').length} prêt(s) actif(s)</div></div>
+        <div class="stat-card red"><div class="stat-label">Dette sur Compte</div><div class="stat-value">${fmt(unpaidCredit)}</div><div class="stat-sub">${DB.customers.filter(c=>c.creditBalance>0).length} client(s)</div></div>
+      </div>
+    </div>
+    <div class="stats">
       <div class="stat-card"><div class="stat-label">Vant Jodi a</div><div class="stat-value">${fmt(salesToday)}</div><div class="stat-sub">${DB.invoices.filter(i=>i.date===today).length} fakti</div></div>
-      <div class="stat-card gold"><div class="stat-label">Valè Estòk</div><div class="stat-value">${fmt(stockValue)}</div><div class="stat-sub">${DB.products.length} pwodwi</div></div>
-      <div class="stat-card red"><div class="stat-label">Estòk Ba</div><div class="stat-value">${lowStock}</div><div class="stat-sub">pwodwi anba sèy minimòm</div></div>
-      <div class="stat-card red"><div class="stat-label">Dèt Kliyan (Sou Kont)</div><div class="stat-value">${fmt(unpaidCredit)}</div><div class="stat-sub">${DB.customers.filter(c=>c.creditBalance>0).length} kliyan</div></div>
-      <div class="stat-card"><div class="stat-label">Total Depo Kliyan</div><div class="stat-value">${fmt(totalDeposits)}</div><div class="stat-sub">${DB.customers.filter(c=>c.walletBalance>0).length} kliyan ak balans</div></div>
       <div class="stat-card red"><div class="stat-label">Depans Jodi a</div><div class="stat-value">${fmt(expensesToday)}</div><div class="stat-sub">${DB.expenses.filter(e=>e.date===today).length} depans</div></div>
       <div class="stat-card ${netProfit30>=0?'':'red'}"><div class="stat-label">Pwofi Net (30 Jou)</div><div class="stat-value">${fmt(netProfit30)}</div><div class="stat-sub">Vant ${fmt(totalSales30)} − Depans ${fmt(totalExpenses30)}</div></div>
     </div>
@@ -1751,7 +1809,7 @@ function renderCustomers(){
     <div class="panel">
       <div class="panel-head">
         <span class="panel-title">👥 Kliyan <span class="count" id="custCount"></span></span>
-        <button class="btn btn-primary" onclick="openCustomerForm()">+ Nouvo Kliyan</button>
+        ${currentUser.role==='admin' ? `<button class="btn btn-primary" onclick="openCustomerForm()">+ Nouvo Kliyan</button>` : ''}
       </div>
       <div class="toolbar"><input class="tb-input" id="custSearch" placeholder="Chèche non, telefòn..." oninput="renderCustomerTable()"></div>
       <div id="custTableWrap"></div>
@@ -1765,7 +1823,7 @@ function renderCustomerTable(){
   const wrap=document.getElementById('custTableWrap');
   if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen kliyan.</div>'; return; }
   wrap.innerHTML=`<div style="overflow-x:auto;"><table>
-    <thead><tr><th>Non</th><th>Telefòn</th><th>Balans Depo</th><th>Dèt Sou Kont</th><th>Prè ki Rete</th><th></th></tr></thead>
+    <thead><tr><th>Non</th><th>Telefòn</th><th>Balans Depo</th><th>Dèt Sou Kont</th><th>Prè ki Rete</th><th>Statut</th><th></th></tr></thead>
     <tbody>${rows.map(c=>{
       const bal=customerBalanceSummary(c);
       return `<tr>
@@ -1773,14 +1831,29 @@ function renderCustomerTable(){
         <td class="mono" style="color:var(--green);">${fmt(bal.wallet)}</td>
         <td class="mono" style="color:${bal.credit>0?'var(--red)':'inherit'};">${fmt(bal.credit)}</td>
         <td class="mono" style="color:${bal.loan>0?'var(--red)':'inherit'};">${fmt(bal.loan)}</td>
+        <td>${c.blocked?'<span class="badge red">Bloqué</span>':'<span class="badge green">Actif</span>'}</td>
         <td class="row-actions">
           <button class="icon-btn" onclick="openCustomerForm('${c.id}')">Modifye</button>
           <button class="icon-btn danger" onclick="deleteCustomer('${c.id}')">Efase</button>
+          ${currentUser.role==='admin' ? `<button class="icon-btn" onclick="toggleCustomerBlock('${c.id}')">${c.blocked?'Débloquer':'Bloquer'}</button>` : ''}
         </td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 }
+/* L'Admin seul a le droit de bloquer un client — un client bloqué ne
+   peut pas être sélectionné pour une nouvelle facture, dépôt, retrait
+   ou prêt. */
+function toggleCustomerBlock(id){
+  if(!requireAdminOrBlock('bloquer/débloquer un client')) return;
+  const c=DB.customers.find(x=>x.id===id);
+  if(!c) return;
+  c.blocked=!c.blocked;
+  logActivity((c.blocked?'Bloqué':'Débloqué')+' le client: '+c.name);
+  saveDB();
+  renderCustomerTable();
+}
 function openCustomerForm(id){
+  if(!id && !requireAdminOrBlock('ajoute yon nouvo kliyan')) return;
   const row=id?DB.customers.find(c=>c.id===id):{};
   openModalHTML(`
     <div class="modal-title">${id?'Modifye':'Nouvo'} Kliyan</div>
@@ -1834,10 +1907,10 @@ function renderInvoicing(){
     <div class="panel">
       <div class="panel-head"><span class="panel-title">🧾 Nouvo Fakti <span class="count">#${String((DB.invoiceCounter||0)+1).padStart(6,'0')}</span></span></div>
       <div class="form-grid" style="margin-bottom:14px;">
-        <div class="field"><label>Kliyan *</label><select id="invCustomer">${DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Kliyan *</label><select id="invCustomer">${DB.customers.filter(c=>!c.blocked).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
       </div>
       <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end;">
-        <div class="field"><label>Pwodwi</label><select id="invProduct">${DB.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} ${esc(p.unit||'')})</option>`).join('')}</select></div>
+        <div class="field"><label>Pwodwi</label><select id="invProduct">${DB.products.filter(p=>!p.blocked).map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} ${esc(p.unit||'')})</option>`).join('')}</select></div>
         <div class="field"><label>Kantite</label><input id="invQty" type="number" value="1" min="1"></div>
         <div class="field"><label>Pri Vant</label><input id="invPrice" type="number"></div>
         <div class="field"><button class="btn btn-primary" onclick="addToCart()">+ Ajoute</button></div>
@@ -1867,6 +1940,7 @@ function addToCart(){
   const price=Number(document.getElementById('invPrice').value||0);
   const p=DB.products.find(x=>x.id===productId);
   if(!p||qty<=0){ alert('Chwazi yon pwodwi ak yon kantite valab.'); return; }
+  if(p.blocked){ alert('Pwodwi sa a bloke — li pa disponib pou vant.'); return; }
   if(qty>p.qty){ alert('Kantite mande a depase estòk disponib ('+p.qty+').'); return; }
   cart.push({productId, name:p.name, unit:p.unit, qty, price});
   renderCart();
@@ -2306,13 +2380,27 @@ function confirmReturn(invoiceId){
   const rec={id:uid('ret'), txnNumber, date:todayISO(), invoiceId, customerId:inv.customerId, items, total, method,
     reason:document.getElementById('retReason').value.trim(), createdBy:currentUser.name};
   DB.returns.push(rec);
+
+  /* Si TOUT atik fakti a fin retounen (menm si machandiz la te deja
+     livre), fakti a elimine nèt nan istorik vant yo — se pa yon vant
+     ki reyalize ankò depi kliyan an retounen tout bagay. */
+  const isFullReturn=inv.items.every(it=>returnedQtyForItem(invoiceId, it.productId)>=it.qty);
+  if(isFullReturn){
+    DB.invoices=DB.invoices.filter(i=>i.id!==invoiceId);
+    logActivity('Retou konplè — fakti #'+(inv.invoiceNumber||inv.id)+' elimine nan istorik vant yo');
+  }
   saveDB();
+
   const methodLabel=method==='depo'?'Kredite sou Depo':method==='dedwi'?'Diminye Dèt sou Kont':'Ranbouse Kach';
   const lines=items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)]);
   lines.push(['Mòd Ranbousman', methodLabel]);
   lines.push(['TOTAL', fmt(total)]);
+  if(isFullReturn) lines.push(['Estati Fakti', 'Elimine (Retou Konplè)']);
   sendWhatsAppReceipt(customer, 'Resi Retou Machandiz', lines, rec.reason?('Rezon: '+rec.reason):'', txnNumber, txnNumber, 'Kliyan');
   window._returnMethod=null;
+  if(isFullReturn){
+    alert('Retou konplè konfime — fakti #'+(inv.invoiceNumber||inv.id)+' elimine nèt nan istorik vant yo.');
+  }
   renderReturns();
 }
 function renderReturnsTable(){
@@ -2352,7 +2440,7 @@ function finTab(t){
     document.getElementById('finTab'+k.charAt(0).toUpperCase()+k.slice(1)).classList.toggle('active', k===t);
   });
 }
-function custOptions(){ return DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); }
+function custOptions(){ return DB.customers.filter(c=>!c.blocked).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); }
 
 function renderFinDepo(){
   document.getElementById('finTabDepo').innerHTML=`
@@ -2442,16 +2530,32 @@ function renderFinPrete(){
   const rows=[...DB.loans].reverse();
   const wrap=document.getElementById('loanTableWrap');
   if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen prè.</div>'; return; }
-  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Montan</th><th>Peye</th><th>Rete</th><th>Dat Rebousman</th><th>Otorize Pa</th><th>Estati</th></tr></thead>
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Montan</th><th>Peye</th><th>Rete</th><th>Taux</th><th>Dat Rebousman</th><th>Otorize Pa</th><th>Estati</th><th></th></tr></thead>
   <tbody>${rows.map(l=>{
     const c=DB.customers.find(x=>x.id===l.customerId);
     const rest=l.amount-(l.paidAmount||0);
     const overdue=l.status!=='solde' && l.dueDate<todayISO();
     return `<tr><td class="mono">${l.date}</td><td>${esc(c?c.name:'—')}</td><td class="mono">${fmt(l.amount)}</td><td class="mono">${fmt(l.paidAmount||0)}</td>
-    <td class="mono ${rest>0?'tag-low':''}">${fmt(rest)}</td><td class="mono ${overdue?'tag-low':''}">${l.dueDate}</td>
+    <td class="mono ${rest>0?'tag-low':''}">${fmt(rest)}</td><td class="mono">${l.interestRate||0}%</td><td class="mono ${overdue?'tag-low':''}">${l.dueDate}</td>
     <td>${esc(l.authorizedBy||'—')}</td>
-    <td><span class="badge ${l.status==='solde'?'green':overdue?'red':'gold'}">${l.status==='solde'?'Solde':overdue?'An Reta':'Aktif'}</span></td></tr>`;
+    <td><span class="badge ${l.status==='solde'?'green':overdue?'red':'gold'}">${l.status==='solde'?'Solde':overdue?'An Reta':'Aktif'}</span></td>
+    <td>${currentUser.role==='admin' && l.status!=='solde' ? `<button class="icon-btn" onclick="adjustLoanInterestRate('${l.id}')">Ajuster taux</button>` : ''}</td></tr>`;
   }).join('')}</tbody></table></div>`;
+}
+/* L'Admin seul a le droit d'ajuster le taux d'intérêt d'un prêt existant. */
+function adjustLoanInterestRate(loanId){
+  if(!requireAdminOrBlock('ajuster le taux d\'intérêt')) return;
+  const loan=DB.loans.find(l=>l.id===loanId);
+  if(!loan) return;
+  const input=prompt('Nouveau taux d\'intérêt (%) pour ce prêt :', loan.interestRate||0);
+  if(input===null) return;
+  const rate=Number(input);
+  if(isNaN(rate)||rate<0){ alert('Taux invalide.'); return; }
+  const oldRate=loan.interestRate||0;
+  loan.interestRate=rate;
+  logActivity('Ajusté le taux d\'intérêt du prêt #'+(loan.txnNumber||loan.id)+': '+oldRate+'% → '+rate+'%');
+  saveDB();
+  renderFinPrete();
 }
 function saveLoan(){
   const customerId=document.getElementById('loCustomer').value;
