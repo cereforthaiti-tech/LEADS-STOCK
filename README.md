@@ -99,6 +99,30 @@ lyen fiks ou pa oblije rekonfigire chak fwa.
 > verifye yo la e byen ekri (san espas anplis), epi fè yon **Redeploy**
 > (nan onglè "Deployments", "..." bò dènye deplwaman an → Redeploy).
 
+## 📲 Ajoute Icon sou Ekran Akèy Telefòn (PWA)
+
+App la kounye a gen yon icon LeadStock ki fèt espesyal, plis yon
+fichye `manifest.json` — sa vle di li ka enstale tankou yon vrè app,
+ak pwòp icon li (pa yon senp rakousi navigatè). Sa **mande app la
+sèvi via lyen Vercel/backend ou a** (pa file:// lokal), paske icon
+ak manifest yo dwe rive via HTTP.
+
+### Sou Android (Chrome)
+1. Louvri lyen app ou a (`https://non-pwojè-ou.vercel.app/leadstock-erp.html`)
+2. Peze meni twa pwen (⋮) an wo dwat la
+3. Chwazi **"Add to Home screen"** / "Ajoute nan ekran Akèy"
+4. Icon LeadStock la ap parèt sou ekran akèy la, e app la louvri plen ekran san bawo navigatè a
+
+### Sou iPhone (Safari)
+1. Louvri menm lyen an nan **Safari** (fonksyon sa a pa mache nan Chrome sou iOS)
+2. Peze bouton **Pataje** (kare ak flèch anlè a) anba ekran an
+3. Fè desann epi chwazi **"Add to Home Screen"**
+4. Konfime — icon LeadStock la ap parèt sou ekran akèy la
+
+> ⚠️ Si w chanje icon oswa logo pita, sonje mete ajou fichye yo nan
+> `public/icons/` epi `public/manifest.json`, epi fè yon Redeploy sou
+> Vercel pou chanjman an rive.
+
 ## 🔌 Konekte App la ak Backend la
 
 1. Louvri `leadstock-erp.html`
