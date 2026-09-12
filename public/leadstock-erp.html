@@ -1749,15 +1749,21 @@ function renderInventory(){
 function renderInventoryTable(){
   const q=(document.getElementById('invSearch')?.value||'').toLowerCase();
   const rows=DB.products.filter(p=>!q||p.name.toLowerCase().includes(q));
+  const canAdjust=currentUser.role==='admin';
   document.getElementById('invTableWrap').innerHTML=`<div style="overflow-x:auto;"><table>
-    <thead><tr><th>Pwodwi</th><th>Kantite Sistèm</th><th>Kantite Reyèl (Kontwòl)</th><th>Diferans</th><th></th></tr></thead>
-    <tbody>${rows.map(p=>`<tr>
+    <thead><tr><th>Pwodwi</th><th>Kantite Sistèm</th>${canAdjust?'<th>Kantite Reyèl (Kontwòl)</th><th>Diferans</th><th></th>':''}</tr></thead>
+    <tbody>${rows.map(p=>canAdjust?`<tr>
       <td>${esc(p.name)}</td>
       <td class="mono">${p.qty}</td>
       <td><input class="tb-input" style="width:100px;" type="number" id="invCount_${p.id}" placeholder="${p.qty}"></td>
       <td class="mono" id="invDiff_${p.id}">—</td>
       <td><button class="icon-btn" onclick="applyInventoryAdjust('${p.id}')">Ajiste</button></td>
-    </tr>`).join('')}</tbody></table></div>`;
+    </tr>`:`<tr>
+      <td>${esc(p.name)}</td>
+      <td class="mono">${p.qty}</td>
+    </tr>`).join('')}</tbody></table></div>
+    ${canAdjust?'':'<p style="font-size:12px;color:var(--text-faint);margin-top:10px;">Sèlman Admin ka fè ajisteman envantè.</p>'}`;
+  if(!canAdjust) return;
   rows.forEach(p=>{
     document.getElementById('invCount_'+p.id).addEventListener('input',e=>{
       const val=Number(e.target.value||p.qty);
@@ -1766,6 +1772,7 @@ function renderInventoryTable(){
   });
 }
 function applyInventoryAdjust(productId){
+  if(!requireAdminOrBlock('fè yon ajisteman envantè')) return;
   const p=DB.products.find(x=>x.id===productId);
   const val=Number(document.getElementById('invCount_'+productId).value);
   if(isNaN(val)){ alert('Antre yon kantite reyèl.'); return; }
