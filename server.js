@@ -147,6 +147,12 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
 
+// Redireksyon rasin lyen an ('/') dirèkteman sou app la, pou moun ki
+// louvri lyen debaz Vercel a (san /leadstock-erp.html) pa wè "Cannot GET /".
+app.get('/', (req, res) => {
+  res.redirect('/leadstock-erp.html');
+});
+
 // Blòk anpil ki ba yon mesaj klè olye kraze si Upstash pa konfigire —
 // men kite /api/health ak fichye estatik yo pase pou dyagnostik rete posib.
 app.use((req, res, next) => {
