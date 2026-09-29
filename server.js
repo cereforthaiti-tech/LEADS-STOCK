@@ -186,20 +186,29 @@ app.get('/api/public/catalog', ah(async (req, res) => {
   const stateRaw = await redisGet(KEYS.appState);
   const data = stateRaw ? JSON.parse(stateRaw) : emptyState();
   const settings = data.settings || {};
-  const products = (data.products || []).map(p => ({
-    id: p.id, name: p.name, category: p.category, unit: p.unit,
-    sellPrice: p.sellPrice, qty: p.qty, photo: p.photo || null, blocked: !!p.blocked
-  }));
+  const catList = settings.categories || [];
+  const isCatActive = (name) => {
+    const c = catList.find(x => x.name === (name || 'Lòt'));
+    return !c || c.active !== false;
+  };
+  const products = (data.products || [])
+    .filter(p => isCatActive(p.category))
+    .map(p => ({
+      id: p.id, name: p.name, category: p.category, unit: p.unit,
+      sellPrice: p.sellPrice, qty: p.qty, photo: p.photo || null, blocked: !!p.blocked
+    }));
   res.json({
     products,
     logoDataUrl: settings.logoDataUrl || null,
     natcashNumber: settings.natcashNumber || '',
-    moncashNumber: settings.moncashNumber || ''
+    moncashNumber: settings.moncashNumber || '',
+    businessAddress: settings.businessAddress || '',
+    deliveryZones: settings.deliveryZones || []
   });
 }));
 
 app.post('/api/public/orders', ah(async (req, res) => {
-  const { customerName, customerPhone, items, paymentMethod, reference } = req.body || {};
+  const { customerName, customerPhone, items, paymentMethod, reference, deliveryType, deliveryAddress, zoneId } = req.body || {};
   if (!customerName || !customerPhone || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Enfòmasyon kòmand lan enkonplè.' });
   }
@@ -224,12 +233,22 @@ app.post('/api/public/orders', ah(async (req, res) => {
     const p = (data.products || []).find(x => x.id === it.productId);
     return { productId: it.productId, name: p ? p.name : '—', qty: Number(it.qty), price: p ? p.sellPrice : 0 };
   });
-  const total = priced.reduce((s, it) => s + it.qty * it.price, 0);
+  const itemsTotal = priced.reduce((s, it) => s + it.qty * it.price, 0);
+  const isDelivery = deliveryType === 'livrezon';
+  let deliveryFee = 0, zoneName = '';
+  if (isDelivery) {
+    const zone = (data.settings.deliveryZones || []).find(z => z.id === zoneId);
+    if (zone) { deliveryFee = Number(zone.fee) || 0; zoneName = zone.name; }
+  }
+  const total = itemsTotal + deliveryFee;
   const order = {
     id: uid('ord'), date: new Date().toISOString().slice(0, 10),
     customerName, customerPhone, items: priced, total,
     paymentMethod: paymentMethod || 'natcash', reference: reference.trim(),
-    status: 'an_atant', createdAt: new Date().toISOString()
+    status: 'an_atant', createdAt: new Date().toISOString(),
+    deliveryType: isDelivery ? 'livrezon' : 'retrè',
+    deliveryAddress: isDelivery ? (deliveryAddress || '').trim() : '',
+    deliveryFee, zoneName
   };
   await redisHSet(KEYS.orders, order.id, JSON.stringify(order));
   res.json({ ok: true, orderId: order.id });

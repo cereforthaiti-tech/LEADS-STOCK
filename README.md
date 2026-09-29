@@ -139,6 +139,16 @@ wè tout pwodwi ki gen yon dat ekspirasyon anrejistre, gwoupe pa
 kategori pwodwi, ak jou ki rete anvan chak ekspire (make an wouj si
 30 jou oswa mwens). Ekspòtab an Excel oswa PDF.
 
+## ⚙️ Paramèt Biznis (Admin sèlman)
+
+Nouvo seksyon "Paramèt Biznis" nan meni an bay:
+- **Livrezon**: adrès pou retrè sou plas + zòn livrezon ak frè pa zòn (kliyan chwazi youn nan katalòg la, frè a ajoute otomatikman sou total kòmand la)
+- **Limit kredi**: yon limit default pou tout kliyan, ki ka ranplase pou yon kliyan espesifik nan fich li — sistèm nan refize yon vant sou kont si l ta depase limit la, e li montre balans anvan/apre anvan konfimasyon
+- **Kategori pwodwi**: kreye/renome/aktive/dezaktive — yon kategori dezaktive disparèt nan katalòg kliyan an otomatikman
+- **Rapèl WhatsApp**: aktive/dezaktive, chwazi lè, to enterè ak peryòd (jounalye/hebdomadaire/mensyèl), mòd (sèlman an reta oswa tout moun ki dwe chak jou), ak enstriksyon peman. ⚠️ WhatsApp gratis pa pèmèt anvwa 100% otomatik san moun — a lè ou chwazi a, yon bandwòl parèt sou Dashboard ak lis kliyan pou relanse, yon klik voye chak mesaj. Pa gen rapèl pou yon kliyan ki pa dwe anyen.
+
+Chak chanjman nan paramèt sa yo rete nan Jounal Aktivite ak non moun ki fè l, dat ak lè.
+
 ## 🛍️ Mòd Kliyan (Katalòg, Kòmand, Peye Dèt/Prè)
 
 Menm `leadstock-erp.html` la gen yon mòd Kliyan entegre, aksesib san
