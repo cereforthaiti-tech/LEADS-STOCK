@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LeadStock ERP — Jesyon Estòk, Vant & Finans</title>
+
+<!-- ====== Icon sou ekran akèy telefòn (PWA) ====== -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#2f6b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LeadStock">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -35,7 +44,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
   background-color: var(--bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='6' y='6' width='228' height='108' rx='10' fill='none' stroke='%232f6b3a' stroke-width='2' stroke-opacity='0.12'/%3E%3Ctext x='120' y='78' font-family='Georgia,serif' font-size='54' font-weight='700' fill='%232f6b3a' fill-opacity='0.09' text-anchor='middle'%3E100%3C/text%3E%3Ctext x='24' y='32' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10'%3E%24%3C/text%3E%3Ctext x='216' y='104' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10' text-anchor='end'%3E%24%3C/text%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect x='10' y='14' width='140' height='34' fill='%23002d62' fill-opacity='0.10'/%3E%3Crect x='10' y='48' width='140' height='34' fill='%23d21034' fill-opacity='0.10'/%3E%3C/svg%3E");
   background-repeat: repeat;
   color:var(--text);
   font-family:var(--font-body);
@@ -53,7 +62,7 @@ a{color:inherit;}
 /* ============ LOGIN ============ */
 #loginScreen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background-image: radial-gradient(circle at 30% 20%,#faf3de,var(--bg) 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect x='6' y='6' width='228' height='108' rx='10' fill='none' stroke='%232f6b3a' stroke-width='2' stroke-opacity='0.12'/%3E%3Ctext x='120' y='78' font-family='Georgia,serif' font-size='54' font-weight='700' fill='%232f6b3a' fill-opacity='0.09' text-anchor='middle'%3E100%3C/text%3E%3Ctext x='24' y='32' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10'%3E%24%3C/text%3E%3Ctext x='216' y='104' font-family='Georgia,serif' font-size='20' fill='%232f6b3a' fill-opacity='0.10' text-anchor='end'%3E%24%3C/text%3E%3C/svg%3E");
+  background-image: radial-gradient(circle at 30% 20%,#faf3de,var(--bg) 60%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect x='10' y='14' width='140' height='34' fill='%23002d62' fill-opacity='0.10'/%3E%3Crect x='10' y='48' width='140' height='34' fill='%23d21034' fill-opacity='0.10'/%3E%3C/svg%3E");
   background-repeat: no-repeat, repeat;
   padding:20px;
 }
@@ -302,6 +311,12 @@ tbody tr:hover{background:var(--bg-panel2);}
 .kv-loan-line{font-size:12px;color:var(--text-dim);padding:3px 0 3px 10px;border-left:2px solid var(--line);margin-bottom:3px;}
 .kv-search-bar{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:22px;background:#fff;font-size:14px;margin-bottom:16px;}
 .kv-search-bar:focus{outline:none;border-color:var(--green);}
+.kv-chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;}
+.kv-chip{flex:0 0 auto;padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--text-dim);}
+.kv-chip.active{background:var(--green);border-color:var(--green);color:#fff;}
+.kv-radio-row{display:flex;gap:10px;margin-bottom:12px;}
+.kv-radio{flex:1;border:2px solid var(--line);border-radius:10px;padding:11px 8px;text-align:center;font-weight:700;font-size:13px;background:#fff;color:var(--text-dim);}
+.kv-radio.sel{border-color:var(--green);background:var(--green-pale);color:var(--green);}
 .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .kv-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:12px;position:relative;}
 .kv-card img{width:100%;height:90px;object-fit:cover;border-radius:8px;background:var(--bg-panel2);margin-bottom:8px;}
@@ -409,6 +424,7 @@ tbody tr:hover{background:var(--bg-panel2);}
     <div class="nav-group">
       <div class="nav-group-label">Analiz</div>
       <div class="nav-item" data-view="reports"><span class="ic">📈</span>Rapò</div>
+      <div class="nav-item" data-view="bizsettings" id="navBiz"><span class="ic">⚙️</span>Paramèt Biznis</div>
       <div class="nav-item" data-view="users" id="navUsers"><span class="ic">🔐</span>Itilizatè</div>
       <div class="nav-item" data-view="auditlog" id="navAudit"><span class="ic">📜</span>Jounal Aktivite</div>
       <div class="nav-item" data-view="orders"><span class="ic">🛍️</span>Kòmand An Atant</div>
@@ -461,6 +477,7 @@ tbody tr:hover{background:var(--bg-panel2);}
 
   <div class="kv-wrap" id="kvPageCatalog">
     <input class="kv-search-bar" id="kvSearchBox" placeholder="Chèche yon pwodwi..." oninput="renderClientCatalog()">
+    <div class="kv-chips" id="kvCatChips"></div>
     <div class="kv-grid" id="kvCatalogGrid"></div>
   </div>
 
@@ -558,9 +575,13 @@ async function fetchLatestDBFromServer(){
   const base=getApiBase(); const auth=apiAuthHeader();
   if(!base || !auth) return null;
   try{
-    const res=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    const controller=new AbortController();
+    const timeoutId=setTimeout(()=>controller.abort(), 8000);
+    const res=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}, signal:controller.signal});
+    clearTimeout(timeoutId);
     if(!res.ok) return null;
-    return await res.json();
+    const data=await res.json();
+    return applyDBDefaults(data);
   }catch(e){ return null; }
 }
 function setServerStatus(ok){
@@ -592,12 +613,15 @@ async function autoSyncTick(){
   if(!getApiBase()) return;
   const modalOpen=document.getElementById('modalOverlay')?.classList.contains('open');
   if(modalOpen) return;
+  // Pa re-afiche si moun nan gen tèks nan yon bwat rechèch kounye a —
+  // sa ta efase sa yo ap chèche a. Done yo mete ajou pandanm.
+  const activeSearch=[...document.querySelectorAll('.tb-input')].some(el=>el.value && el.value.trim().length>0);
   const fresh=await fetchLatestDBFromServer();
   if(!fresh){ setServerStatus(false); return; }
   setServerStatus(true);
   DB=fresh;
   localStorage.setItem(DB_KEY, JSON.stringify(DB));
-  if(SAFE_AUTOREFRESH_VIEWS.has(currentView)){
+  if(SAFE_AUTOREFRESH_VIEWS.has(currentView) && !activeSearch){
     renderView(currentView);
   }
 }
@@ -614,17 +638,46 @@ function stopAutoSync(){
 }
 function _autoSyncOnVisible(){ if(!document.hidden) autoSyncTick(); }
 
-let DB = JSON.parse(localStorage.getItem(DB_KEY) || 'null') || seedDB();
-if(!DB.returns) DB.returns=[];
-if(!DB.expenses) DB.expenses=[];
-if(!DB.auditLog) DB.auditLog=[];
-if(!DB.supplierOrders) DB.supplierOrders=[];
-if(!DB.invoiceCounter) DB.invoiceCounter=DB.invoices?DB.invoices.length:0;
-if(!DB.counters) DB.counters={};
-if(!DB.settings) DB.settings={ logoDataUrl:null, receiptFormat:'a4', natcashNumber:'', moncashNumber:'' };
-if(DB.settings.natcashNumber===undefined) DB.settings.natcashNumber='';
-if(DB.settings.moncashNumber===undefined) DB.settings.moncashNumber='';
-if(DB.settings.receiptFormat===undefined) DB.settings.receiptFormat='a4';
+/* Yon SÈL fonksyon ki asire tout chan DB dwe genyen egziste — rele l
+   CHAK fwa DB chanje (premye chajman, chak fwa nou rale done fre sou
+   sèvè a, ak enpòte backup). Anvan sa, sekirite sa yo te sèlman aplike
+   yon sèl fwa nan chajman inisyal la, donk yon chan ki manke apre yon
+   senkwonizasyon te ka fè yon seksyon "sispann mache" san mesaj erè. */
+function applyDBDefaults(data){
+  if(!data) return data;
+  if(!data.products) data.products=[];
+  if(!data.suppliers) data.suppliers=[];
+  if(!data.customers) data.customers=[];
+  if(!data.users) data.users=[];
+  if(!data.stockIn) data.stockIn=[];
+  if(!data.stockOut) data.stockOut=[];
+  if(!data.invoices) data.invoices=[];
+  if(!data.returns) data.returns=[];
+  if(!data.deposits) data.deposits=[];
+  if(!data.withdrawals) data.withdrawals=[];
+  if(!data.loans) data.loans=[];
+  if(!data.loanPayments) data.loanPayments=[];
+  if(!data.inventoryChecks) data.inventoryChecks=[];
+  if(!data.expenses) data.expenses=[];
+  if(!data.auditLog) data.auditLog=[];
+  if(!data.supplierOrders) data.supplierOrders=[];
+  if(!data.invoiceCounter) data.invoiceCounter=data.invoices.length;
+  if(!data.counters) data.counters={};
+  if(!data.settings) data.settings={};
+  if(data.settings.logoDataUrl===undefined) data.settings.logoDataUrl=null;
+  if(data.settings.receiptFormat===undefined) data.settings.receiptFormat='a4';
+  if(data.settings.natcashNumber===undefined) data.settings.natcashNumber='';
+  if(data.settings.moncashNumber===undefined) data.settings.moncashNumber='';
+  if(data.settings.businessAddress===undefined) data.settings.businessAddress='';
+  if(!Array.isArray(data.settings.deliveryZones)) data.settings.deliveryZones=[];
+  if(data.settings.defaultCreditLimit===undefined) data.settings.defaultCreditLimit=0;
+  if(!Array.isArray(data.settings.categories)) data.settings.categories=[];
+  if(!data.settings.reminders) data.settings.reminders={enabled:false,hour:8,rate:0,period:'mensuel',mode:'retard',instructions:''};
+  if(!data.reminderLog) data.reminderLog=[];
+  return data;
+}
+
+let DB = applyDBDefaults(JSON.parse(localStorage.getItem(DB_KEY) || 'null') || seedDB());
 function saveDB(){
   localStorage.setItem(DB_KEY, JSON.stringify(DB));
   apiPushDB(); // best-effort — pa bloke UI si sèvè a pa reponn
@@ -667,7 +720,7 @@ async function doLogin(){
       const user=await res.json();
       sessionStorage.setItem(API_CREDS_KEY, JSON.stringify({username:u,password:p}));
       const dbRes=await fetch(base.replace(/\/$/,'')+'/api/db',{headers:{'Authorization':'Basic '+btoa(u+':'+p),'ngrok-skip-browser-warning':'true'}});
-      if(dbRes.ok){ DB=await dbRes.json(); localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
+      if(dbRes.ok){ DB=applyDBDefaults(await dbRes.json()); localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
       setServerStatus(true);
       errBox.style.display='none';
       currentUser=user;
@@ -714,6 +767,7 @@ function enterApp(){
   document.getElementById('navUsers').style.display=currentUser.role==='admin'?'flex':'none';
   document.getElementById('navAudit').style.display=currentUser.role==='admin'?'flex':'none';
   document.getElementById('navSupplierOrders').style.display=currentUser.role==='admin'?'flex':'none';
+  document.getElementById('navBiz').style.display=currentUser.role==='admin'?'flex':'none';
   updateServerStatusChip();
   startAutoSync();
   goView('dashboard');
@@ -830,30 +884,38 @@ async function loadClientCatalog(){
     document.getElementById('kvCatalogGrid').outerHTML=`<div class="kv-empty" id="kvCatalogGrid"><div class="big">Pa ka konekte ak katalòg la</div><div>Verifye lyen an oswa eseye ankò pita.</div></div>`;
   }
 }
+let clientCat='';
+function renderClientChips(){
+  const cats=[...new Set(CLIENT_CATALOG.products.map(p=>p.category||'Lòt'))].sort();
+  const el=document.getElementById('kvCatChips'); if(!el) return;
+  el.innerHTML=cats.length<2?'':`<button class="kv-chip ${clientCat===''?'active':''}" onclick="setClientCat('')">Tout</button>`+cats.map(c=>`<button class="kv-chip ${clientCat===c?'active':''}" data-c="${esc(c)}" onclick="setClientCat(this.dataset.c)">${esc(c)}</button>`).join('');
+}
+function setClientCat(c){ clientCat=c; renderClientCatalog(); }
 function renderClientCatalog(){
+  renderClientChips();
   const q=(document.getElementById('kvSearchBox').value||'').toLowerCase();
-  const items=CLIENT_CATALOG.products.filter(p=>!q || p.name.toLowerCase().includes(q));
+  const items=CLIENT_CATALOG.products.filter(p=>(!q || p.name.toLowerCase().includes(q)) && (!clientCat || (p.category||'Lòt')===clientCat));
   const grid=document.getElementById('kvCatalogGrid');
   if(items.length===0){
     grid.outerHTML='<div class="kv-empty" id="kvCatalogGrid"><div class="big">Pa gen pwodwi</div><div>Eseye yon lòt rechèch.</div></div>';
     return;
   }
   grid.innerHTML=items.map(p=>{
-    const out=p.qty<=0;
+    const out=p.qty<=0 || p.blocked;
     return `<div class="kv-card">
       ${out?'<span class="kv-badge-out">Pa Disponib</span>':''}
       ${p.photo?`<img src="${p.photo}">`:'<div class="noimg">📦</div>'}
       <div class="name">${esc(p.name)}</div>
       <div class="cat">${esc(p.category||'')}</div>
       <div class="price">${fmt(p.sellPrice)}</div>
-      <div class="stockline">${out?'Fini pou kounye a':p.qty+' '+(p.unit||'')+' disponib'}</div>
+      <div class="stockline">${p.blocked?'Pa disponib kounye a':out?'Fini pou kounye a':p.qty+' '+(p.unit||'')+' disponib'}</div>
       <button class="kv-add-btn" ${out?'disabled':''} onclick="addToClientCart('${p.id}')">${out?'Pa Disponib':'+ Ajoute'}</button>
     </div>`;
   }).join('');
 }
 function addToClientCart(productId){
   const p=CLIENT_CATALOG.products.find(x=>x.id===productId);
-  if(!p||p.qty<=0) return;
+  if(!p||p.qty<=0||p.blocked) return;
   const existing=clientCart.find(c=>c.productId===productId);
   if(existing){
     if(existing.qty<p.qty) existing.qty++;
@@ -902,16 +964,26 @@ function changeClientQty(i,delta){
   renderClientCartStep();
 }
 function goToClientCheckout(){
+  clientDelType='retrè';
   const total=clientCart.reduce((s,c)=>s+c.qty*c.price,0);
   document.getElementById('kvCartModalBox').innerHTML=`
     <div class="kv-modal-title">📱 Peman</div>
     <div class="kv-error-box" id="kvCheckoutError"></div>
     <div class="kv-pay-instructions">
-      Voye <b>${fmt(total)}</b> sou youn nan nimewo sa yo, epi kenbe referans tranzaksyon an:<br><br>
+      Voye <b id="kvPayTotal">${fmt(total)}</b> sou youn nan nimewo sa yo, epi kenbe referans tranzaksyon an:<br><br>
       ${CLIENT_CATALOG.natcashNumber?`📲 <b>NatCash:</b> ${esc(CLIENT_CATALOG.natcashNumber)}<br>`:''}
       ${CLIENT_CATALOG.moncashNumber?`📲 <b>MonCash:</b> ${esc(CLIENT_CATALOG.moncashNumber)}`:''}
       ${(!CLIENT_CATALOG.natcashNumber && !CLIENT_CATALOG.moncashNumber)?'Kontakte biznis la pou enfòmasyon peman.':''}
     </div>
+    <div class="kv-radio-row">
+      <div class="kv-radio sel" id="kvDelPickup" onclick="setClientDelivery('retrè')">🏪 Retrè sou plas</div>
+      <div class="kv-radio" id="kvDelShip" onclick="setClientDelivery('livrezon')">🚚 Livrezon</div>
+    </div>
+    <div id="kvDelBox" style="display:none;">
+      <div class="kv-field"><label>Adrès Livrezon *</label><input id="kvCoAddr" placeholder="Rue, katye, vil..."></div>
+      ${(CLIENT_CATALOG.deliveryZones||[]).length?`<div class="kv-field"><label>Zòn *</label><select id="kvCoZone" onchange="updateClientTotal()">${CLIENT_CATALOG.deliveryZones.map(z=>`<option value="${z.id}">${esc(z.name)} — ${fmt(z.fee)}</option>`).join('')}</select></div>`:'<p style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Frè livrezon an ap konfime pa biznis la.</p>'}
+    </div>
+    <div id="kvPickupInfo" class="kv-pay-instructions" style="margin-bottom:12px;">🏪 Vin pran kòmand lan nan: <b>${esc(CLIENT_CATALOG.businessAddress||'adrès biznis la (kontakte nou)')}</b></div>
     <div class="kv-field"><label>Non Ou *</label><input id="kvCoName" placeholder="Non konplè"></div>
     <div class="kv-field"><label>Telefòn Ou (WhatsApp) *</label><input id="kvCoPhone" placeholder="509xxxxxxxx"></div>
     <div class="kv-field">
@@ -926,14 +998,34 @@ function goToClientCheckout(){
     <button class="kv-btn-ghost-full" onclick="renderClientCartStep()">Retounen</button>
   `;
 }
+let clientDelType='retrè';
+function clientDeliveryFee(){
+  if(clientDelType!=='livrezon') return 0;
+  const z=document.getElementById('kvCoZone'); if(!z) return 0;
+  const zone=(CLIENT_CATALOG.deliveryZones||[]).find(x=>x.id===z.value); return zone?zone.fee:0;
+}
+function updateClientTotal(){
+  const base=clientCart.reduce((s,c)=>s+c.qty*c.price,0);
+  const el=document.getElementById('kvPayTotal'); if(el) el.textContent=fmt(base+clientDeliveryFee());
+}
+function setClientDelivery(t){
+  clientDelType=t;
+  document.getElementById('kvDelPickup').classList.toggle('sel',t==='retrè');
+  document.getElementById('kvDelShip').classList.toggle('sel',t==='livrezon');
+  document.getElementById('kvDelBox').style.display=t==='livrezon'?'block':'none';
+  document.getElementById('kvPickupInfo').style.display=t==='livrezon'?'none':'block';
+  updateClientTotal();
+}
 async function submitClientOrder(total){
   const name=document.getElementById('kvCoName').value.trim();
   const phone=document.getElementById('kvCoPhone').value.trim();
   const method=document.getElementById('kvCoMethod').value;
   const reference=document.getElementById('kvCoRef').value.trim();
   const err=document.getElementById('kvCheckoutError');
-  if(!name||!phone||!reference){
-    err.textContent='Tanpri ranpli tout chan obligatwa yo.';
+  const addr=(document.getElementById('kvCoAddr')||{}).value||'';
+  const zoneEl=document.getElementById('kvCoZone');
+  if(!name||!phone||!reference||(clientDelType==='livrezon'&&!addr.trim())){
+    err.textContent=clientDelType==='livrezon'&&!addr.trim()&&name&&phone&&reference?'Antre adrès livrezon an.':'Tanpri ranpli tout chan obligatwa yo.';
     err.style.display='block';
     return;
   }
@@ -944,7 +1036,8 @@ async function submitClientOrder(total){
       body:JSON.stringify({
         customerName:name, customerPhone:phone,
         items:clientCart.map(c=>({productId:c.productId, qty:c.qty})),
-        reference, paymentMethod:method
+        reference, paymentMethod:method,
+        deliveryType:clientDelType, deliveryAddress:clientDelType==='livrezon'?addr.trim():'', zoneId:zoneEl?zoneEl.value:''
       })
     });
     const data=await res.json();
@@ -999,7 +1092,7 @@ const VIEW_TITLES={
   expenses:'Depans/Chaj', finance:'Depo · Retrè · Prè',
   reports:'Rapò', users:'Jesyon Itilizatè', auditlog:'Jounal Aktivite',
   orders:'Kòmand An Atant', supplierOrders:'Kòmand Founisè',
-  backup:'Sovgad Done', serverConfig:'Sèvè / Backend'
+  backup:'Sovgad Done', serverConfig:'Sèvè / Backend', bizsettings:'Paramèt Biznis'
 };
 
 function goView(view){
@@ -1021,7 +1114,7 @@ function renderView(view){
     finance:renderFinance,
     reports:renderReports, users:renderUsers, auditlog:renderAuditLog,
     orders:renderOrders, supplierOrders:renderSupplierOrders,
-    backup:renderBackup, serverConfig:renderServerConfig
+    backup:renderBackup, serverConfig:renderServerConfig, bizsettings:renderBizSettings
   };
   c.innerHTML='';
   (renderers[view]||(()=>{c.innerHTML='<div class="empty-state">Vi pa jwenn.</div>';}))();
@@ -1210,30 +1303,49 @@ function buildReceiptPDFThermal(title, customer, lines, footerNote, txnNumber, p
    sipòte l (Web Share API — Android/iOS resan). Si sa pa disponib,
    nou tonbe tounen sou telechajman PDF + yon ti mesaj kout sou WhatsApp
    ki mande moun nan tache fichye a li menm. */
-async function sendWhatsAppReceipt(customer, title, lines, footerNote, filename, txnNumber, partyLabel){
+/* Konfimasyon tranzaksyon: si kliyan an gen yon nimewo telefòn, nou
+   TOUJOU voye yon mesaj tèks WhatsApp otomatikman (metòd ki pi fyab
+   la, li mache sou tout aparèy san eksepsyon), ansanm ak yon kopi PDF
+   ki telechaje pou achiv. Si kliyan an PA gen WhatsApp disponib (pa
+   gen nimewo telefòn), PDF la enprime otomatikman olye l jis
+   telechaje an silans. */
+function sendWhatsAppReceipt(customer, title, lines, footerNote, filename, txnNumber, partyLabel){
   const doc=buildReceiptPDF(title, customer, lines, footerNote, txnNumber, partyLabel||'Kliyan');
-  const blob=doc.output('blob');
   const cleanName=(filename||'Resi').replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
-  const file=new File([blob], cleanName, {type:'application/pdf'});
-  const caption=`LeadStock — ${title} — #${txnNumber||''}`;
 
-  let sharedDirectly=false;
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{
-      await navigator.share({files:[file], title:caption, text:caption});
-      sharedDirectly=true;
-    }catch(e){ /* moun nan anile pataj la — pa gen erè pou montre */ sharedDirectly=true; }
+  if(customer && customer.phone){
+    doc.save(cleanName);
+    const isTotalLabel=l=>/^total$/i.test((l+'').trim());
+    const normalLines=lines.filter(l=>!isTotalLabel(l[0]));
+    const totalLines=lines.filter(l=>isTotalLabel(l[0]));
+    let msg=`*LeadStock — ${title}*\n`;
+    msg+=`${partyLabel||'Kliyan'}: *${customer.name}*\n`;
+    msg+=`# Tranzaksyon: *${txnNumber||'—'}*\n`;
+    msg+=`Dat: ${nowStamp()}\n\n`;
+    normalLines.forEach(l=>{
+      const val=(l[1]+'').toString().startsWith('HTG') ? `*${l[1]}*` : l[1];
+      msg+=`${l[0]}: ${val}\n`;
+    });
+    if(totalLines.length){
+      msg+=`——————————————\n`;
+      totalLines.forEach(l=>{ msg+=`*${l[0]}: ${l[1]}*\n`; });
+    }
+    if(partyLabel!=='Founisè'){
+      const bal=customerBalanceSummary(customer);
+      msg+=`\n*Balans Kont Ou:*\n`;
+      msg+=`• Depo: *${fmt(bal.wallet)}*\n`;
+      msg+=`• Dèt sou Kont: *${fmt(bal.credit)}*\n`;
+      msg+=`• Prè ki Rete: *${fmt(bal.loan)}*\n`;
+    }
+    if(footerNote) msg+=`\n${footerNote}\n`;
+    msg+=`\n_Tranzaksyon an konfime. Yon kopi PDF telechaje sou aparèy la._`;
+    const phone=customer.phone.replace(/[^0-9]/g,'');
+    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+    window.open(url,'_blank');
+  }else{
+    doc.autoPrint();
+    window.open(doc.output('bloburl'),'_blank');
   }
-  if(sharedDirectly) return;
-
-  // Fallback: pa gen Web Share API disponib (egzanp: òdinatè) — telechaje
-  // PDF la epi louvri WhatsApp ak yon ti mesaj kout ki mande tache fichye a.
-  doc.save(cleanName);
-  if(!customer || !customer.phone) return;
-  const msg=`*${caption}*\n_Resi PDF la telechaje sou aparèy la — tanpri tache l nan konvèsasyon sa a._`;
-  const phone=customer.phone.replace(/[^0-9]/g,'');
-  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
-  window.open(url,'_blank');
 }
 
 /* =====================================================================
@@ -1267,6 +1379,7 @@ function selectPayOpt(m){
   const {total, customerId}=window._payState;
   const customer=DB.customers.find(c=>c.id===customerId);
   const bal=customer?customerBalanceSummary(customer):{wallet:0};
+  if(m==='dedwi'){ extra.innerHTML=creditPreviewHTML(customer,total); window._payState.remainderMethod=null; return; }
   if(m==='depo' && bal.wallet < total){
     const short=total-bal.wallet;
     extra.innerHTML=`
@@ -1276,7 +1389,7 @@ function selectPayOpt(m){
       <div class="pay-options" style="grid-template-columns:1fr 1fr;">
         <div class="pay-opt" data-r="kach" onclick="selectRemainder('kach')"><span class="ic">💵</span>Kach pou rès la</div>
         <div class="pay-opt" data-r="dedwi" onclick="selectRemainder('dedwi')"><span class="ic">📒</span>Dedwi pou rès la</div>
-      </div>`;
+      </div><div id="remPreview"></div>`;
   }else{
     extra.innerHTML='';
     window._payState.remainderMethod=null;
@@ -1284,6 +1397,8 @@ function selectPayOpt(m){
 }
 function selectRemainder(m){
   window._payState.remainderMethod=m;
+  const rp=document.getElementById('remPreview');
+  if(rp){ const cu=DB.customers.find(c=>c.id===window._payState.customerId); const w=(cu&&cu.walletBalance)||0; rp.innerHTML=m==='dedwi'?creditPreviewHTML(cu,window._payState.total-w):''; }
   document.querySelectorAll('#payExtra .pay-opt').forEach(el=>el.classList.toggle('selected', el.getAttribute('data-r')===m));
 }
 function confirmPayment(){
@@ -1303,8 +1418,24 @@ function confirmPayment(){
       if(st.remainderMethod==='kach') breakdown.cash=short; else breakdown.credit=short;
     }
   }
+  if(breakdown.credit>0 && customer){
+    const lim=creditLimitOf(customer);
+    if(lim>0 && (customer.creditBalance||0)+breakdown.credit>lim){
+      alert('Limite de crédit dépassée.\nLimite: '+fmt(lim)+'\nDette actuelle: '+fmt(customer.creditBalance||0)+'\nDisponible: '+fmt(Math.max(0,lim-(customer.creditBalance||0)))+'\nMontant à crédit demandé: '+fmt(breakdown.credit));
+      return;
+    }
+  }
   closeModal();
   window._payConfirmCb(breakdown);
+}
+function creditLimitOf(c){ return c && c.creditLimit!==undefined ? c.creditLimit : (DB.settings.defaultCreditLimit||0); }
+function creditPreviewHTML(customer, amount){
+  if(!customer) return '';
+  const lim=creditLimitOf(customer), before=customer.creditBalance||0, after=before+amount;
+  const over=lim>0 && after>lim;
+  return `<div style="background:${over?'var(--red-pale)':'var(--green-pale)'};border-radius:8px;padding:10px 12px;font-size:12.5px;margin-bottom:10px;line-height:1.7;">
+    Solde avant: <b>${fmt(before)}</b> · Achat à crédit: <b>${fmt(amount)}</b> · Nouveau solde: <b>${fmt(after)}</b><br>
+    Limite: <b>${lim>0?fmt(lim):'aucune'}</b>${lim>0?' · Disponible: <b>'+fmt(Math.max(0,lim-before))+'</b>':''}${over?'<br><b>⚠️ Limite dépassée — refusé</b>':''}</div>`;
 }
 function applyPaymentToCustomer(customerId, breakdown){
   const customer=DB.customers.find(c=>c.id===customerId);
@@ -1341,7 +1472,8 @@ const ENTITY_CONFIG={
       {k:'photo',l:'',fmt:v=>v?`<img src="${v}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;">`:'<span style="color:var(--text-faint);">—</span>'},
       {k:'code',l:'Kòd'},{k:'name',l:'Non'},{k:'category',l:'Kategori'},
       {k:'qty',l:'Estòk',fmt:(v,row)=>`<span class="${row.qty<=row.minQty?'tag-low':''}">${row.qty} ${esc(row.unit||'')}</span>`},
-      {k:'sellPrice',l:'Pri Vant',fmt:v=>fmt(v)}
+      {k:'sellPrice',l:'Pri Vant',fmt:v=>fmt(v)},
+      {k:'blocked',l:'Statut',fmt:v=>v?'<span class="badge red">Bloqué</span>':'<span class="badge green">Actif</span>'}
     ]
   },
   suppliers:{
@@ -1387,7 +1519,7 @@ function renderEntityView(key, containerId){
     <div class="panel">
       <div class="panel-head">
         <span class="panel-title">${cfg.icon} ${cfg.label} <span class="count" id="${key}Count"></span></span>
-        <button class="btn btn-primary" onclick="openEntityForm('${key}')">+ Nouvo ${cfg.singular}</button>
+        ${key==='suppliers' && currentUser.role!=='admin' ? '' : `<button class="btn btn-primary" onclick="openEntityForm('${key}')">+ Nouvo ${cfg.singular}</button>`}
       </div>
       <div class="toolbar">
         <input class="tb-input" id="${key}Search" placeholder="Chèche..." oninput="renderEntityTable('${key}')">
@@ -1413,11 +1545,24 @@ function renderEntityTable(key){
       <td class="row-actions">
         <button class="icon-btn" onclick="openEntityForm('${key}','${r.id}')">Modifye</button>
         <button class="icon-btn danger" onclick="deleteEntity('${key}','${r.id}')">Efase</button>
+        ${key==='products' && currentUser.role==='admin' ? `<button class="icon-btn" onclick="toggleProductBlock('${r.id}')">${r.blocked?'Débloquer':'Bloquer'}</button>` : ''}
       </td>
     </tr>`).join('')}</tbody>
   </table></div>`;
 }
+/* L'Admin seul a le droit de bloquer un produit — un produit bloqué
+   ne peut pas être ajouté à une nouvelle facture ni au catalogue client. */
+function toggleProductBlock(id){
+  if(!requireAdminOrBlock('bloquer/débloquer un produit')) return;
+  const p=DB.products.find(x=>x.id===id);
+  if(!p) return;
+  p.blocked=!p.blocked;
+  logActivity((p.blocked?'Bloqué':'Débloqué')+' le produit: '+p.name);
+  saveDB();
+  renderEntityTable('products');
+}
 function openEntityForm(key,id){
+  if(key==='suppliers' && !id && !requireAdminOrBlock('ajoute yon nouvo founisè')) return;
   const cfg=ENTITY_CONFIG[key];
   const row=id?DB[key].find(r=>r.id===id):{};
   openModalHTML(`
@@ -1464,6 +1609,7 @@ async function saveEntity(key,id){
     const el=document.getElementById('ef_'+f.key);
     data[f.key]=f.type==='number'?Number(el.value||0):el.value.trim();
   }
+  if(key==='products' && !data.category) data.category='Lòt';
   if(cfg.fields.some(f=>f.required) && !data[cfg.fields.find(f=>f.required).key]){
     alert('Tanpri ranpli chan obligatwa yo.'); return;
   }
@@ -1477,7 +1623,178 @@ async function saveEntity(key,id){
   if(document.getElementById(key+'TableWrap')) renderEntityTable(key);
   else renderView(currentView);
 }
+/* Gadyen jeneral: Anplwaye pa gen dwa efase/anile okenn bagay ki deja
+   anrejistre nan app la — sèlman Admin ka fè sa. */
+/* =====================================================================
+   PARAMÈT BIZNIS (Admin) — livrezon, kredi, kategori, rapèl WhatsApp
+===================================================================== */
+const REMINDER_PERIOD_DAYS={jounalye:1,hebdomadaire:7,mensuel:30};
+function addDaysTo(dateStr,n){ const d=new Date(dateStr); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function getReminderRows(){
+  const today=todayISO(), r=DB.settings.reminders, pd=REMINDER_PERIOD_DAYS[r.period]||30, rows=[];
+  DB.customers.forEach(c=>{
+    const bal=customerBalanceSummary(c), owed=bal.credit+bal.loan;
+    if(owed<=0) return; // règle: jamais de rappel sans solde dû
+    const loans=DB.loans.filter(l=>l.customerId===c.id && l.status!=='solde');
+    const dues=loans.map(l=>l.dueDate);
+    if(bal.credit>0){
+      const ci=DB.invoices.filter(i=>i.customerId===c.id && i.breakdown && i.breakdown.credit>0).map(i=>i.date).sort();
+      if(ci.length) dues.push(addDaysTo(ci[0],30));
+    }
+    const due=dues.filter(Boolean).sort()[0]||'';
+    const daysLate=due && due<today ? Math.floor((new Date(today)-new Date(due))/86400000) : 0;
+    const overdue=daysLate>0;
+    if(r.mode==='retard' && !overdue) return;
+    const periods=overdue?Math.floor(daysLate/pd):0;
+    const interest=Math.round(owed*(r.rate||0)/100*periods);
+    const nextPay=loans.map(l=>l.dueDate).filter(d=>d>=today).sort()[0]||'';
+    rows.push({customerId:c.id,name:c.name,phone:c.phone,owed,due,daysLate,periods,interest,nextPay,
+      sentToday:DB.reminderLog.some(x=>x.customerId===c.id && x.date===today)});
+  });
+  return rows.sort((a,b)=>b.daysLate-a.daysLate);
+}
+function buildReminderMessage(row){
+  const r=DB.settings.reminders, S=DB.settings;
+  let m=`*LeadStock — Rappel de paiement*\nBonjour *${row.name}*,\n\n`;
+  m+=`Montant dû: *${fmt(row.owed)}*\n`;
+  if(row.due) m+=`Date d'échéance: ${row.due}${row.daysLate>0?' ('+row.daysLate+' jour(s) de retard)':''}\n`;
+  if(row.nextPay) m+=`Prochain paiement: ${row.nextPay}\n`;
+  if(row.interest>0) m+=`Intérêt ajouté (${r.rate}% / ${r.period}, ${row.periods} période(s)): *${fmt(row.interest)}*\nTotal à payer: *${fmt(row.owed+row.interest)}*\n`;
+  m+=`\n*Comment payer:*\n`;
+  if(S.natcashNumber) m+=`• NatCash: ${S.natcashNumber}\n`;
+  if(S.moncashNumber) m+=`• MonCash: ${S.moncashNumber}\n`;
+  if(r.instructions) m+=`${r.instructions}\n`;
+  m+=`\nMerci de votre confiance.`;
+  return m;
+}
+function sendReminder(customerId){
+  const row=getReminderRows().find(x=>x.customerId===customerId);
+  if(!row){ alert('Ce client n\'a plus de solde dû.'); return; }
+  if(!row.phone){ alert('Ce client n\'a pas de numéro de téléphone.'); return; }
+  window.open('https://wa.me/'+row.phone.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(buildReminderMessage(row)),'_blank');
+  const d=new Date();
+  DB.reminderLog.push({id:uid('rmd'),date:todayISO(),time:d.toTimeString().slice(0,5),customerId,name:row.name,amount:row.owed,interest:row.interest,by:currentUser.name});
+  saveDB(); renderBizSettings();
+}
+function reminderBannerHTML(){
+  const r=DB.settings.reminders;
+  if(!r.enabled || new Date().getHours()<r.hour) return '';
+  const n=getReminderRows().filter(x=>!x.sentToday && x.phone).length;
+  if(!n) return '';
+  return `<div class="panel" style="border-left:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;"><span>📲 <b>${n}</b> rappel(s) de paiement à envoyer aujourd'hui</span><button class="btn btn-primary btn-sm" onclick="goView('bizsettings')">Voir et envoyer</button></div>`;
+}
+function renderBizSettings(){
+  if(currentUser.role!=='admin'){ document.getElementById('content').innerHTML='<div class="empty-state">Sèlman Admin gen aksè nan seksyon sa a.</div>'; return; }
+  const S=DB.settings, r=S.reminders;
+  const prodCats=[...new Set(DB.products.map(p=>p.category||'Lòt'))];
+  const catNames=[...new Set([...S.categories.map(c=>c.name),...prodCats])].sort();
+  const isActive=n=>{const c=S.categories.find(x=>x.name===n); return !c||c.active!==false;};
+  const rows=getReminderRows();
+  const hist=[...DB.reminderLog].reverse().slice(0,50);
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🚚 Livraison</span></div>
+      <div class="form-grid">
+        <div class="field full"><label>Adresse de l'entreprise (retrait sur place)</label><input id="bsAddress" value="${esc(S.businessAddress)}"></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;margin:8px 0 14px;"><button class="btn btn-primary btn-sm" onclick="saveBizAddress()">Enregistrer l'adresse</button></div>
+      <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:8px;">Tarifs de livraison par zone (distance, camion, etc.). Le client choisit sa zone à la commande.</p>
+      ${S.deliveryZones.length?`<table><thead><tr><th>Zone</th><th>Frais</th><th></th></tr></thead><tbody>${S.deliveryZones.map(z=>`<tr><td>${esc(z.name)}</td><td class="mono">${fmt(z.fee)}</td><td class="row-actions"><button class="icon-btn" onclick="editZone('${z.id}')">Modifier</button><button class="icon-btn danger" onclick="deleteZone('${z.id}')">Supprimer</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty-state" style="padding:16px;">Aucune zone configurée.</div>'}
+      <div class="form-grid" style="grid-template-columns:2fr 1fr auto;align-items:end;margin-top:10px;">
+        <div class="field"><label>Nouvelle zone</label><input id="bsZoneName" placeholder="Ex: Cap-Haïtien centre"></div>
+        <div class="field"><label>Frais (HTG)</label><input id="bsZoneFee" type="number" min="0"></div>
+        <div class="field"><button class="btn btn-primary" onclick="addZone()">+ Ajouter</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💳 Crédit client</span></div>
+      <div class="form-grid"><div class="field"><label>Limite de crédit par défaut (HTG) — 0 = pas de limite</label><input id="bsDefLimit" type="number" min="0" value="${S.defaultCreditLimit||0}"></div></div>
+      <div class="modal-actions" style="justify-content:flex-start;"><button class="btn btn-primary btn-sm" onclick="saveDefaultLimit()">Enregistrer</button></div>
+      <p style="font-size:12px;color:var(--text-faint);margin-top:6px;">Une limite spécifique peut être fixée dans la fiche de chaque client (Kliyan → Modifye).</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🗂️ Catégories de produits</span></div>
+      <table><thead><tr><th>Catégorie</th><th>Produits</th><th>Statut</th><th></th></tr></thead><tbody>
+      ${catNames.map(n=>`<tr><td>${esc(n)}</td><td class="mono">${DB.products.filter(p=>(p.category||'Lòt')===n).length}</td><td><span class="badge ${isActive(n)?'green':'red'}">${isActive(n)?'Active':'Désactivée'}</span></td>
+      <td class="row-actions"><button class="icon-btn" data-n="${esc(n)}" onclick="renameCategory(this.dataset.n)">Renommer</button><button class="icon-btn" data-n="${esc(n)}" onclick="toggleCategory(this.dataset.n)">${isActive(n)?'Désactiver':'Activer'}</button></td></tr>`).join('')}
+      </tbody></table>
+      <div class="form-grid" style="grid-template-columns:2fr auto;align-items:end;margin-top:10px;"><div class="field"><label>Nouvelle catégorie</label><input id="bsCatName"></div><div class="field"><button class="btn btn-primary" onclick="addCategory()">+ Créer</button></div></div>
+      <p style="font-size:12px;color:var(--text-faint);margin-top:6px;">Une catégorie désactivée n'apparaît plus dans le catalogue client.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📲 Rappels de paiement WhatsApp</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Rappels</label><select id="rmEnabled"><option value="1" ${r.enabled?'selected':''}>Activés</option><option value="0" ${!r.enabled?'selected':''}>Désactivés</option></select></div>
+        <div class="field"><label>Heure de préparation</label><input id="rmHour" type="number" min="0" max="23" value="${r.hour}"></div>
+        <div class="field"><label>Taux d'intérêt (%)</label><input id="rmRate" type="number" min="0" step="0.1" value="${r.rate}"></div>
+        <div class="field"><label>Période de calcul</label><select id="rmPeriod"><option value="jounalye" ${r.period==='jounalye'?'selected':''}>Journalière</option><option value="hebdomadaire" ${r.period==='hebdomadaire'?'selected':''}>Hebdomadaire</option><option value="mensuel" ${r.period==='mensuel'?'selected':''}>Mensuelle</option></select></div>
+        <div class="field"><label>Clients concernés</label><select id="rmMode"><option value="retard" ${r.mode==='retard'?'selected':''}>Seulement en retard de paiement</option><option value="quotidien" ${r.mode==='quotidien'?'selected':''}>Tous ceux qui doivent (chaque jour)</option></select></div>
+        <div class="field full"><label>Instructions de paiement (ajoutées au message)</label><textarea id="rmInstr">${esc(r.instructions)}</textarea></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;"><button class="btn btn-primary" onclick="saveReminderSettings()">Enregistrer</button></div>
+      <p style="font-size:12px;color:var(--text-faint);margin:8px 0;">⚠️ WhatsApp gratuit n'autorise pas l'envoi 100% automatique: à l'heure choisie, la liste est préparée et une bannière apparaît au tableau de bord; un clic envoie le message à chaque client. Aucun rappel n'est proposé pour un client sans solde dû.</p>
+      ${!r.enabled?'<div class="empty-state" style="padding:14px;">Rappels désactivés.</div>':rows.length===0?'<div class="empty-state" style="padding:14px;">Aucun client à relancer.</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>Client</th><th>Dû</th><th>Échéance</th><th>Retard</th><th>Intérêt</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td class="mono">${fmt(x.owed)}</td><td class="mono">${x.due||'—'}</td><td class="mono ${x.daysLate>0?'tag-low':''}">${x.daysLate>0?x.daysLate+' j':'—'}</td><td class="mono">${fmt(x.interest)}</td><td>${!x.phone?'<span class="badge gray">Pas de tél.</span>':x.sentToday?'<span class="badge green">Envoyé ✓</span>':`<button class="icon-btn" onclick="sendReminder('${x.customerId}')">📲 Envoyer</button>`}</td></tr>`).join('')}</tbody></table></div>`}
+      <div class="panel-head" style="margin-top:18px;"><span class="panel-title" style="font-size:15px;">Historique des rappels envoyés</span></div>
+      ${hist.length===0?'<div class="empty-state" style="padding:14px;">Aucun rappel envoyé.</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Heure</th><th>Client</th><th>Dû</th><th>Intérêt</th><th>Par</th></tr></thead><tbody>${hist.map(h=>`<tr><td class="mono">${h.date}</td><td class="mono">${h.time}</td><td>${esc(h.name)}</td><td class="mono">${fmt(h.amount)}</td><td class="mono">${fmt(h.interest)}</td><td>${esc(h.by)}</td></tr>`).join('')}</tbody></table></div>`}
+    </div>`;
+}
+function saveBizAddress(){ const v=document.getElementById('bsAddress').value.trim(); logActivity('Adresse entreprise modifiée'); DB.settings.businessAddress=v; saveDB(); alert('Enregistré.'); }
+function addZone(){
+  const name=document.getElementById('bsZoneName').value.trim(), fee=Number(document.getElementById('bsZoneFee').value||0);
+  if(!name){ alert('Nom de zone requis.'); return; }
+  DB.settings.deliveryZones.push({id:uid('z'),name,fee}); logActivity('Zone de livraison ajoutée: '+name+' — '+fmt(fee)); saveDB(); renderBizSettings();
+}
+function editZone(id){
+  const z=DB.settings.deliveryZones.find(x=>x.id===id); if(!z) return;
+  const v=prompt('Nouveau frais de livraison (HTG) pour "'+z.name+'":',z.fee); if(v===null) return;
+  const n=Number(v); if(isNaN(n)||n<0){ alert('Montant invalide.'); return; }
+  logActivity('Frais de livraison "'+z.name+'": '+fmt(z.fee)+' → '+fmt(n)); z.fee=n; saveDB(); renderBizSettings();
+}
+function deleteZone(id){
+  const z=DB.settings.deliveryZones.find(x=>x.id===id); if(!z||!confirm('Supprimer la zone "'+z.name+'"?')) return;
+  DB.settings.deliveryZones=DB.settings.deliveryZones.filter(x=>x.id!==id); logActivity('Zone de livraison supprimée: '+z.name); saveDB(); renderBizSettings();
+}
+function saveDefaultLimit(){
+  const n=Number(document.getElementById('bsDefLimit').value||0); if(isNaN(n)||n<0){ alert('Montant invalide.'); return; }
+  logActivity('Limite de crédit par défaut: '+fmt(DB.settings.defaultCreditLimit||0)+' → '+fmt(n)); DB.settings.defaultCreditLimit=n; saveDB(); alert('Enregistré.');
+}
+function addCategory(){
+  const n=document.getElementById('bsCatName').value.trim(); if(!n) return;
+  if(DB.settings.categories.some(c=>c.name.toLowerCase()===n.toLowerCase())){ alert('Catégorie existante.'); return; }
+  DB.settings.categories.push({name:n,active:true}); logActivity('Catégorie créée: '+n); saveDB(); renderBizSettings();
+}
+function renameCategory(old){
+  const n=prompt('Nouveau nom pour la catégorie "'+old+'":',old); if(!n||!n.trim()||n.trim()===old) return;
+  const nn=n.trim();
+  DB.products.forEach(p=>{ if((p.category||'Lòt')===old) p.category=nn; });
+  const c=DB.settings.categories.find(x=>x.name===old); if(c) c.name=nn; else DB.settings.categories.push({name:nn,active:true});
+  logActivity('Catégorie renommée: '+old+' → '+nn); saveDB(); renderBizSettings();
+}
+function toggleCategory(n){
+  let c=DB.settings.categories.find(x=>x.name===n); if(!c){ c={name:n,active:true}; DB.settings.categories.push(c); }
+  c.active=c.active===false; logActivity('Catégorie '+n+': '+(c.active?'activée':'désactivée')); saveDB(); renderBizSettings();
+}
+function saveReminderSettings(){
+  const r=DB.settings.reminders, old={...r};
+  r.enabled=document.getElementById('rmEnabled').value==='1';
+  r.hour=Math.min(23,Math.max(0,Number(document.getElementById('rmHour').value||8)));
+  r.rate=Number(document.getElementById('rmRate').value||0);
+  r.period=document.getElementById('rmPeriod').value;
+  r.mode=document.getElementById('rmMode').value;
+  r.instructions=document.getElementById('rmInstr').value.trim();
+  logActivity('Rappels: actifs '+old.enabled+'→'+r.enabled+', heure '+old.hour+'→'+r.hour+', taux '+old.rate+'%→'+r.rate+'%, période '+old.period+'→'+r.period+', mode '+old.mode+'→'+r.mode);
+  saveDB(); renderBizSettings();
+}
+
+function requireAdminOrBlock(actionLabel){
+  if(currentUser.role!=='admin'){
+    alert('Sèlman Admin ka '+actionLabel+'. Kontakte yon Administratè si w bezwen sa fèt.');
+    return false;
+  }
+  return true;
+}
 function deleteEntity(key,id){
+  if(!requireAdminOrBlock('efase '+(ENTITY_CONFIG[key]?ENTITY_CONFIG[key].singular.toLowerCase():'antre sa a'))) return;
   if(!confirm('Efase antre sa a?')) return;
   DB[key]=DB[key].filter(r=>r.id!==id);
   logActivity('Efase yon '+(ENTITY_CONFIG[key]?ENTITY_CONFIG[key].singular:key));
@@ -1489,10 +1806,34 @@ function deleteEntity(key,id){
    DASHBOARD
 ===================================================================== */
 function renderDashboard(){
+  const lowStock=DB.products.filter(p=>p.qty<=p.minQty).length;
+  const blockedProducts=DB.products.filter(p=>p.blocked).length;
+  const blockedCustomers=DB.customers.filter(c=>c.blocked).length;
+  const loansOutstanding=DB.loans.filter(l=>l.status!=='solde').reduce((s,l)=>s+(l.amount-(l.paidAmount||0)),0);
+
+  if(currentUser.role!=='admin'){
+    document.getElementById('content').innerHTML=`
+      <div class="stats">
+        <div class="stat-card red"><div class="stat-label">Alerte Stock</div><div class="stat-value">${lowStock}</div><div class="stat-sub">produits sous le seuil minimum</div></div>
+        <div class="stat-card red"><div class="stat-label">Client Bloqué</div><div class="stat-value">${blockedCustomers}</div><div class="stat-sub">client(s) bloqué(s)</div></div>
+        <div class="stat-card red"><div class="stat-label">Marchandise Bloquée</div><div class="stat-value">${blockedProducts}</div><div class="stat-sub">produit(s) bloqué(s)</div></div>
+        <div class="stat-card gold"><div class="stat-label">Prêt en Cours</div><div class="stat-value">${fmt(loansOutstanding)}</div><div class="stat-sub">total des prêts actifs</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">⚠️ Produits en Stock Bas</span></div>
+        ${lowStock===0?'<div class="empty-state">Tous les produits ont un stock suffisant.</div>':`
+        <table><thead><tr><th>Produit</th><th>Stock</th><th>Seuil Min.</th></tr></thead>
+        <tbody>${DB.products.filter(p=>p.qty<=p.minQty).map(p=>`<tr><td>${esc(p.name)}</td><td class="tag-low">${p.qty} ${esc(p.unit||'')}</td><td>${p.minQty}</td></tr>`).join('')}</tbody></table>`}
+      </div>`;
+    return;
+  }
+
   const today=todayISO();
   const salesToday=DB.invoices.filter(i=>i.date===today).reduce((s,i)=>s+i.total,0);
   const stockValue=DB.products.reduce((s,p)=>s+p.qty*p.sellPrice,0);
-  const lowStock=DB.products.filter(p=>p.qty<=p.minQty).length;
+  const totalPurchases=DB.stockIn.reduce((s,r)=>s+r.qty*(r.unitPrice||0),0);
+  const totalSales=DB.invoices.reduce((s,i)=>s+i.total,0);
+  const margeGlobale=totalSales-totalPurchases;
   const unpaidCredit=DB.customers.reduce((s,c)=>s+(c.creditBalance||0),0);
   const totalDeposits=DB.customers.reduce((s,c)=>s+(c.walletBalance||0),0);
   const expensesToday=DB.expenses.filter(e=>e.date===today).reduce((s,e)=>s+e.amount,0);
@@ -1501,12 +1842,24 @@ function renderDashboard(){
   const netProfit30=totalSales30-totalExpenses30;
 
   document.getElementById('content').innerHTML=`
+    ${reminderBannerHTML()}
+    <div class="stats">
+      <div class="stat-card gold"><div class="stat-label">Valeur Stock</div><div class="stat-value">${fmt(stockValue)}</div><div class="stat-sub">${DB.products.length} produits</div></div>
+      <div class="stat-card"><div class="stat-label">Valeur Achat</div><div class="stat-value">${fmt(totalPurchases)}</div><div class="stat-sub">total historique des achats</div></div>
+      <div class="stat-card"><div class="stat-label">Valeur Vente</div><div class="stat-value">${fmt(totalSales)}</div><div class="stat-sub">total historique des ventes</div></div>
+      <div class="stat-card ${margeGlobale>=0?'':'red'}"><div class="stat-label">Marge Globale</div><div class="stat-value">${fmt(margeGlobale)}</div><div class="stat-sub">Vente − Achat</div></div>
+      <div class="stat-card red"><div class="stat-label">Alerte Stock</div><div class="stat-value">${lowStock}</div><div class="stat-sub">produits sous le seuil minimum</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💰 Finance Client</span></div>
+      <div class="stats" style="margin-bottom:0;">
+        <div class="stat-card"><div class="stat-label">Total Solde</div><div class="stat-value">${fmt(totalDeposits)}</div><div class="stat-sub">${DB.customers.filter(c=>c.walletBalance>0).length} client(s) avec solde</div></div>
+        <div class="stat-card gold"><div class="stat-label">Prêts en Cours</div><div class="stat-value">${fmt(loansOutstanding)}</div><div class="stat-sub">${DB.loans.filter(l=>l.status!=='solde').length} prêt(s) actif(s)</div></div>
+        <div class="stat-card red"><div class="stat-label">Dette sur Compte</div><div class="stat-value">${fmt(unpaidCredit)}</div><div class="stat-sub">${DB.customers.filter(c=>c.creditBalance>0).length} client(s)</div></div>
+      </div>
+    </div>
     <div class="stats">
       <div class="stat-card"><div class="stat-label">Vant Jodi a</div><div class="stat-value">${fmt(salesToday)}</div><div class="stat-sub">${DB.invoices.filter(i=>i.date===today).length} fakti</div></div>
-      <div class="stat-card gold"><div class="stat-label">Valè Estòk</div><div class="stat-value">${fmt(stockValue)}</div><div class="stat-sub">${DB.products.length} pwodwi</div></div>
-      <div class="stat-card red"><div class="stat-label">Estòk Ba</div><div class="stat-value">${lowStock}</div><div class="stat-sub">pwodwi anba sèy minimòm</div></div>
-      <div class="stat-card red"><div class="stat-label">Dèt Kliyan (Sou Kont)</div><div class="stat-value">${fmt(unpaidCredit)}</div><div class="stat-sub">${DB.customers.filter(c=>c.creditBalance>0).length} kliyan</div></div>
-      <div class="stat-card"><div class="stat-label">Total Depo Kliyan</div><div class="stat-value">${fmt(totalDeposits)}</div><div class="stat-sub">${DB.customers.filter(c=>c.walletBalance>0).length} kliyan ak balans</div></div>
       <div class="stat-card red"><div class="stat-label">Depans Jodi a</div><div class="stat-value">${fmt(expensesToday)}</div><div class="stat-sub">${DB.expenses.filter(e=>e.date===today).length} depans</div></div>
       <div class="stat-card ${netProfit30>=0?'':'red'}"><div class="stat-label">Pwofi Net (30 Jou)</div><div class="stat-value">${fmt(netProfit30)}</div><div class="stat-sub">Vant ${fmt(totalSales30)} − Depans ${fmt(totalExpenses30)}</div></div>
     </div>
@@ -1632,15 +1985,21 @@ function renderInventory(){
 function renderInventoryTable(){
   const q=(document.getElementById('invSearch')?.value||'').toLowerCase();
   const rows=DB.products.filter(p=>!q||p.name.toLowerCase().includes(q));
+  const canAdjust=currentUser.role==='admin';
   document.getElementById('invTableWrap').innerHTML=`<div style="overflow-x:auto;"><table>
-    <thead><tr><th>Pwodwi</th><th>Kantite Sistèm</th><th>Kantite Reyèl (Kontwòl)</th><th>Diferans</th><th></th></tr></thead>
-    <tbody>${rows.map(p=>`<tr>
+    <thead><tr><th>Pwodwi</th><th>Kantite Sistèm</th>${canAdjust?'<th>Kantite Reyèl (Kontwòl)</th><th>Diferans</th><th></th>':''}</tr></thead>
+    <tbody>${rows.map(p=>canAdjust?`<tr>
       <td>${esc(p.name)}</td>
       <td class="mono">${p.qty}</td>
       <td><input class="tb-input" style="width:100px;" type="number" id="invCount_${p.id}" placeholder="${p.qty}"></td>
       <td class="mono" id="invDiff_${p.id}">—</td>
       <td><button class="icon-btn" onclick="applyInventoryAdjust('${p.id}')">Ajiste</button></td>
-    </tr>`).join('')}</tbody></table></div>`;
+    </tr>`:`<tr>
+      <td>${esc(p.name)}</td>
+      <td class="mono">${p.qty}</td>
+    </tr>`).join('')}</tbody></table></div>
+    ${canAdjust?'':'<p style="font-size:12px;color:var(--text-faint);margin-top:10px;">Sèlman Admin ka fè ajisteman envantè.</p>'}`;
+  if(!canAdjust) return;
   rows.forEach(p=>{
     document.getElementById('invCount_'+p.id).addEventListener('input',e=>{
       const val=Number(e.target.value||p.qty);
@@ -1649,6 +2008,7 @@ function renderInventoryTable(){
   });
 }
 function applyInventoryAdjust(productId){
+  if(!requireAdminOrBlock('fè yon ajisteman envantè')) return;
   const p=DB.products.find(x=>x.id===productId);
   const val=Number(document.getElementById('invCount_'+productId).value);
   if(isNaN(val)){ alert('Antre yon kantite reyèl.'); return; }
@@ -1692,7 +2052,7 @@ function renderCustomers(){
     <div class="panel">
       <div class="panel-head">
         <span class="panel-title">👥 Kliyan <span class="count" id="custCount"></span></span>
-        <button class="btn btn-primary" onclick="openCustomerForm()">+ Nouvo Kliyan</button>
+        ${currentUser.role==='admin' ? `<button class="btn btn-primary" onclick="openCustomerForm()">+ Nouvo Kliyan</button>` : ''}
       </div>
       <div class="toolbar"><input class="tb-input" id="custSearch" placeholder="Chèche non, telefòn..." oninput="renderCustomerTable()"></div>
       <div id="custTableWrap"></div>
@@ -1706,7 +2066,7 @@ function renderCustomerTable(){
   const wrap=document.getElementById('custTableWrap');
   if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen kliyan.</div>'; return; }
   wrap.innerHTML=`<div style="overflow-x:auto;"><table>
-    <thead><tr><th>Non</th><th>Telefòn</th><th>Balans Depo</th><th>Dèt Sou Kont</th><th>Prè ki Rete</th><th></th></tr></thead>
+    <thead><tr><th>Non</th><th>Telefòn</th><th>Balans Depo</th><th>Dèt Sou Kont</th><th>Prè ki Rete</th><th>Statut</th><th></th></tr></thead>
     <tbody>${rows.map(c=>{
       const bal=customerBalanceSummary(c);
       return `<tr>
@@ -1714,14 +2074,29 @@ function renderCustomerTable(){
         <td class="mono" style="color:var(--green);">${fmt(bal.wallet)}</td>
         <td class="mono" style="color:${bal.credit>0?'var(--red)':'inherit'};">${fmt(bal.credit)}</td>
         <td class="mono" style="color:${bal.loan>0?'var(--red)':'inherit'};">${fmt(bal.loan)}</td>
+        <td>${c.blocked?'<span class="badge red">Bloqué</span>':'<span class="badge green">Actif</span>'}</td>
         <td class="row-actions">
           <button class="icon-btn" onclick="openCustomerForm('${c.id}')">Modifye</button>
           <button class="icon-btn danger" onclick="deleteCustomer('${c.id}')">Efase</button>
+          ${currentUser.role==='admin' ? `<button class="icon-btn" onclick="toggleCustomerBlock('${c.id}')">${c.blocked?'Débloquer':'Bloquer'}</button>` : ''}
         </td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 }
+/* L'Admin seul a le droit de bloquer un client — un client bloqué ne
+   peut pas être sélectionné pour une nouvelle facture, dépôt, retrait
+   ou prêt. */
+function toggleCustomerBlock(id){
+  if(!requireAdminOrBlock('bloquer/débloquer un client')) return;
+  const c=DB.customers.find(x=>x.id===id);
+  if(!c) return;
+  c.blocked=!c.blocked;
+  logActivity((c.blocked?'Bloqué':'Débloqué')+' le client: '+c.name);
+  saveDB();
+  renderCustomerTable();
+}
 function openCustomerForm(id){
+  if(!id && !requireAdminOrBlock('ajoute yon nouvo kliyan')) return;
   const row=id?DB.customers.find(c=>c.id===id):{};
   openModalHTML(`
     <div class="modal-title">${id?'Modifye':'Nouvo'} Kliyan</div>
@@ -1729,25 +2104,47 @@ function openCustomerForm(id){
       <div class="field"><label>Non *</label><input id="cf_name" value="${esc(row.name||'')}"></div>
       <div class="field"><label>Telefòn (pou WhatsApp)</label><input id="cf_phone" value="${esc(row.phone||'')}" placeholder="50937xxxxxx"></div>
       <div class="field full"><label>Adrès</label><input id="cf_address" value="${esc(row.address||'')}"></div>
+      ${currentUser.role==='admin'?`<div class="field full"><label>Limite de crédit (HTG) — 0 = pas de limite</label><input id="cf_limit" type="number" min="0" value="${row.creditLimit!==undefined?row.creditLimit:''}" placeholder="Par défaut: ${DB.settings.defaultCreditLimit||0}"></div>`:''}
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Anile</button>
       <button class="btn btn-primary" onclick="saveCustomer('${id||''}')">Anrejistre</button>
     </div>`);
 }
-function saveCustomer(id){
+async function saveCustomer(id){
   const name=document.getElementById('cf_name').value.trim();
   if(!name){ alert('Tanpri antre non kliyan an.'); return; }
   const data={name, phone:document.getElementById('cf_phone').value.trim(), address:document.getElementById('cf_address').value.trim()};
-  if(id){ const idx=DB.customers.findIndex(c=>c.id===id); DB.customers[idx]={...DB.customers[idx],...data}; }
-  else{ DB.customers.push({id:uid('c'),...data,walletBalance:0,creditBalance:0}); }
-  saveDB(); closeModal(); renderCustomerTable();
+  const limEl=document.getElementById('cf_limit');
+  if(limEl && currentUser.role==='admin' && limEl.value!==''){
+    data.creditLimit=Number(limEl.value);
+    const old=id?(DB.customers.find(c=>c.id===id)||{}).creditLimit:undefined;
+    if(old!==data.creditLimit) logActivity('Limite de crédit de '+name+': '+(old===undefined?'défaut':fmt(old))+' → '+fmt(data.creditLimit));
+  }
+  try{
+    const fresh=await fetchLatestDBFromServer();
+    if(fresh) DB=fresh;
+    if(id){ const idx=DB.customers.findIndex(c=>c.id===id); if(idx>=0) DB.customers[idx]={...DB.customers[idx],...data}; else DB.customers.push({id,...data,walletBalance:0,creditBalance:0}); }
+    else{ DB.customers.push({id:uid('c'),...data,walletBalance:0,creditBalance:0}); }
+    saveDB(); closeModal(); renderCustomerTable();
+  }catch(e){
+    alert('Yon erè rive pandan anrejistreman an. Eseye ankò.');
+    console.error(e);
+  }
 }
-function deleteCustomer(id){
+async function deleteCustomer(id){
+  if(!requireAdminOrBlock('efase yon kliyan')) return;
   if(!confirm('Efase kliyan sa a?')) return;
-  DB.customers=DB.customers.filter(c=>c.id!==id);
-  logActivity('Efase yon kliyan');
-  saveDB(); renderCustomerTable();
+  try{
+    const fresh=await fetchLatestDBFromServer();
+    if(fresh) DB=fresh;
+    DB.customers=DB.customers.filter(c=>c.id!==id);
+    logActivity('Efase yon kliyan');
+    saveDB(); renderCustomerTable();
+  }catch(e){
+    alert('Yon erè rive pandan efase a. Eseye ankò.');
+    console.error(e);
+  }
 }
 
 /* =====================================================================
@@ -1760,10 +2157,10 @@ function renderInvoicing(){
     <div class="panel">
       <div class="panel-head"><span class="panel-title">🧾 Nouvo Fakti <span class="count">#${String((DB.invoiceCounter||0)+1).padStart(6,'0')}</span></span></div>
       <div class="form-grid" style="margin-bottom:14px;">
-        <div class="field"><label>Kliyan *</label><select id="invCustomer">${DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Kliyan *</label><select id="invCustomer">${DB.customers.filter(c=>!c.blocked).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
       </div>
       <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end;">
-        <div class="field"><label>Pwodwi</label><select id="invProduct">${DB.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} ${esc(p.unit||'')})</option>`).join('')}</select></div>
+        <div class="field"><label>Pwodwi</label><select id="invProduct">${DB.products.filter(p=>!p.blocked).map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} ${esc(p.unit||'')})</option>`).join('')}</select></div>
         <div class="field"><label>Kantite</label><input id="invQty" type="number" value="1" min="1"></div>
         <div class="field"><label>Pri Vant</label><input id="invPrice" type="number"></div>
         <div class="field"><button class="btn btn-primary" onclick="addToCart()">+ Ajoute</button></div>
@@ -1793,6 +2190,7 @@ function addToCart(){
   const price=Number(document.getElementById('invPrice').value||0);
   const p=DB.products.find(x=>x.id===productId);
   if(!p||qty<=0){ alert('Chwazi yon pwodwi ak yon kantite valab.'); return; }
+  if(p.blocked){ alert('Pwodwi sa a bloke — li pa disponib pou vant.'); return; }
   if(qty>p.qty){ alert('Kantite mande a depase estòk disponib ('+p.qty+').'); return; }
   cart.push({productId, name:p.name, unit:p.unit, qty, price});
   renderCart();
@@ -1832,7 +2230,7 @@ function completeInvoice(){
       DB.stockOut.push({id:uid('so'), date:todayISO(), productId:it.productId, qty:it.qty, reason:'Vant (Fakti '+invoiceNumber+')', ref:invoiceNumber});
     }
     applyPaymentToCustomer(customerId, breakdown);
-    const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId, items:[...cart], total, breakdown, comment};
+    const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId, items:[...cart], total, breakdown, comment, createdBy:currentUser.name};
     DB.invoices.push(invoice);
     saveDB();
     const customer=DB.customers.find(c=>c.id===customerId);
@@ -1983,10 +2381,11 @@ function renderOrdersLists(){
   const history=ORDERS_CACHE.filter(o=>o.status!=='an_atant');
   const pendingWrap=document.getElementById('ordersPendingWrap');
   pendingWrap.innerHTML = pending.length===0 ? '<div class="empty-state">Pa gen kòmand an atant kounye a.</div>' :
-    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Telefòn</th><th>Atik</th><th>Total</th><th>Mòd</th><th>Referans</th><th></th></tr></thead>
+    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Telefòn</th><th>Atik</th><th>Livrezon</th><th>Total</th><th>Mòd</th><th>Referans</th><th></th></tr></thead>
     <tbody>${pending.map(o=>`<tr>
       <td class="mono">${o.date}</td><td>${esc(o.customerName)}</td><td class="mono">${esc(o.customerPhone)}</td>
       <td>${o.items.map(it=>`${esc(it.name)} x${it.qty}`).join(', ')}</td>
+      <td>${o.deliveryType==='livrezon'?`🚚 <b>Livrezon</b><br><span style="font-size:11.5px;">${esc(o.deliveryAddress||'—')}${o.zoneName?' ('+esc(o.zoneName)+')':''}<br>Frè: ${fmt(o.deliveryFee||0)}</span>`:'🏪 Retrè sou plas'}</td>
       <td class="mono">${fmt(o.total)}</td>
       <td><span class="badge gold">${o.paymentMethod==='natcash'?'NatCash':o.paymentMethod==='moncash'?'MonCash':esc(o.paymentMethod||'—')}</span></td>
       <td class="mono">${esc(o.reference||'—')}</td>
@@ -2014,18 +2413,20 @@ async function validateOrder(orderId){
   }
   if(!confirm('Konfime kòmand sa a? Estòk ap desann e yon fakti ap kreye pou '+order.customerName+'.')) return;
 
-  let customer=DB.customers.find(c=>c.phone===order.customerPhone);
+  const normP=x=>(x||'').replace(/\D/g,'');
+  let customer=DB.customers.find(c=>normP(c.phone)&&normP(c.phone)===normP(order.customerPhone));
   if(!customer){
-    customer={id:uid('c'), name:order.customerName, phone:order.customerPhone, address:'', walletBalance:0, creditBalance:0};
+    customer={id:uid('c'), name:order.customerName, phone:order.customerPhone, address:order.deliveryAddress||'', walletBalance:0, creditBalance:0};
     DB.customers.push(customer);
-  }
+    logActivity('Profil client créé automatiquement: '+customer.name);
+  }else if(!customer.address && order.deliveryAddress){ customer.address=order.deliveryAddress; }
   order.items.forEach(it=>{
     const p=DB.products.find(x=>x.id===it.productId);
     p.qty-=it.qty;
   });
   const breakdown={cash:order.total, credit:0, deposit:0}; // Kòmand konfime trete tankou Kach
   const invoiceNumber=nextInvoiceNumber();
-  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy'};
+  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy', createdBy:currentUser.name, deliveryType:order.deliveryType||'retrè', deliveryAddress:order.deliveryAddress||'', deliveryFee:order.deliveryFee||0};
   DB.invoices.push(invoice);
   logActivity('Valide kòmand an liy #'+order.id+' pou '+order.customerName+' — '+fmt(order.total));
   saveDB();
@@ -2034,6 +2435,8 @@ async function validateOrder(orderId){
   if(!ok){ alert('Fakti a kreye lokalman, men mizajou estati kòmand la sou sèvè a echwe — reesye pita.'); }
 
   const lines=order.items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)]);
+  if(order.deliveryType==='livrezon'){ lines.push(['Frè Livrezon', fmt(order.deliveryFee||0)]); lines.push(['Adrès Livrezon', order.deliveryAddress||'—']); }
+  else lines.push(['Mòd', 'Retrè sou plas']);
   lines.push(['Referans Peman', order.reference||'—']);
   lines.push(['TOTAL', fmt(order.total)]);
   sendWhatsAppReceipt(customer, 'Fakti — Kòmand Konfime', lines, 'Kòmand ou an konfime. Mèsi pou konfyans ou nan LeadStock!', invoiceNumber, invoiceNumber, 'Kliyan');
@@ -2103,7 +2506,7 @@ async function validateDebtRequest(requestId){
     const loan=DB.loans.find(l=>l.id===target);
     loan.paidAmount=(loan.paidAmount||0)+req.amount;
     if(loan.paidAmount>=loan.amount) loan.status='solde'; else loan.status='pasyèl';
-    DB.loanPayments.push({id:uid('rp'), date:todayISO(), loanId:loan.id, amount:req.amount, source:'Peman An Liy'});
+    DB.loanPayments.push({id:uid('rp'), date:todayISO(), loanId:loan.id, amount:req.amount, source:'Peman An Liy', createdBy:currentUser.name});
   }
   const txnNumber=nextTxnNumber('debtPayment','PDL');
   logActivity('Valide peman dèt/prè an liy #'+req.id+' — '+fmt(req.amount)+' pou '+customer.name);
@@ -2230,15 +2633,29 @@ function confirmReturn(invoiceId){
   else if(method==='dedwi') customer.creditBalance=Math.max(0,(customer.creditBalance||0)-total);
   const txnNumber=nextTxnNumber('return','RM');
   const rec={id:uid('ret'), txnNumber, date:todayISO(), invoiceId, customerId:inv.customerId, items, total, method,
-    reason:document.getElementById('retReason').value.trim()};
+    reason:document.getElementById('retReason').value.trim(), createdBy:currentUser.name};
   DB.returns.push(rec);
+
+  /* Si TOUT atik fakti a fin retounen (menm si machandiz la te deja
+     livre), fakti a elimine nèt nan istorik vant yo — se pa yon vant
+     ki reyalize ankò depi kliyan an retounen tout bagay. */
+  const isFullReturn=inv.items.every(it=>returnedQtyForItem(invoiceId, it.productId)>=it.qty);
+  if(isFullReturn){
+    DB.invoices=DB.invoices.filter(i=>i.id!==invoiceId);
+    logActivity('Retou konplè — fakti #'+(inv.invoiceNumber||inv.id)+' elimine nan istorik vant yo');
+  }
   saveDB();
+
   const methodLabel=method==='depo'?'Kredite sou Depo':method==='dedwi'?'Diminye Dèt sou Kont':'Ranbouse Kach';
   const lines=items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)]);
   lines.push(['Mòd Ranbousman', methodLabel]);
   lines.push(['TOTAL', fmt(total)]);
+  if(isFullReturn) lines.push(['Estati Fakti', 'Elimine (Retou Konplè)']);
   sendWhatsAppReceipt(customer, 'Resi Retou Machandiz', lines, rec.reason?('Rezon: '+rec.reason):'', txnNumber, txnNumber, 'Kliyan');
   window._returnMethod=null;
+  if(isFullReturn){
+    alert('Retou konplè konfime — fakti #'+(inv.invoiceNumber||inv.id)+' elimine nèt nan istorik vant yo.');
+  }
   renderReturns();
 }
 function renderReturnsTable(){
@@ -2278,7 +2695,7 @@ function finTab(t){
     document.getElementById('finTab'+k.charAt(0).toUpperCase()+k.slice(1)).classList.toggle('active', k===t);
   });
 }
-function custOptions(){ return DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); }
+function custOptions(){ return DB.customers.filter(c=>!c.blocked).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); }
 
 function renderFinDepo(){
   document.getElementById('finTabDepo').innerHTML=`
@@ -2287,6 +2704,8 @@ function renderFinDepo(){
       <div class="form-grid">
         <div class="field"><label>Kliyan *</label><select id="depCustomer">${custOptions()}</select></div>
         <div class="field"><label>Montan (HTG) *</label><input id="depAmount" type="number"></div>
+        <div class="field"><label>Mwayen Peman</label><select id="depMethod"><option value="kach">Kach</option><option value="natcash">NatCash</option><option value="moncash">MonCash</option><option value="lòt">Lòt</option></select></div>
+        <div class="field"><label>Referans Tranzaksyon</label><input id="depRef" placeholder="Opsyonèl"></div>
         <div class="field full"><label>Ajan ki Resevwa</label><input id="depAgent" value="${esc(currentUser?currentUser.name:'')}"></div>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" onclick="saveDeposit()">Konfime Depo</button></div>
@@ -2295,9 +2714,9 @@ function renderFinDepo(){
       <div class="panel-head"><span class="panel-title">Istorik Depo <span class="count">(${DB.deposits.length})</span></span></div>
       <div id="depTableWrap"></div>
     </div>`;
-  renderFinHistTable('deposits','depTableWrap',['Dat','Kliyan','Montan','Ajan'],r=>{
+  renderFinHistTable('deposits','depTableWrap',['Dat','Kliyan','Montan','Mwayen','Referans','Ajan'],r=>{
     const c=DB.customers.find(x=>x.id===r.customerId);
-    return [r.date, c?c.name:'—', fmt(r.amount), r.agent||'—'];
+    return [r.date, c?c.name:'—', fmt(r.amount), r.method||'—', r.reference||'—', r.agent||'—'];
   });
 }
 function saveDeposit(){
@@ -2307,9 +2726,11 @@ function saveDeposit(){
   const customer=DB.customers.find(c=>c.id===customerId);
   customer.walletBalance=(customer.walletBalance||0)+amount;
   const txnNumber=nextTxnNumber('deposit','DEP');
-  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, agent:document.getElementById('depAgent').value.trim()};
+  const method=document.getElementById('depMethod').value;
+  const reference=document.getElementById('depRef').value.trim();
+  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, method, reference, agent:document.getElementById('depAgent').value.trim(), createdBy:currentUser.name};
   DB.deposits.push(rec); saveDB();
-  sendWhatsAppReceipt(customer,'Resi Depo',[['Montan Depoze',fmt(amount)],['Ajan',rec.agent||'—']],'Mèsi pou depo w la.',txnNumber,txnNumber,'Kliyan');
+  sendWhatsAppReceipt(customer,'Resi Depo',[['Montan Depoze',fmt(amount)],['Mwayen',method],['Referans',reference||'—'],['Ajan',rec.agent||'—']],'Mèsi pou depo w la.',txnNumber,txnNumber,'Kliyan');
   renderFinance(); finTab('depo');
 }
 
@@ -2340,7 +2761,7 @@ function saveWithdrawal(){
   if(amount>(customer.walletBalance||0)){ alert('Balans depo kliyan an pa sifi pou retrè sa a.'); return; }
   customer.walletBalance-=amount;
   const txnNumber=nextTxnNumber('withdrawal','RET');
-  const rec={id:uid('wd'), txnNumber, date:todayISO(), customerId, amount};
+  const rec={id:uid('wd'), txnNumber, date:todayISO(), customerId, amount, createdBy:currentUser.name};
   DB.withdrawals.push(rec); saveDB();
   sendWhatsAppReceipt(customer,'Resi Retrè',[['Montan Retire',fmt(amount)]],'Tranzaksyon retrè konfime.',txnNumber,txnNumber,'Kliyan');
   renderFinance(); finTab('retre');
@@ -2368,16 +2789,32 @@ function renderFinPrete(){
   const rows=[...DB.loans].reverse();
   const wrap=document.getElementById('loanTableWrap');
   if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Poko gen prè.</div>'; return; }
-  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Montan</th><th>Peye</th><th>Rete</th><th>Dat Rebousman</th><th>Otorize Pa</th><th>Estati</th></tr></thead>
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Montan</th><th>Peye</th><th>Rete</th><th>Taux</th><th>Dat Rebousman</th><th>Otorize Pa</th><th>Estati</th><th></th></tr></thead>
   <tbody>${rows.map(l=>{
     const c=DB.customers.find(x=>x.id===l.customerId);
     const rest=l.amount-(l.paidAmount||0);
     const overdue=l.status!=='solde' && l.dueDate<todayISO();
     return `<tr><td class="mono">${l.date}</td><td>${esc(c?c.name:'—')}</td><td class="mono">${fmt(l.amount)}</td><td class="mono">${fmt(l.paidAmount||0)}</td>
-    <td class="mono ${rest>0?'tag-low':''}">${fmt(rest)}</td><td class="mono ${overdue?'tag-low':''}">${l.dueDate}</td>
+    <td class="mono ${rest>0?'tag-low':''}">${fmt(rest)}</td><td class="mono">${l.interestRate||0}%</td><td class="mono ${overdue?'tag-low':''}">${l.dueDate}</td>
     <td>${esc(l.authorizedBy||'—')}</td>
-    <td><span class="badge ${l.status==='solde'?'green':overdue?'red':'gold'}">${l.status==='solde'?'Solde':overdue?'An Reta':'Aktif'}</span></td></tr>`;
+    <td><span class="badge ${l.status==='solde'?'green':overdue?'red':'gold'}">${l.status==='solde'?'Solde':overdue?'An Reta':'Aktif'}</span></td>
+    <td>${currentUser.role==='admin' && l.status!=='solde' ? `<button class="icon-btn" onclick="adjustLoanInterestRate('${l.id}')">Ajuster taux</button>` : ''}</td></tr>`;
   }).join('')}</tbody></table></div>`;
+}
+/* L'Admin seul a le droit d'ajuster le taux d'intérêt d'un prêt existant. */
+function adjustLoanInterestRate(loanId){
+  if(!requireAdminOrBlock('ajuster le taux d\'intérêt')) return;
+  const loan=DB.loans.find(l=>l.id===loanId);
+  if(!loan) return;
+  const input=prompt('Nouveau taux d\'intérêt (%) pour ce prêt :', loan.interestRate||0);
+  if(input===null) return;
+  const rate=Number(input);
+  if(isNaN(rate)||rate<0){ alert('Taux invalide.'); return; }
+  const oldRate=loan.interestRate||0;
+  loan.interestRate=rate;
+  logActivity('Ajusté le taux d\'intérêt du prêt #'+(loan.txnNumber||loan.id)+': '+oldRate+'% → '+rate+'%');
+  saveDB();
+  renderFinPrete();
 }
 function saveLoan(){
   const customerId=document.getElementById('loCustomer').value;
@@ -2399,7 +2836,7 @@ function saveLoan(){
 }
 function createLoanRecord(loanData, authorizedBy){
   const txnNumber=nextTxnNumber('loan','PRE');
-  const rec={id:uid('lo'), txnNumber, date:todayISO(), status:'aktif', paidAmount:0, authorizedBy, ...loanData};
+  const rec={id:uid('lo'), txnNumber, date:todayISO(), status:'aktif', paidAmount:0, authorizedBy, createdBy:currentUser.name, ...loanData};
   DB.loans.push(rec);
   logActivity('Prè kreye ('+fmt(rec.amount)+') — otorize pa '+authorizedBy);
   saveDB();
@@ -2478,7 +2915,7 @@ function saveLoanPayment(){
   loan.paidAmount=(loan.paidAmount||0)+amount;
   if(loan.paidAmount>=loan.amount) loan.status='solde'; else loan.status='pasyèl';
   const txnNumber=nextTxnNumber('loanPayment','RBS');
-  const rec={id:uid('rp'), txnNumber, date:todayISO(), loanId, amount};
+  const rec={id:uid('rp'), txnNumber, date:todayISO(), loanId, amount, createdBy:currentUser.name};
   DB.loanPayments.push(rec); saveDB();
   const customer=DB.customers.find(c=>c.id===loan.customerId);
   sendWhatsAppReceipt(customer,'Resi Ranbousman Prè',[['Montan Peye',fmt(amount)],['Rete sou Prè a',fmt(loan.amount-loan.paidAmount)]],'Mèsi pou ranbousman an.',txnNumber,txnNumber,'Kliyan');
@@ -2501,6 +2938,21 @@ function renderReports(){
       <div class="panel-head"><span class="panel-title">🔔 Rapèl Kliyan an Reta</span></div>
       <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Kliyan ki gen dèt sou kont oswa prè an reta — voye yon rapèl WhatsApp yon sèl klik.</p>
       <div id="overdueRemindersWrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">👤 Rapò pa Itilizatè</span></div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Detay aktivite chak itilizatè: kantite fakti, vant total, depo/retrè, depans, ak kòmand founisè yo trete. Konpare pèfòmans yo kòt pou kòt sou nenpòt peryòd.</p>
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="field"><label>Dat Kòmanse</label><input id="urFrom" type="date" value="${addDays(-30)}" onchange="renderUserReportTable()"></div>
+        <div class="field"><label>Dat Fini</label><input id="urTo" type="date" value="${todayISO()}" onchange="renderUserReportTable()"></div>
+        <div class="field"><button class="btn btn-sm" style="margin-top:22px;" onclick="document.getElementById('urFrom').value='2000-01-01';renderUserReportTable();">Tout Peryòd</button></div>
+      </div>
+      <div class="chart-box" style="height:200px;margin-bottom:14px;"><canvas id="userCompareChart"></canvas></div>
+      <div id="userReportWrap"></div>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="btn" onclick="exportUserReportExcel()">⬇ Excel</button>
+        <button class="btn" onclick="exportUserReportPDF()">⬇ PDF</button>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-head"><span class="panel-title">📈 Rapò Vant</span></div>
@@ -2569,6 +3021,85 @@ function renderReports(){
       <div id="productReportResult" style="margin-top:16px;"></div>
     </div>`;
   renderExpirationReportTable();
+  renderUserReportTable();
+}
+function getUserReportRows(from, to){
+  from=from||'2000-01-01'; to=to||'9999-12-31';
+  const inRange=d=>d>=from && d<=to;
+  const users=[...new Set([
+    ...DB.invoices.map(i=>i.createdBy),
+    ...DB.deposits.map(d=>d.createdBy),
+    ...DB.withdrawals.map(w=>w.createdBy),
+    ...DB.loans.map(l=>l.createdBy),
+    ...DB.loanPayments.map(p=>p.createdBy),
+    ...DB.returns.map(r=>r.createdBy),
+    ...DB.expenses.map(e=>e.createdBy),
+    ...DB.supplierOrders.map(o=>o.createdBy)
+  ].filter(Boolean))];
+  return users.sort().map(name=>{
+    const userInvoices=DB.invoices.filter(i=>i.createdBy===name && inRange(i.date));
+    return {
+      name,
+      invoiceCount:userInvoices.length,
+      salesTotal:userInvoices.reduce((s,i)=>s+i.total,0),
+      depositsTotal:DB.deposits.filter(d=>d.createdBy===name && inRange(d.date)).reduce((s,d)=>s+d.amount,0),
+      withdrawalsTotal:DB.withdrawals.filter(w=>w.createdBy===name && inRange(w.date)).reduce((s,w)=>s+w.amount,0),
+      loansTotal:DB.loans.filter(l=>l.createdBy===name && inRange(l.date)).reduce((s,l)=>s+l.amount,0),
+      loanPaymentsTotal:DB.loanPayments.filter(p=>p.createdBy===name && inRange(p.date)).reduce((s,p)=>s+p.amount,0),
+      returnsTotal:DB.returns.filter(r=>r.createdBy===name && inRange(r.date)).reduce((s,r)=>s+r.total,0),
+      expensesTotal:DB.expenses.filter(e=>e.createdBy===name && inRange(e.date)).reduce((s,e)=>s+e.amount,0),
+      supplierOrdersCount:DB.supplierOrders.filter(o=>o.createdBy===name && inRange(o.date)).length
+    };
+  });
+}
+function renderUserReportTable(){
+  const from=document.getElementById('urFrom')?.value||'2000-01-01';
+  const to=document.getElementById('urTo')?.value||todayISO();
+  const rows=getUserReportRows(from,to);
+  const wrap=document.getElementById('userReportWrap');
+  if(!wrap) return;
+  if(rows.length===0){ wrap.innerHTML='<div class="empty-state">Pa gen istorik pou peryòd sa a (fonksyon sa a swiv sèlman tranzaksyon ki fèt apre dènye mizajou a).</div>'; if(charts.userCompare){charts.userCompare.destroy();charts.userCompare=null;} return; }
+  wrap.innerHTML=`<div style="overflow-x:auto;"><table><thead><tr><th>Itilizatè</th><th>Fakti</th><th>Total Vant</th><th>Depo</th><th>Retrè</th><th>Prè Bay</th><th>Ranbousman</th><th>Retou</th><th>Depans</th><th>Kòmand Founisè</th></tr></thead>
+  <tbody>${rows.map(r=>`<tr>
+    <td>${esc(r.name)}</td><td class="mono">${r.invoiceCount}</td><td class="mono">${fmt(r.salesTotal)}</td>
+    <td class="mono">${fmt(r.depositsTotal)}</td><td class="mono">${fmt(r.withdrawalsTotal)}</td>
+    <td class="mono">${fmt(r.loansTotal)}</td><td class="mono">${fmt(r.loanPaymentsTotal)}</td>
+    <td class="mono">${fmt(r.returnsTotal)}</td><td class="mono">${fmt(r.expensesTotal)}</td>
+    <td class="mono">${r.supplierOrdersCount}</td>
+  </tr>`).join('')}</tbody></table></div>`;
+  const ctx=document.getElementById('userCompareChart');
+  if(ctx){
+    if(charts.userCompare) charts.userCompare.destroy();
+    charts.userCompare=new Chart(ctx,{
+      type:'bar',
+      data:{labels:rows.map(r=>r.name),datasets:[{label:'Total Vant',data:rows.map(r=>r.salesTotal),backgroundColor:'#2f6b3a',borderRadius:5}]},
+      options:{plugins:{legend:{display:false}},scales:{
+        x:{grid:{display:false},ticks:{color:'#6b5f47',font:{family:'Inter',size:11}}},
+        y:{grid:{color:'#e5d9b8'},ticks:{color:'#6b5f47',font:{family:'JetBrains Mono',size:10}}}
+      }}
+    });
+  }
+}
+function exportUserReportExcel(){
+  const from=document.getElementById('urFrom')?.value; const to=document.getElementById('urTo')?.value;
+  const rows=getUserReportRows(from,to).map(r=>({
+    Itilizatè:r.name, Fakti:r.invoiceCount, 'Total Vant':r.salesTotal, Depo:r.depositsTotal,
+    Retrè:r.withdrawalsTotal, 'Prè Bay':r.loansTotal, Ranbousman:r.loanPaymentsTotal,
+    Retou:r.returnsTotal, Depans:r.expensesTotal, 'Kòmand Founisè':r.supplierOrdersCount
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Pa Itilizatè'); XLSX.writeFile(wb,'LeadStock_Rapo_Itilizatè_'+todayISO()+'.xlsx');
+}
+function exportUserReportPDF(){
+  const from=document.getElementById('urFrom')?.value; const to=document.getElementById('urTo')?.value;
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text('LeadStock — Rapò pa Itilizatè',14,16);
+  doc.setFontSize(9); doc.setTextColor(120,110,90);
+  doc.text('Peryòd: '+(from||'—')+' → '+(to||'—'),14,22);
+  doc.autoTable({startY:28, head:[['Itilizatè','Fakti','Total Vant','Depo','Retrè','Prè Bay','Ranbousman','Retou','Depans','Kòm. Founisè']],
+    body:getUserReportRows(from,to).map(r=>[r.name,r.invoiceCount,fmt(r.salesTotal),fmt(r.depositsTotal),fmt(r.withdrawalsTotal),fmt(r.loansTotal),fmt(r.loanPaymentsTotal),fmt(r.returnsTotal),fmt(r.expensesTotal),r.supplierOrdersCount]),
+    styles:{fontSize:8}, headStyles:{fillColor:[47,107,58]}});
+  doc.save('LeadStock_Rapo_Itilizatè_'+todayISO()+'.pdf');
 }
 function getExpirationRows(){
   return DB.stockIn.filter(r=>r.expirationDate).map(r=>{
@@ -3081,12 +3612,13 @@ async function saveExpense(){
     id:uid('exp'), date:document.getElementById('expDate').value||todayISO(),
     category:document.getElementById('expCategory').value,
     description:document.getElementById('expDesc').value.trim(),
-    amount, proofPhoto
+    amount, proofPhoto, createdBy:currentUser.name
   });
   logActivity('Ajoute depans: '+fmt(amount));
   saveDB(); renderExpenses();
 }
 function deleteExpense(id){
+  if(!requireAdminOrBlock('efase yon depans')) return;
   if(!confirm('Efase depans sa a?')) return;
   DB.expenses=DB.expenses.filter(e=>e.id!==id);
   logActivity('Efase yon depans');
@@ -3159,7 +3691,7 @@ function saveSupplierOrder(){
   const supplierId=document.getElementById('soFounisè').value;
   const total=supplierCart.reduce((s,it)=>s+it.qty*it.unitPrice,0);
   const txnNumber=nextTxnNumber('supplierOrder','KF');
-  const order={id:uid('supo'), txnNumber, date:todayISO(), supplierId, items:[...supplierCart], total, status:'an_atant'};
+  const order={id:uid('supo'), txnNumber, date:todayISO(), supplierId, items:[...supplierCart], total, status:'an_atant', createdBy:currentUser.name};
   DB.supplierOrders.push(order);
   logActivity('Kreye kòmand founisè pou '+fmt(total));
   saveDB();
@@ -3277,28 +3809,8 @@ function sendSupplierReceivingConfirmation(order, supplier, receiving){
   if(receiving.address) linesForPDF.push(['Adrès', receiving.address]);
 
   const party=supplier?{name:supplier.name, phone:supplier.phone}:null;
-  const doc=buildReceiptPDF('Konfimasyon Resepsyon', party, linesForPDF, 'Nou konfime nou resevwa machandiz la jan sa dekri anwo a. Mèsi!', order.txnNumber||order.id, 'Founisè');
-  finalizeSupplierDoc(doc, supplier, order);
-}
-function finalizeSupplierDoc(doc, supplier, order){
-  const blob=doc.output('blob');
-  const cleanName=('Resepsyon_'+(order.txnNumber||order.id)).replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
-  const file=new File([blob], cleanName, {type:'application/pdf'});
-  const caption=`LeadStock — Konfimasyon Resepsyon — #${order.txnNumber||order.id}`;
-
-  const trySend=async()=>{
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file], title:caption, text:caption}); return; }
-      catch(e){ /* moun nan anile — ok */ return; }
-    }
-    doc.save(cleanName);
-    if(!supplier || !supplier.phone) return;
-    const msg=`*${caption}*\n_Resi PDF la telechaje sou aparèy la — tanpri tache l nan konvèsasyon sa a._`;
-    const phone=supplier.phone.replace(/[^0-9]/g,'');
-    const url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
-    window.open(url,'_blank');
-  };
-  trySend();
+  const txnNumber=order.txnNumber||order.id;
+  sendWhatsAppReceipt(party, 'Konfimasyon Resepsyon', linesForPDF, 'Nou konfime nou resevwa machandiz la jan sa dekri anwo a. Mèsi!', txnNumber, txnNumber, 'Founisè');
 }
 
 /* =====================================================================
