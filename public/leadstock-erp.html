@@ -311,6 +311,12 @@ tbody tr:hover{background:var(--bg-panel2);}
 .kv-loan-line{font-size:12px;color:var(--text-dim);padding:3px 0 3px 10px;border-left:2px solid var(--line);margin-bottom:3px;}
 .kv-search-bar{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:22px;background:#fff;font-size:14px;margin-bottom:16px;}
 .kv-search-bar:focus{outline:none;border-color:var(--green);}
+.kv-chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;}
+.kv-chip{flex:0 0 auto;padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--text-dim);}
+.kv-chip.active{background:var(--green);border-color:var(--green);color:#fff;}
+.kv-radio-row{display:flex;gap:10px;margin-bottom:12px;}
+.kv-radio{flex:1;border:2px solid var(--line);border-radius:10px;padding:11px 8px;text-align:center;font-weight:700;font-size:13px;background:#fff;color:var(--text-dim);}
+.kv-radio.sel{border-color:var(--green);background:var(--green-pale);color:var(--green);}
 .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .kv-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:12px;padding:12px;position:relative;}
 .kv-card img{width:100%;height:90px;object-fit:cover;border-radius:8px;background:var(--bg-panel2);margin-bottom:8px;}
@@ -323,6 +329,8 @@ tbody tr:hover{background:var(--bg-panel2);}
 .kv-add-btn{width:100%;margin-top:8px;padding:8px;border:none;border-radius:7px;background:var(--green);color:#fff;font-weight:700;font-size:12.5px;}
 .kv-add-btn:disabled{background:var(--line);color:var(--text-faint);cursor:not-allowed;}
 .kv-add-btn:hover:not(:disabled){background:var(--green-soft);}
+.kv-ghost-btn{width:100%;margin-top:6px;padding:7px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--text-dim);font-weight:600;font-size:11.5px;}
+.kv-ghost-btn:hover{border-color:var(--green);color:var(--green);}
 .kv-empty{text-align:center;padding:50px 20px;color:var(--text-faint);}
 .kv-empty .big{font-family:var(--font-display);font-size:18px;color:var(--text-dim);margin-bottom:5px;}
 .kv-cart-fab{position:fixed;bottom:18px;right:18px;background:var(--green);color:#fff;border:none;border-radius:30px;padding:14px 20px;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;z-index:30;}
@@ -418,6 +426,7 @@ tbody tr:hover{background:var(--bg-panel2);}
     <div class="nav-group">
       <div class="nav-group-label">Analiz</div>
       <div class="nav-item" data-view="reports"><span class="ic">📈</span>Rapò</div>
+      <div class="nav-item" data-view="bizsettings" id="navBiz"><span class="ic">⚙️</span>Paramèt Biznis</div>
       <div class="nav-item" data-view="users" id="navUsers"><span class="ic">🔐</span>Itilizatè</div>
       <div class="nav-item" data-view="auditlog" id="navAudit"><span class="ic">📜</span>Jounal Aktivite</div>
       <div class="nav-item" data-view="orders"><span class="ic">🛍️</span>Kòmand An Atant</div>
@@ -470,6 +479,7 @@ tbody tr:hover{background:var(--bg-panel2);}
 
   <div class="kv-wrap" id="kvPageCatalog">
     <input class="kv-search-bar" id="kvSearchBox" placeholder="Chèche yon pwodwi..." oninput="renderClientCatalog()">
+    <div class="kv-chips" id="kvCatChips"></div>
     <div class="kv-grid" id="kvCatalogGrid"></div>
   </div>
 
@@ -660,6 +670,12 @@ function applyDBDefaults(data){
   if(data.settings.receiptFormat===undefined) data.settings.receiptFormat='a4';
   if(data.settings.natcashNumber===undefined) data.settings.natcashNumber='';
   if(data.settings.moncashNumber===undefined) data.settings.moncashNumber='';
+  if(data.settings.businessAddress===undefined) data.settings.businessAddress='';
+  if(!Array.isArray(data.settings.deliveryZones)) data.settings.deliveryZones=[];
+  if(data.settings.defaultCreditLimit===undefined) data.settings.defaultCreditLimit=0;
+  if(!Array.isArray(data.settings.categories)) data.settings.categories=[];
+  if(!data.settings.reminders) data.settings.reminders={enabled:false,hour:8,rate:0,period:'mensuel',mode:'retard',instructions:''};
+  if(!data.reminderLog) data.reminderLog=[];
   return data;
 }
 
@@ -753,6 +769,7 @@ function enterApp(){
   document.getElementById('navUsers').style.display=currentUser.role==='admin'?'flex':'none';
   document.getElementById('navAudit').style.display=currentUser.role==='admin'?'flex':'none';
   document.getElementById('navSupplierOrders').style.display=currentUser.role==='admin'?'flex':'none';
+  document.getElementById('navBiz').style.display=currentUser.role==='admin'?'flex':'none';
   updateServerStatusChip();
   startAutoSync();
   goView('dashboard');
@@ -869,9 +886,17 @@ async function loadClientCatalog(){
     document.getElementById('kvCatalogGrid').outerHTML=`<div class="kv-empty" id="kvCatalogGrid"><div class="big">Pa ka konekte ak katalòg la</div><div>Verifye lyen an oswa eseye ankò pita.</div></div>`;
   }
 }
+let clientCat='';
+function renderClientChips(){
+  const cats=[...new Set(CLIENT_CATALOG.products.map(p=>p.category||'Lòt'))].sort();
+  const el=document.getElementById('kvCatChips'); if(!el) return;
+  el.innerHTML=cats.length<2?'':`<button class="kv-chip ${clientCat===''?'active':''}" onclick="setClientCat('')">Tout</button>`+cats.map(c=>`<button class="kv-chip ${clientCat===c?'active':''}" data-c="${esc(c)}" onclick="setClientCat(this.dataset.c)">${esc(c)}</button>`).join('');
+}
+function setClientCat(c){ clientCat=c; renderClientCatalog(); }
 function renderClientCatalog(){
+  renderClientChips();
   const q=(document.getElementById('kvSearchBox').value||'').toLowerCase();
-  const items=CLIENT_CATALOG.products.filter(p=>!q || p.name.toLowerCase().includes(q));
+  const items=CLIENT_CATALOG.products.filter(p=>(!q || p.name.toLowerCase().includes(q)) && (!clientCat || (p.category||'Lòt')===clientCat));
   const grid=document.getElementById('kvCatalogGrid');
   if(items.length===0){
     grid.outerHTML='<div class="kv-empty" id="kvCatalogGrid"><div class="big">Pa gen pwodwi</div><div>Eseye yon lòt rechèch.</div></div>';
@@ -887,8 +912,22 @@ function renderClientCatalog(){
       <div class="price">${fmt(p.sellPrice)}</div>
       <div class="stockline">${p.blocked?'Pa disponib kounye a':out?'Fini pou kounye a':p.qty+' '+(p.unit||'')+' disponib'}</div>
       <button class="kv-add-btn" ${out?'disabled':''} onclick="addToClientCart('${p.id}')">${out?'Pa Disponib':'+ Ajoute'}</button>
+      ${out && !p.blocked?`<button class="kv-ghost-btn" onclick="requestProductWatch('${p.id}','${esc(p.name).replace(/'/g,"\\'")}')">🔔 Notifye m lè l disponib</button>`:''}
     </div>`;
   }).join('');
+}
+async function requestProductWatch(productId, productName){
+  const phone=prompt('Antre nimewo telefòn ou (WhatsApp) pou nou notifye w lè "'+productName+'" disponib ankò:');
+  if(!phone||!phone.trim()) return;
+  try{
+    const res=await fetch('/api/public/watch-product',{
+      method:'POST', headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
+      body:JSON.stringify({productId, phone:phone.trim(), name:''})
+    });
+    const data=await res.json();
+    if(!res.ok){ alert(data.error||'Yon erè rive.'); return; }
+    alert(data.already?'Ou deja enskri pou pwodwi sa a.':'Nou pral notifye w sou WhatsApp lè pwodwi a disponib ankò!');
+  }catch(e){ alert('Pa ka konekte ak sèvè a.'); }
 }
 function addToClientCart(productId){
   const p=CLIENT_CATALOG.products.find(x=>x.id===productId);
@@ -941,16 +980,26 @@ function changeClientQty(i,delta){
   renderClientCartStep();
 }
 function goToClientCheckout(){
+  clientDelType='retrè';
   const total=clientCart.reduce((s,c)=>s+c.qty*c.price,0);
   document.getElementById('kvCartModalBox').innerHTML=`
     <div class="kv-modal-title">📱 Peman</div>
     <div class="kv-error-box" id="kvCheckoutError"></div>
     <div class="kv-pay-instructions">
-      Voye <b>${fmt(total)}</b> sou youn nan nimewo sa yo, epi kenbe referans tranzaksyon an:<br><br>
+      Voye <b id="kvPayTotal">${fmt(total)}</b> sou youn nan nimewo sa yo, epi kenbe referans tranzaksyon an:<br><br>
       ${CLIENT_CATALOG.natcashNumber?`📲 <b>NatCash:</b> ${esc(CLIENT_CATALOG.natcashNumber)}<br>`:''}
       ${CLIENT_CATALOG.moncashNumber?`📲 <b>MonCash:</b> ${esc(CLIENT_CATALOG.moncashNumber)}`:''}
       ${(!CLIENT_CATALOG.natcashNumber && !CLIENT_CATALOG.moncashNumber)?'Kontakte biznis la pou enfòmasyon peman.':''}
     </div>
+    <div class="kv-radio-row">
+      <div class="kv-radio sel" id="kvDelPickup" onclick="setClientDelivery('retrè')">🏪 Retrè sou plas</div>
+      <div class="kv-radio" id="kvDelShip" onclick="setClientDelivery('livrezon')">🚚 Livrezon</div>
+    </div>
+    <div id="kvDelBox" style="display:none;">
+      <div class="kv-field"><label>Adrès Livrezon *</label><input id="kvCoAddr" placeholder="Rue, katye, vil..."></div>
+      ${(CLIENT_CATALOG.deliveryZones||[]).length?`<div class="kv-field"><label>Zòn *</label><select id="kvCoZone" onchange="updateClientTotal()">${CLIENT_CATALOG.deliveryZones.map(z=>`<option value="${z.id}">${esc(z.name)} — ${fmt(z.fee)}</option>`).join('')}</select></div>`:'<p style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Frè livrezon an ap konfime pa biznis la.</p>'}
+    </div>
+    <div id="kvPickupInfo" class="kv-pay-instructions" style="margin-bottom:12px;">🏪 Vin pran kòmand lan nan: <b>${esc(CLIENT_CATALOG.businessAddress||'adrès biznis la (kontakte nou)')}</b></div>
     <div class="kv-field"><label>Non Ou *</label><input id="kvCoName" placeholder="Non konplè"></div>
     <div class="kv-field"><label>Telefòn Ou (WhatsApp) *</label><input id="kvCoPhone" placeholder="509xxxxxxxx"></div>
     <div class="kv-field">
@@ -965,14 +1014,34 @@ function goToClientCheckout(){
     <button class="kv-btn-ghost-full" onclick="renderClientCartStep()">Retounen</button>
   `;
 }
+let clientDelType='retrè';
+function clientDeliveryFee(){
+  if(clientDelType!=='livrezon') return 0;
+  const z=document.getElementById('kvCoZone'); if(!z) return 0;
+  const zone=(CLIENT_CATALOG.deliveryZones||[]).find(x=>x.id===z.value); return zone?zone.fee:0;
+}
+function updateClientTotal(){
+  const base=clientCart.reduce((s,c)=>s+c.qty*c.price,0);
+  const el=document.getElementById('kvPayTotal'); if(el) el.textContent=fmt(base+clientDeliveryFee());
+}
+function setClientDelivery(t){
+  clientDelType=t;
+  document.getElementById('kvDelPickup').classList.toggle('sel',t==='retrè');
+  document.getElementById('kvDelShip').classList.toggle('sel',t==='livrezon');
+  document.getElementById('kvDelBox').style.display=t==='livrezon'?'block':'none';
+  document.getElementById('kvPickupInfo').style.display=t==='livrezon'?'none':'block';
+  updateClientTotal();
+}
 async function submitClientOrder(total){
   const name=document.getElementById('kvCoName').value.trim();
   const phone=document.getElementById('kvCoPhone').value.trim();
   const method=document.getElementById('kvCoMethod').value;
   const reference=document.getElementById('kvCoRef').value.trim();
   const err=document.getElementById('kvCheckoutError');
-  if(!name||!phone||!reference){
-    err.textContent='Tanpri ranpli tout chan obligatwa yo.';
+  const addr=(document.getElementById('kvCoAddr')||{}).value||'';
+  const zoneEl=document.getElementById('kvCoZone');
+  if(!name||!phone||!reference||(clientDelType==='livrezon'&&!addr.trim())){
+    err.textContent=clientDelType==='livrezon'&&!addr.trim()&&name&&phone&&reference?'Antre adrès livrezon an.':'Tanpri ranpli tout chan obligatwa yo.';
     err.style.display='block';
     return;
   }
@@ -983,7 +1052,8 @@ async function submitClientOrder(total){
       body:JSON.stringify({
         customerName:name, customerPhone:phone,
         items:clientCart.map(c=>({productId:c.productId, qty:c.qty})),
-        reference, paymentMethod:method
+        reference, paymentMethod:method,
+        deliveryType:clientDelType, deliveryAddress:clientDelType==='livrezon'?addr.trim():'', zoneId:zoneEl?zoneEl.value:''
       })
     });
     const data=await res.json();
@@ -1038,7 +1108,7 @@ const VIEW_TITLES={
   expenses:'Depans/Chaj', finance:'Depo · Retrè · Prè',
   reports:'Rapò', users:'Jesyon Itilizatè', auditlog:'Jounal Aktivite',
   orders:'Kòmand An Atant', supplierOrders:'Kòmand Founisè',
-  backup:'Sovgad Done', serverConfig:'Sèvè / Backend'
+  backup:'Sovgad Done', serverConfig:'Sèvè / Backend', bizsettings:'Paramèt Biznis'
 };
 
 function goView(view){
@@ -1060,7 +1130,7 @@ function renderView(view){
     finance:renderFinance,
     reports:renderReports, users:renderUsers, auditlog:renderAuditLog,
     orders:renderOrders, supplierOrders:renderSupplierOrders,
-    backup:renderBackup, serverConfig:renderServerConfig
+    backup:renderBackup, serverConfig:renderServerConfig, bizsettings:renderBizSettings
   };
   c.innerHTML='';
   (renderers[view]||(()=>{c.innerHTML='<div class="empty-state">Vi pa jwenn.</div>';}))();
@@ -1325,6 +1395,7 @@ function selectPayOpt(m){
   const {total, customerId}=window._payState;
   const customer=DB.customers.find(c=>c.id===customerId);
   const bal=customer?customerBalanceSummary(customer):{wallet:0};
+  if(m==='dedwi'){ extra.innerHTML=creditPreviewHTML(customer,total); window._payState.remainderMethod=null; return; }
   if(m==='depo' && bal.wallet < total){
     const short=total-bal.wallet;
     extra.innerHTML=`
@@ -1334,7 +1405,7 @@ function selectPayOpt(m){
       <div class="pay-options" style="grid-template-columns:1fr 1fr;">
         <div class="pay-opt" data-r="kach" onclick="selectRemainder('kach')"><span class="ic">💵</span>Kach pou rès la</div>
         <div class="pay-opt" data-r="dedwi" onclick="selectRemainder('dedwi')"><span class="ic">📒</span>Dedwi pou rès la</div>
-      </div>`;
+      </div><div id="remPreview"></div>`;
   }else{
     extra.innerHTML='';
     window._payState.remainderMethod=null;
@@ -1342,6 +1413,8 @@ function selectPayOpt(m){
 }
 function selectRemainder(m){
   window._payState.remainderMethod=m;
+  const rp=document.getElementById('remPreview');
+  if(rp){ const cu=DB.customers.find(c=>c.id===window._payState.customerId); const w=(cu&&cu.walletBalance)||0; rp.innerHTML=m==='dedwi'?creditPreviewHTML(cu,window._payState.total-w):''; }
   document.querySelectorAll('#payExtra .pay-opt').forEach(el=>el.classList.toggle('selected', el.getAttribute('data-r')===m));
 }
 function confirmPayment(){
@@ -1361,8 +1434,24 @@ function confirmPayment(){
       if(st.remainderMethod==='kach') breakdown.cash=short; else breakdown.credit=short;
     }
   }
+  if(breakdown.credit>0 && customer){
+    const lim=creditLimitOf(customer);
+    if(lim>0 && (customer.creditBalance||0)+breakdown.credit>lim){
+      alert('Limite de crédit dépassée.\nLimite: '+fmt(lim)+'\nDette actuelle: '+fmt(customer.creditBalance||0)+'\nDisponible: '+fmt(Math.max(0,lim-(customer.creditBalance||0)))+'\nMontant à crédit demandé: '+fmt(breakdown.credit));
+      return;
+    }
+  }
   closeModal();
   window._payConfirmCb(breakdown);
+}
+function creditLimitOf(c){ return c && c.creditLimit!==undefined ? c.creditLimit : (DB.settings.defaultCreditLimit||0); }
+function creditPreviewHTML(customer, amount){
+  if(!customer) return '';
+  const lim=creditLimitOf(customer), before=customer.creditBalance||0, after=before+amount;
+  const over=lim>0 && after>lim;
+  return `<div style="background:${over?'var(--red-pale)':'var(--green-pale)'};border-radius:8px;padding:10px 12px;font-size:12.5px;margin-bottom:10px;line-height:1.7;">
+    Solde avant: <b>${fmt(before)}</b> · Achat à crédit: <b>${fmt(amount)}</b> · Nouveau solde: <b>${fmt(after)}</b><br>
+    Limite: <b>${lim>0?fmt(lim):'aucune'}</b>${lim>0?' · Disponible: <b>'+fmt(Math.max(0,lim-before))+'</b>':''}${over?'<br><b>⚠️ Limite dépassée — refusé</b>':''}</div>`;
 }
 function applyPaymentToCustomer(customerId, breakdown){
   const customer=DB.customers.find(c=>c.id===customerId);
@@ -1536,6 +1625,7 @@ async function saveEntity(key,id){
     const el=document.getElementById('ef_'+f.key);
     data[f.key]=f.type==='number'?Number(el.value||0):el.value.trim();
   }
+  if(key==='products' && !data.category) data.category='Lòt';
   if(cfg.fields.some(f=>f.required) && !data[cfg.fields.find(f=>f.required).key]){
     alert('Tanpri ranpli chan obligatwa yo.'); return;
   }
@@ -1551,6 +1641,167 @@ async function saveEntity(key,id){
 }
 /* Gadyen jeneral: Anplwaye pa gen dwa efase/anile okenn bagay ki deja
    anrejistre nan app la — sèlman Admin ka fè sa. */
+/* =====================================================================
+   PARAMÈT BIZNIS (Admin) — livrezon, kredi, kategori, rapèl WhatsApp
+===================================================================== */
+const REMINDER_PERIOD_DAYS={jounalye:1,hebdomadaire:7,mensuel:30};
+function addDaysTo(dateStr,n){ const d=new Date(dateStr); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function getReminderRows(){
+  const today=todayISO(), r=DB.settings.reminders, pd=REMINDER_PERIOD_DAYS[r.period]||30, rows=[];
+  DB.customers.forEach(c=>{
+    const bal=customerBalanceSummary(c), owed=bal.credit+bal.loan;
+    if(owed<=0) return; // règle: jamais de rappel sans solde dû
+    const loans=DB.loans.filter(l=>l.customerId===c.id && l.status!=='solde');
+    const dues=loans.map(l=>l.dueDate);
+    if(bal.credit>0){
+      const ci=DB.invoices.filter(i=>i.customerId===c.id && i.breakdown && i.breakdown.credit>0).map(i=>i.date).sort();
+      if(ci.length) dues.push(addDaysTo(ci[0],30));
+    }
+    const due=dues.filter(Boolean).sort()[0]||'';
+    const daysLate=due && due<today ? Math.floor((new Date(today)-new Date(due))/86400000) : 0;
+    const overdue=daysLate>0;
+    if(r.mode==='retard' && !overdue) return;
+    const periods=overdue?Math.floor(daysLate/pd):0;
+    const interest=Math.round(owed*(r.rate||0)/100*periods);
+    const nextPay=loans.map(l=>l.dueDate).filter(d=>d>=today).sort()[0]||'';
+    rows.push({customerId:c.id,name:c.name,phone:c.phone,owed,due,daysLate,periods,interest,nextPay,
+      sentToday:DB.reminderLog.some(x=>x.customerId===c.id && x.date===today)});
+  });
+  return rows.sort((a,b)=>b.daysLate-a.daysLate);
+}
+function buildReminderMessage(row){
+  const r=DB.settings.reminders, S=DB.settings;
+  let m=`*LeadStock — Rappel de paiement*\nBonjour *${row.name}*,\n\n`;
+  m+=`Montant dû: *${fmt(row.owed)}*\n`;
+  if(row.due) m+=`Date d'échéance: ${row.due}${row.daysLate>0?' ('+row.daysLate+' jour(s) de retard)':''}\n`;
+  if(row.nextPay) m+=`Prochain paiement: ${row.nextPay}\n`;
+  if(row.interest>0) m+=`Intérêt ajouté (${r.rate}% / ${r.period}, ${row.periods} période(s)): *${fmt(row.interest)}*\nTotal à payer: *${fmt(row.owed+row.interest)}*\n`;
+  m+=`\n*Comment payer:*\n`;
+  if(S.natcashNumber) m+=`• NatCash: ${S.natcashNumber}\n`;
+  if(S.moncashNumber) m+=`• MonCash: ${S.moncashNumber}\n`;
+  if(r.instructions) m+=`${r.instructions}\n`;
+  m+=`\nMerci de votre confiance.`;
+  return m;
+}
+function sendReminder(customerId){
+  const row=getReminderRows().find(x=>x.customerId===customerId);
+  if(!row){ alert('Ce client n\'a plus de solde dû.'); return; }
+  if(!row.phone){ alert('Ce client n\'a pas de numéro de téléphone.'); return; }
+  window.open('https://wa.me/'+row.phone.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(buildReminderMessage(row)),'_blank');
+  const d=new Date();
+  DB.reminderLog.push({id:uid('rmd'),date:todayISO(),time:d.toTimeString().slice(0,5),customerId,name:row.name,amount:row.owed,interest:row.interest,by:currentUser.name});
+  saveDB(); renderBizSettings();
+}
+function reminderBannerHTML(){
+  const r=DB.settings.reminders;
+  if(!r.enabled || new Date().getHours()<r.hour) return '';
+  const n=getReminderRows().filter(x=>!x.sentToday && x.phone).length;
+  if(!n) return '';
+  return `<div class="panel" style="border-left:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;"><span>📲 <b>${n}</b> rappel(s) de paiement à envoyer aujourd'hui</span><button class="btn btn-primary btn-sm" onclick="goView('bizsettings')">Voir et envoyer</button></div>`;
+}
+function renderBizSettings(){
+  if(currentUser.role!=='admin'){ document.getElementById('content').innerHTML='<div class="empty-state">Sèlman Admin gen aksè nan seksyon sa a.</div>'; return; }
+  const S=DB.settings, r=S.reminders;
+  const prodCats=[...new Set(DB.products.map(p=>p.category||'Lòt'))];
+  const catNames=[...new Set([...S.categories.map(c=>c.name),...prodCats])].sort();
+  const isActive=n=>{const c=S.categories.find(x=>x.name===n); return !c||c.active!==false;};
+  const rows=getReminderRows();
+  const hist=[...DB.reminderLog].reverse().slice(0,50);
+  document.getElementById('content').innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🚚 Livraison</span></div>
+      <div class="form-grid">
+        <div class="field full"><label>Adresse de l'entreprise (retrait sur place)</label><input id="bsAddress" value="${esc(S.businessAddress)}"></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;margin:8px 0 14px;"><button class="btn btn-primary btn-sm" onclick="saveBizAddress()">Enregistrer l'adresse</button></div>
+      <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:8px;">Tarifs de livraison par zone (distance, camion, etc.). Le client choisit sa zone à la commande.</p>
+      ${S.deliveryZones.length?`<table><thead><tr><th>Zone</th><th>Frais</th><th></th></tr></thead><tbody>${S.deliveryZones.map(z=>`<tr><td>${esc(z.name)}</td><td class="mono">${fmt(z.fee)}</td><td class="row-actions"><button class="icon-btn" onclick="editZone('${z.id}')">Modifier</button><button class="icon-btn danger" onclick="deleteZone('${z.id}')">Supprimer</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty-state" style="padding:16px;">Aucune zone configurée.</div>'}
+      <div class="form-grid" style="grid-template-columns:2fr 1fr auto;align-items:end;margin-top:10px;">
+        <div class="field"><label>Nouvelle zone</label><input id="bsZoneName" placeholder="Ex: Cap-Haïtien centre"></div>
+        <div class="field"><label>Frais (HTG)</label><input id="bsZoneFee" type="number" min="0"></div>
+        <div class="field"><button class="btn btn-primary" onclick="addZone()">+ Ajouter</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">💳 Crédit client</span></div>
+      <div class="form-grid"><div class="field"><label>Limite de crédit par défaut (HTG) — 0 = pas de limite</label><input id="bsDefLimit" type="number" min="0" value="${S.defaultCreditLimit||0}"></div></div>
+      <div class="modal-actions" style="justify-content:flex-start;"><button class="btn btn-primary btn-sm" onclick="saveDefaultLimit()">Enregistrer</button></div>
+      <p style="font-size:12px;color:var(--text-faint);margin-top:6px;">Une limite spécifique peut être fixée dans la fiche de chaque client (Kliyan → Modifye).</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">🗂️ Catégories de produits</span></div>
+      <table><thead><tr><th>Catégorie</th><th>Produits</th><th>Statut</th><th></th></tr></thead><tbody>
+      ${catNames.map(n=>`<tr><td>${esc(n)}</td><td class="mono">${DB.products.filter(p=>(p.category||'Lòt')===n).length}</td><td><span class="badge ${isActive(n)?'green':'red'}">${isActive(n)?'Active':'Désactivée'}</span></td>
+      <td class="row-actions"><button class="icon-btn" data-n="${esc(n)}" onclick="renameCategory(this.dataset.n)">Renommer</button><button class="icon-btn" data-n="${esc(n)}" onclick="toggleCategory(this.dataset.n)">${isActive(n)?'Désactiver':'Activer'}</button></td></tr>`).join('')}
+      </tbody></table>
+      <div class="form-grid" style="grid-template-columns:2fr auto;align-items:end;margin-top:10px;"><div class="field"><label>Nouvelle catégorie</label><input id="bsCatName"></div><div class="field"><button class="btn btn-primary" onclick="addCategory()">+ Créer</button></div></div>
+      <p style="font-size:12px;color:var(--text-faint);margin-top:6px;">Une catégorie désactivée n'apparaît plus dans le catalogue client.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">📲 Rappels de paiement WhatsApp</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Rappels</label><select id="rmEnabled"><option value="1" ${r.enabled?'selected':''}>Activés</option><option value="0" ${!r.enabled?'selected':''}>Désactivés</option></select></div>
+        <div class="field"><label>Heure de préparation</label><input id="rmHour" type="number" min="0" max="23" value="${r.hour}"></div>
+        <div class="field"><label>Taux d'intérêt (%)</label><input id="rmRate" type="number" min="0" step="0.1" value="${r.rate}"></div>
+        <div class="field"><label>Période de calcul</label><select id="rmPeriod"><option value="jounalye" ${r.period==='jounalye'?'selected':''}>Journalière</option><option value="hebdomadaire" ${r.period==='hebdomadaire'?'selected':''}>Hebdomadaire</option><option value="mensuel" ${r.period==='mensuel'?'selected':''}>Mensuelle</option></select></div>
+        <div class="field"><label>Clients concernés</label><select id="rmMode"><option value="retard" ${r.mode==='retard'?'selected':''}>Seulement en retard de paiement</option><option value="quotidien" ${r.mode==='quotidien'?'selected':''}>Tous ceux qui doivent (chaque jour)</option></select></div>
+        <div class="field full"><label>Instructions de paiement (ajoutées au message)</label><textarea id="rmInstr">${esc(r.instructions)}</textarea></div>
+      </div>
+      <div class="modal-actions" style="justify-content:flex-start;"><button class="btn btn-primary" onclick="saveReminderSettings()">Enregistrer</button></div>
+      <p style="font-size:12px;color:var(--text-faint);margin:8px 0;">⚠️ WhatsApp gratuit n'autorise pas l'envoi 100% automatique: à l'heure choisie, la liste est préparée et une bannière apparaît au tableau de bord; un clic envoie le message à chaque client. Aucun rappel n'est proposé pour un client sans solde dû.</p>
+      ${!r.enabled?'<div class="empty-state" style="padding:14px;">Rappels désactivés.</div>':rows.length===0?'<div class="empty-state" style="padding:14px;">Aucun client à relancer.</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>Client</th><th>Dû</th><th>Échéance</th><th>Retard</th><th>Intérêt</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td class="mono">${fmt(x.owed)}</td><td class="mono">${x.due||'—'}</td><td class="mono ${x.daysLate>0?'tag-low':''}">${x.daysLate>0?x.daysLate+' j':'—'}</td><td class="mono">${fmt(x.interest)}</td><td>${!x.phone?'<span class="badge gray">Pas de tél.</span>':x.sentToday?'<span class="badge green">Envoyé ✓</span>':`<button class="icon-btn" onclick="sendReminder('${x.customerId}')">📲 Envoyer</button>`}</td></tr>`).join('')}</tbody></table></div>`}
+      <div class="panel-head" style="margin-top:18px;"><span class="panel-title" style="font-size:15px;">Historique des rappels envoyés</span></div>
+      ${hist.length===0?'<div class="empty-state" style="padding:14px;">Aucun rappel envoyé.</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Heure</th><th>Client</th><th>Dû</th><th>Intérêt</th><th>Par</th></tr></thead><tbody>${hist.map(h=>`<tr><td class="mono">${h.date}</td><td class="mono">${h.time}</td><td>${esc(h.name)}</td><td class="mono">${fmt(h.amount)}</td><td class="mono">${fmt(h.interest)}</td><td>${esc(h.by)}</td></tr>`).join('')}</tbody></table></div>`}
+    </div>`;
+}
+function saveBizAddress(){ const v=document.getElementById('bsAddress').value.trim(); logActivity('Adresse entreprise modifiée'); DB.settings.businessAddress=v; saveDB(); alert('Enregistré.'); }
+function addZone(){
+  const name=document.getElementById('bsZoneName').value.trim(), fee=Number(document.getElementById('bsZoneFee').value||0);
+  if(!name){ alert('Nom de zone requis.'); return; }
+  DB.settings.deliveryZones.push({id:uid('z'),name,fee}); logActivity('Zone de livraison ajoutée: '+name+' — '+fmt(fee)); saveDB(); renderBizSettings();
+}
+function editZone(id){
+  const z=DB.settings.deliveryZones.find(x=>x.id===id); if(!z) return;
+  const v=prompt('Nouveau frais de livraison (HTG) pour "'+z.name+'":',z.fee); if(v===null) return;
+  const n=Number(v); if(isNaN(n)||n<0){ alert('Montant invalide.'); return; }
+  logActivity('Frais de livraison "'+z.name+'": '+fmt(z.fee)+' → '+fmt(n)); z.fee=n; saveDB(); renderBizSettings();
+}
+function deleteZone(id){
+  const z=DB.settings.deliveryZones.find(x=>x.id===id); if(!z||!confirm('Supprimer la zone "'+z.name+'"?')) return;
+  DB.settings.deliveryZones=DB.settings.deliveryZones.filter(x=>x.id!==id); logActivity('Zone de livraison supprimée: '+z.name); saveDB(); renderBizSettings();
+}
+function saveDefaultLimit(){
+  const n=Number(document.getElementById('bsDefLimit').value||0); if(isNaN(n)||n<0){ alert('Montant invalide.'); return; }
+  logActivity('Limite de crédit par défaut: '+fmt(DB.settings.defaultCreditLimit||0)+' → '+fmt(n)); DB.settings.defaultCreditLimit=n; saveDB(); alert('Enregistré.');
+}
+function addCategory(){
+  const n=document.getElementById('bsCatName').value.trim(); if(!n) return;
+  if(DB.settings.categories.some(c=>c.name.toLowerCase()===n.toLowerCase())){ alert('Catégorie existante.'); return; }
+  DB.settings.categories.push({name:n,active:true}); logActivity('Catégorie créée: '+n); saveDB(); renderBizSettings();
+}
+function renameCategory(old){
+  const n=prompt('Nouveau nom pour la catégorie "'+old+'":',old); if(!n||!n.trim()||n.trim()===old) return;
+  const nn=n.trim();
+  DB.products.forEach(p=>{ if((p.category||'Lòt')===old) p.category=nn; });
+  const c=DB.settings.categories.find(x=>x.name===old); if(c) c.name=nn; else DB.settings.categories.push({name:nn,active:true});
+  logActivity('Catégorie renommée: '+old+' → '+nn); saveDB(); renderBizSettings();
+}
+function toggleCategory(n){
+  let c=DB.settings.categories.find(x=>x.name===n); if(!c){ c={name:n,active:true}; DB.settings.categories.push(c); }
+  c.active=c.active===false; logActivity('Catégorie '+n+': '+(c.active?'activée':'désactivée')); saveDB(); renderBizSettings();
+}
+function saveReminderSettings(){
+  const r=DB.settings.reminders, old={...r};
+  r.enabled=document.getElementById('rmEnabled').value==='1';
+  r.hour=Math.min(23,Math.max(0,Number(document.getElementById('rmHour').value||8)));
+  r.rate=Number(document.getElementById('rmRate').value||0);
+  r.period=document.getElementById('rmPeriod').value;
+  r.mode=document.getElementById('rmMode').value;
+  r.instructions=document.getElementById('rmInstr').value.trim();
+  logActivity('Rappels: actifs '+old.enabled+'→'+r.enabled+', heure '+old.hour+'→'+r.hour+', taux '+old.rate+'%→'+r.rate+'%, période '+old.period+'→'+r.period+', mode '+old.mode+'→'+r.mode);
+  saveDB(); renderBizSettings();
+}
+
 function requireAdminOrBlock(actionLabel){
   if(currentUser.role!=='admin'){
     alert('Sèlman Admin ka '+actionLabel+'. Kontakte yon Administratè si w bezwen sa fèt.');
@@ -1607,6 +1858,7 @@ function renderDashboard(){
   const netProfit30=totalSales30-totalExpenses30;
 
   document.getElementById('content').innerHTML=`
+    ${reminderBannerHTML()}
     <div class="stats">
       <div class="stat-card gold"><div class="stat-label">Valeur Stock</div><div class="stat-value">${fmt(stockValue)}</div><div class="stat-sub">${DB.products.length} produits</div></div>
       <div class="stat-card"><div class="stat-label">Valeur Achat</div><div class="stat-value">${fmt(totalPurchases)}</div><div class="stat-sub">total historique des achats</div></div>
@@ -1868,6 +2120,7 @@ function openCustomerForm(id){
       <div class="field"><label>Non *</label><input id="cf_name" value="${esc(row.name||'')}"></div>
       <div class="field"><label>Telefòn (pou WhatsApp)</label><input id="cf_phone" value="${esc(row.phone||'')}" placeholder="50937xxxxxx"></div>
       <div class="field full"><label>Adrès</label><input id="cf_address" value="${esc(row.address||'')}"></div>
+      ${currentUser.role==='admin'?`<div class="field full"><label>Limite de crédit (HTG) — 0 = pas de limite</label><input id="cf_limit" type="number" min="0" value="${row.creditLimit!==undefined?row.creditLimit:''}" placeholder="Par défaut: ${DB.settings.defaultCreditLimit||0}"></div>`:''}
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Anile</button>
@@ -1878,6 +2131,12 @@ async function saveCustomer(id){
   const name=document.getElementById('cf_name').value.trim();
   if(!name){ alert('Tanpri antre non kliyan an.'); return; }
   const data={name, phone:document.getElementById('cf_phone').value.trim(), address:document.getElementById('cf_address').value.trim()};
+  const limEl=document.getElementById('cf_limit');
+  if(limEl && currentUser.role==='admin' && limEl.value!==''){
+    data.creditLimit=Number(limEl.value);
+    const old=id?(DB.customers.find(c=>c.id===id)||{}).creditLimit:undefined;
+    if(old!==data.creditLimit) logActivity('Limite de crédit de '+name+': '+(old===undefined?'défaut':fmt(old))+' → '+fmt(data.creditLimit));
+  }
   try{
     const fresh=await fetchLatestDBFromServer();
     if(fresh) DB=fresh;
@@ -2055,6 +2314,24 @@ async function pushOrderUpdate(orderId, payload){
   }catch(e){ return false; }
 }
 let DEBT_REQUESTS_CACHE=[];
+let WATCHERS_CACHE=[];
+async function fetchWatchers(){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base || !auth) return null;
+  try{
+    const res=await fetch(base.replace(/\/$/,'')+'/api/watchers',{headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+async function deleteWatcher(id){
+  const base=getApiBase(); const auth=apiAuthHeader();
+  if(!base || !auth) return false;
+  try{
+    const res=await fetch(base.replace(/\/$/,'')+'/api/watchers/'+id,{method:'DELETE', headers:{'Authorization':auth,'ngrok-skip-browser-warning':'true'}});
+    return res.ok;
+  }catch(e){ return false; }
+}
 async function fetchDebtRequests(){
   const base=getApiBase(); const auth=apiAuthHeader();
   if(!base || !auth) return null;
@@ -2090,6 +2367,7 @@ async function renderOrders(){
     <div class="tabs">
       <button class="tab-btn active" data-otab="orders" onclick="ordersTab('orders')">🛍️ Kòmand Pwodwi</button>
       <button class="tab-btn" data-otab="debts" onclick="ordersTab('debts')">💳 Peman Dèt/Prè</button>
+      <button class="tab-btn" data-otab="watch" onclick="ordersTab('watch')">🔔 Notifye Disponibilite</button>
     </div>
     <div id="otabOrders" class="tab-pane active">
       <div class="panel">
@@ -2110,6 +2388,13 @@ async function renderOrders(){
         <div class="panel-head"><span class="panel-title">Istorik Peman</span></div>
         <div id="debtsHistoryWrap"><div class="empty-state">Ap chaje...</div></div>
       </div>
+    </div>
+    <div id="otabWatch" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🔔 Kliyan k ap Tann Disponibilite</span></div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Kliyan ki mande pou yo notifye lè yon pwodwi fini vin disponib ankò. Bouton "Notifye" a aktive sèlman lè estòk pwodwi a > 0.</p>
+        <div id="watchersWrap"><div class="empty-state">Ap chaje...</div></div>
+      </div>
     </div>`;
   const orders=await fetchOrders();
   if(orders===null){
@@ -2127,21 +2412,63 @@ async function renderOrders(){
     DEBT_REQUESTS_CACHE=debts;
     renderDebtRequestsLists();
   }
+  const watchers=await fetchWatchers();
+  if(watchers===null){
+    document.getElementById('watchersWrap').innerHTML='<div class="empty-state">Pa ka konekte ak sèvè a. Verifye "Sèvè / Backend".</div>';
+  }else{
+    WATCHERS_CACHE=watchers;
+    renderWatchersList();
+  }
 }
 function ordersTab(t){
   document.querySelectorAll('[data-otab]').forEach(b=>b.classList.toggle('active', b.getAttribute('data-otab')===t));
   document.getElementById('otabOrders').classList.toggle('active', t==='orders');
   document.getElementById('otabDebts').classList.toggle('active', t==='debts');
+  document.getElementById('otabWatch').classList.toggle('active', t==='watch');
+}
+function renderWatchersList(){
+  const wrap=document.getElementById('watchersWrap');
+  if(WATCHERS_CACHE.length===0){ wrap.innerHTML='<div class="empty-state">Pa gen okenn demann notifikasyon kounye a.</div>'; return; }
+  const byProduct={};
+  WATCHERS_CACHE.forEach(w=>{ (byProduct[w.productId]=byProduct[w.productId]||[]).push(w); });
+  wrap.innerHTML=Object.keys(byProduct).map(pid=>{
+    const list=byProduct[pid];
+    const p=DB.products.find(x=>x.id===pid);
+    const qty=p?p.qty:0;
+    const name=p?p.name:(list[0].productName||'Pwodwi efase');
+    const avail=qty>0;
+    return `<div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <b>${esc(name)}</b>
+        <span class="badge ${avail?'green':'gray'}">${avail?'Disponib — '+qty+' '+(p.unit||''):'Toujou fini'}</span>
+      </div>
+      <table><thead><tr><th>Kliyan</th><th>Telefòn</th><th>Depi</th><th></th></tr></thead>
+      <tbody>${list.map(w=>`<tr>
+        <td>${esc(w.name||'—')}</td><td class="mono">${esc(w.phone)}</td>
+        <td class="mono">${new Date(w.createdAt).toISOString().slice(0,10)}</td>
+        <td><button class="icon-btn" ${avail?'':'disabled'} onclick="notifyWatcher('${w.id}','${pid}','${esc(name).replace(/'/g,"\\'")}','${w.phone}')">📲 Notifye</button></td>
+      </tr>`).join('')}</tbody></table>
+    </div>`;
+  }).join('');
+}
+async function notifyWatcher(watcherId, productId, productName, phone){
+  const p=DB.products.find(x=>x.id===productId);
+  if(!p || p.qty<=0){ alert('Pwodwi sa a pa disponib ankò.'); return; }
+  const msg=`*LeadStock*\nBonjou! Pwodwi *${productName}* ou te mande a disponib ankò — ${fmt(p.sellPrice)}, ${p.qty} ${p.unit||''} disponib.\n\nVin achte l oswa kòmande l anvan l fini!`;
+  window.open('https://wa.me/'+phone.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+  const ok=await deleteWatcher(watcherId);
+  if(ok){ WATCHERS_CACHE=WATCHERS_CACHE.filter(w=>w.id!==watcherId); renderWatchersList(); logActivity('Notifye disponibilite pou '+productName+' bay '+phone); }
 }
 function renderOrdersLists(){
   const pending=ORDERS_CACHE.filter(o=>o.status==='an_atant');
   const history=ORDERS_CACHE.filter(o=>o.status!=='an_atant');
   const pendingWrap=document.getElementById('ordersPendingWrap');
   pendingWrap.innerHTML = pending.length===0 ? '<div class="empty-state">Pa gen kòmand an atant kounye a.</div>' :
-    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Telefòn</th><th>Atik</th><th>Total</th><th>Mòd</th><th>Referans</th><th></th></tr></thead>
+    `<div style="overflow-x:auto;"><table><thead><tr><th>Dat</th><th>Kliyan</th><th>Telefòn</th><th>Atik</th><th>Livrezon</th><th>Total</th><th>Mòd</th><th>Referans</th><th></th></tr></thead>
     <tbody>${pending.map(o=>`<tr>
       <td class="mono">${o.date}</td><td>${esc(o.customerName)}</td><td class="mono">${esc(o.customerPhone)}</td>
       <td>${o.items.map(it=>`${esc(it.name)} x${it.qty}`).join(', ')}</td>
+      <td>${o.deliveryType==='livrezon'?`🚚 <b>Livrezon</b><br><span style="font-size:11.5px;">${esc(o.deliveryAddress||'—')}${o.zoneName?' ('+esc(o.zoneName)+')':''}<br>Frè: ${fmt(o.deliveryFee||0)}</span>`:'🏪 Retrè sou plas'}</td>
       <td class="mono">${fmt(o.total)}</td>
       <td><span class="badge gold">${o.paymentMethod==='natcash'?'NatCash':o.paymentMethod==='moncash'?'MonCash':esc(o.paymentMethod||'—')}</span></td>
       <td class="mono">${esc(o.reference||'—')}</td>
@@ -2169,18 +2496,20 @@ async function validateOrder(orderId){
   }
   if(!confirm('Konfime kòmand sa a? Estòk ap desann e yon fakti ap kreye pou '+order.customerName+'.')) return;
 
-  let customer=DB.customers.find(c=>c.phone===order.customerPhone);
+  const normP=x=>(x||'').replace(/\D/g,'');
+  let customer=DB.customers.find(c=>normP(c.phone)&&normP(c.phone)===normP(order.customerPhone));
   if(!customer){
-    customer={id:uid('c'), name:order.customerName, phone:order.customerPhone, address:'', walletBalance:0, creditBalance:0};
+    customer={id:uid('c'), name:order.customerName, phone:order.customerPhone, address:order.deliveryAddress||'', walletBalance:0, creditBalance:0};
     DB.customers.push(customer);
-  }
+    logActivity('Profil client créé automatiquement: '+customer.name);
+  }else if(!customer.address && order.deliveryAddress){ customer.address=order.deliveryAddress; }
   order.items.forEach(it=>{
     const p=DB.products.find(x=>x.id===it.productId);
     p.qty-=it.qty;
   });
   const breakdown={cash:order.total, credit:0, deposit:0}; // Kòmand konfime trete tankou Kach
   const invoiceNumber=nextInvoiceNumber();
-  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy', createdBy:currentUser.name};
+  const invoice={id:uid('inv'), invoiceNumber, date:todayISO(), customerId:customer.id, items:order.items.map(it=>({productId:it.productId,name:it.name,qty:it.qty,price:it.price})), total:order.total, breakdown, source:'Kòmand An Liy', createdBy:currentUser.name, deliveryType:order.deliveryType||'retrè', deliveryAddress:order.deliveryAddress||'', deliveryFee:order.deliveryFee||0};
   DB.invoices.push(invoice);
   logActivity('Valide kòmand an liy #'+order.id+' pou '+order.customerName+' — '+fmt(order.total));
   saveDB();
@@ -2189,6 +2518,8 @@ async function validateOrder(orderId){
   if(!ok){ alert('Fakti a kreye lokalman, men mizajou estati kòmand la sou sèvè a echwe — reesye pita.'); }
 
   const lines=order.items.map(it=>[`${it.name} x${it.qty}`, fmt(it.qty*it.price)]);
+  if(order.deliveryType==='livrezon'){ lines.push(['Frè Livrezon', fmt(order.deliveryFee||0)]); lines.push(['Adrès Livrezon', order.deliveryAddress||'—']); }
+  else lines.push(['Mòd', 'Retrè sou plas']);
   lines.push(['Referans Peman', order.reference||'—']);
   lines.push(['TOTAL', fmt(order.total)]);
   sendWhatsAppReceipt(customer, 'Fakti — Kòmand Konfime', lines, 'Kòmand ou an konfime. Mèsi pou konfyans ou nan LeadStock!', invoiceNumber, invoiceNumber, 'Kliyan');
@@ -2456,6 +2787,8 @@ function renderFinDepo(){
       <div class="form-grid">
         <div class="field"><label>Kliyan *</label><select id="depCustomer">${custOptions()}</select></div>
         <div class="field"><label>Montan (HTG) *</label><input id="depAmount" type="number"></div>
+        <div class="field"><label>Mwayen Peman</label><select id="depMethod"><option value="kach">Kach</option><option value="natcash">NatCash</option><option value="moncash">MonCash</option><option value="lòt">Lòt</option></select></div>
+        <div class="field"><label>Referans Tranzaksyon</label><input id="depRef" placeholder="Opsyonèl"></div>
         <div class="field full"><label>Ajan ki Resevwa</label><input id="depAgent" value="${esc(currentUser?currentUser.name:'')}"></div>
       </div>
       <div class="modal-actions"><button class="btn btn-primary" onclick="saveDeposit()">Konfime Depo</button></div>
@@ -2464,9 +2797,9 @@ function renderFinDepo(){
       <div class="panel-head"><span class="panel-title">Istorik Depo <span class="count">(${DB.deposits.length})</span></span></div>
       <div id="depTableWrap"></div>
     </div>`;
-  renderFinHistTable('deposits','depTableWrap',['Dat','Kliyan','Montan','Ajan'],r=>{
+  renderFinHistTable('deposits','depTableWrap',['Dat','Kliyan','Montan','Mwayen','Referans','Ajan'],r=>{
     const c=DB.customers.find(x=>x.id===r.customerId);
-    return [r.date, c?c.name:'—', fmt(r.amount), r.agent||'—'];
+    return [r.date, c?c.name:'—', fmt(r.amount), r.method||'—', r.reference||'—', r.agent||'—'];
   });
 }
 function saveDeposit(){
@@ -2476,9 +2809,11 @@ function saveDeposit(){
   const customer=DB.customers.find(c=>c.id===customerId);
   customer.walletBalance=(customer.walletBalance||0)+amount;
   const txnNumber=nextTxnNumber('deposit','DEP');
-  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, agent:document.getElementById('depAgent').value.trim(), createdBy:currentUser.name};
+  const method=document.getElementById('depMethod').value;
+  const reference=document.getElementById('depRef').value.trim();
+  const rec={id:uid('dep'), txnNumber, date:todayISO(), customerId, amount, method, reference, agent:document.getElementById('depAgent').value.trim(), createdBy:currentUser.name};
   DB.deposits.push(rec); saveDB();
-  sendWhatsAppReceipt(customer,'Resi Depo',[['Montan Depoze',fmt(amount)],['Ajan',rec.agent||'—']],'Mèsi pou depo w la.',txnNumber,txnNumber,'Kliyan');
+  sendWhatsAppReceipt(customer,'Resi Depo',[['Montan Depoze',fmt(amount)],['Mwayen',method],['Referans',reference||'—'],['Ajan',rec.agent||'—']],'Mèsi pou depo w la.',txnNumber,txnNumber,'Kliyan');
   renderFinance(); finTab('depo');
 }
 
